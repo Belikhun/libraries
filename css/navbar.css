@@ -445,9 +445,9 @@
 	width: calc(100% + 40px);
 	height: calc(100% + 40px);
 
-	background-image: url("/assets/img/header1.webp");
+	/* background-image: url("/assets/img/header1.webp");
 	background-position: center;
-	background-size: cover;
+	background-size: cover; */
 
 	filter: brightness(0.8) blur(6px);
 }

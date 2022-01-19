@@ -988,9 +988,9 @@ const smenu = {
 
 		Footer: class {
 			constructor({
-				icon = "/assets/img/icon.webp",
-				appName = "An Censored App",
-				version = "1.0.0"
+				icon = "",
+				appName = "Example App",
+				version = "0.0.1"
 			} = {}, child) {
 				this.container = buildElementTree("div", ["component", "footer"], [
 					{ type: "img", class: "icon", name: "icon" },
