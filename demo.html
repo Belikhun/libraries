@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Belikhun/libraries Demo</title>
+
+		<!-- Load Library First -->
+		<link rel="stylesheet" type="text/css" media="screen" href="css/default.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/progressBar.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/button.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/input.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/textView.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/table.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/switch.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/slider.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/navbar.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/smenu.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/wavec.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/spinner.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/editor.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="css/scrollbar.css" />
+		
+		<!-- Fonts -->
+		<link rel="stylesheet" type="text/css" media="screen" href="fonts/calibri/calibri.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="fonts/opensans/opensans.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="fonts/nunito/nunito.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="fonts/consolas/consolas.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="fonts/fontawesome/fontawesome.css" />
+	
+		<style>
+			body {
+				position: relative;
+				margin: 0;
+				background-color: #0d1117;
+			}
+
+			body::-webkit-scrollbar {
+				display: none;
+			}
+
+			.row-center {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+
+				margin-bottom: 30px;
+				padding: 20px;
+				border: 1px solid gray;
+			}
+
+			.column {
+				display: flex;
+				flex-direction: column;
+				margin-bottom: 30px;
+				border: 1px solid gray;
+			}
+
+			.column > .row {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				padding: 0 20px 20px;
+			}
+
+			.column > .row:first-child {
+				padding-top: 20px;
+			}
+
+			.row-center > *:not(.spinner):not(.simpleSpinner),
+			.column > .row > * {
+				margin-right: 10px;
+				width: auto;
+			}
+
+			.row-center > .progressBar {
+				width: 200px!important;
+			}
+
+			.row-center > .simpleSpinner,
+			.row-center > .spinner {
+				margin-right: 40px;
+			}
+
+			#waveccc {
+				position: relative;
+				display: block;
+				margin: auto;
+				width: 500px;
+				height: 500px;
+
+				--container-padding: 0px;
+			}
+
+			#waveccc > .container > .contentBox > .header {
+				display: none;
+			}
+
+			#waveccc > .container > .contentBox > .content {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+			}
+
+			#scrollTest {
+				position: relative;
+				display: block;
+				width: 500px;
+				height: 220px;
+				margin: auto;
+				margin-bottom: 50px;
+
+				background-color: var(--osc-color-pink);
+			}
+
+			#smenuTest {
+				position: relative;
+				display: block;
+				width: 500px;
+				height: 400px;
+				margin: auto;
+				margin-bottom: 50px;
+			}
+
+			#scrollTest .scrollTest {
+				position: relative;
+				display: grid;
+				place-items: center;
+				height: 400px;
+				background-color: var(--osc-color-blue);
+			}
+
+			#navbarTest {
+				position: relative;
+				top: unset;
+				margin-bottom: 200px;
+			}
+
+			.navSubWindow {
+				display: grid;
+				place-items: center;
+				width: 200px;
+				height: 100px;
+			}
+
+			#editorTest {
+				width: 600px;
+				height: 300px;
+				margin: auto;
+				margin-bottom: 200px;
+			}
+		</style>
+	</head>
+	
+	<body class="dark">
+		<div id="btnContainer" class="row-center"></div>
+		<div id="inputContainer" class="row-center"></div>
+		<div id="checkboxContainer" class="row-center"></div>
+		<div id="switchContainer" class="row-center"></div>
+		<div id="sliderContainer" class="row-center"></div>
+		<div id="selectContainer" class="row-center"></div>
+		<div id="choiceContainer" class="row-center"></div>
+		<div class="column">
+			<div id="note1Container" class="row"></div>
+			<div id="note2Container" class="row"></div>
+		</div>
+
+		<div class="row-center">
+			<span class="simpleSpinner"></span>
+			<span class="spinner"></span>
+		</div>
+		
+		<div class="column" style="height: 200px;">
+			<div class="row">
+				<div title="test">test easy</div>
+				<div data-nicevalue="3">? + 9 = ...</div>
+				<div currenttime>can i hav curren time?</div>
+			</div>
+		</div>
+		<div id="progressContainer" class="row-center"></div>
+
+		<div id="waveccc"></div>
+		<div id="scrollTest"></div>
+
+		<div id="smenuTest"></div>
+		<div id="navbarTest"></div>
+
+		<div id="editorTest"></div>
+
+		the end;
+
+		<script src="js/belibrary.js" type="text/javascript"></script>
+		<script src="js/errorHandler.js" type="text/javascript"></script>
+		<script src="js/sounds.js" type="text/javascript"></script>
+		<script src="js/tooltip.js" type="text/javascript"></script>
+		<script src="js/scrollable.js" type="text/javascript"></script>
+		<script src="js/editor.js" type="text/javascript"></script>
+		<script src="js/wavec.js" type="text/javascript"></script>
+		<script src="js/navbar.js" type="text/javascript"></script>
+		<script src="js/smenu.js" type="text/javascript"></script>
+		
+		<script src="demo.js">
+			
+		</script>
+	</body>
+</html>
