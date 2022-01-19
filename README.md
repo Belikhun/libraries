@@ -1,6 +1,6 @@
 # libraries
 
-Contain various home-made components/assets/ultilities that I used in my project to make my life easier.
+Contain various home-made components/assets/ultilities that I used in my project to make my life easier. **[VIEW DEMO 🔎](https://belikhun.github.io/libraries/index.html)**
 
 ## 🚢 What's Included?
 
