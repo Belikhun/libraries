@@ -41,21 +41,21 @@ checkboxContainer.append(...[
 		label: "Can I Hav This?",
 		color: "blue"
 	}).group,
-	
+
 	createCheckbox({
 		label: "",
 		color: "blue"
 	}).group,
-	
+
 	createCheckbox({
 		label: "",
 		color: "pink"
 	}).group,
-	
+
 	createCheckbox({
 		label: "",
 		color: "pink"
-	}).group,
+	}).group
 ]);
 
 switchContainer.append(...[
@@ -172,7 +172,7 @@ note1Container.append(...[
 		message: "Hello World!"
 	}).group,
 
-	
+
 ])
 
 note2Container.append(...[
@@ -197,7 +197,7 @@ note2Container.append(...[
 		style: "round"
 	}).group,
 
-	
+
 ])
 
 progressContainer.append(...[
@@ -219,7 +219,11 @@ var interval = null;
 tooltip.addHook({
 	on: "dataset",
 	key: "nicevalue",
-	handler: ({ target, value, update }) => {
+	handler: ({
+		target,
+		value,
+		update
+	}) => {
 		clearInterval(interval);
 		value = parseInt(value);
 
@@ -241,10 +245,17 @@ var timeInt = null;
 tooltip.addHook({
 	on: "attribute",
 	key: "currenttime",
-	handler: ({ target, value, update }) => {
+	handler: ({
+		target,
+		value,
+		update
+	}) => {
 		timeInt = setInterval(() => {
 			let now = new Date();
-			update(humanReadableTime(now, { beautify: true, alwayShowSecond: true }));
+			update(humanReadableTime(now, {
+				beautify: true,
+				alwayShowSecond: true
+			}));
 		}, 1000)
 
 		return "bla";
@@ -271,10 +282,27 @@ popup.init();
 popupBtn.addEventListener("click", () => {
 	popup.show({
 		buttonList: {
-			button1: { text: "Button 1", complex: true, color: "blue" },
-			button2: { text: "Button 2", complex: true, color: "green" },
-			button3: { text: "Button 3", complex: true, color: "yellow" },
-			button4: { text: "full width button!", complex: true, color: "orange", full: true },
+			button1: {
+				text: "Button 1",
+				complex: true,
+				color: "blue"
+			},
+			button2: {
+				text: "Button 2",
+				complex: true,
+				color: "green"
+			},
+			button3: {
+				text: "Button 3",
+				complex: true,
+				color: "yellow"
+			},
+			button4: {
+				text: "full width button!",
+				complex: true,
+				color: "orange",
+				full: true
+			},
 		}
 	});
 })
@@ -323,7 +351,9 @@ let spanelToggle = new smenu.components.Button({
 	complex: true
 }, testComponentsChild);
 
-let sSubPanel = new smenu.Panel(`setting subpanel!`, { size: "small" });
+let sSubPanel = new smenu.Panel(`setting subpanel!`, {
+	size: "small"
+});
 sSubPanel.setToggler(spanelToggle);
 
 new smenu.components.Checkbox({
@@ -490,5 +520,38 @@ navbar.insert(navIcon3, "right");
 navbar.insert(navIcon4, "right");
 
 new Editor(editorTest, {
+	value: `// program to check if a number is prime or not
+
+// take input from the user
+const number = parseInt(prompt("Enter a positive number: "));
+let isPrime = true;
+
+// check if number is equal to 1
+if (number === 1) {
+	console.log("1 is neither prime nor composite number.");
+}
+
+// check if number is greater than 1
+else if (number > 1) {
+
+	// looping through 2 to number-1
+	for (let i = 2; i < number; i++) {
+		if (number % i == 0) {
+			isPrime = false;
+			break;
+		}
+	}
+
+	if (isPrime) {
+		console.log(\`\${number} is a prime number\`);
+	} else {
+		console.log(\`\${number} is a not prime number\`);
+	}
+}
+
+// check if number is less than 1
+else {
+	console.log("The number is not a prime number.");
+}`,
 	language: "js"
 });
