@@ -905,6 +905,10 @@ icon[data-icon="shapes"]::after {
 	content: "\f61f";
 }
 
+icon[data-icon="compass"]::after {
+	content: "\f14e";
+}
+
 /** ======================== NOTE ======================== **/
 
 .note {
