@@ -2781,14 +2781,14 @@ function createNote({
 
 		set({ level, message, style } = {}) {
 			if (typeof level === "string")
-					this.container.dataset.level = level;
+				container.dataset.level = level;
 
 			if (typeof message !== "undefined")
 				if (typeof message === "object" && message.classList) {
 					emptyNode(this.inner);
-					this.inner.appendChild(message);
+					inner.appendChild(message);
 				} else
-					this.inner.innerHTML = message;
+					inner.innerHTML = message;
 
 			if (typeof style === "string")
 				container.dataset.style = style;
