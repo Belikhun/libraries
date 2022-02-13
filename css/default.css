@@ -771,6 +771,14 @@ icon[data-icon="sync"]::after {
 	content: "\f2f1";
 }
 
+icon[data-icon="forward"]::after {
+	content: "\f04e";
+}
+
+icon[data-icon="backward"]::after {
+	content: "\f04a";
+}
+
 icon[data-icon="book"]::after {
 	content: "\f02d";
 }
