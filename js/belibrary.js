@@ -2642,7 +2642,7 @@ function createButton(text, {
 	textNode.classList.add("text");
 	button.changeText = (text) => textNode.innerText = text;
 
-	if (typeof text === "undefined" || text === null || text === "icon") {
+	if (typeof text === "undefined" || text === null || text === "icon" || text === "") {
 		button.classList.add("empty");
 	} else {
 		textNode.innerText = text;
@@ -3293,6 +3293,7 @@ const popup = {
 
 		this.showing = false;
 		emptyNode(this.popup.body.button);
+		emptyNode(this.popup.body.customNode);
 	}
 }
 
