@@ -81,10 +81,27 @@ const HTTP_STATUS_MESSAGES = {
 
 /**
  * An AJAX function designed for my API
- * @param	{Object}		param0		request data
- * @param	{Function}		callout		on request success handler
- * @param	{Function}		error		on errored handler
- * @returns	{Promise}					A Promise thats resolve on request complete
+ * 
+ * @param	{Object}		options					Request Options
+ * @param	{String}		options.url				Request URL
+ * @param	{String}		options.method			Request Method
+ * @param	{Object}		options.query			Query/Param
+ * @param	{Object}		options.form			Form Data
+ * @param	{Object}		options.json			JSON Object
+ * @param	{String}		options.raw				Raw data to send in request body
+ * @param	{Object}		options.header			Headers
+ * @param	{String}		options.type			Response type
+ * @param	{Function}		options.onUpload		Update upload progress
+ * @param	{Function}		options.onDownload		Update download progress
+ * @param	{Boolean}		options.force			Force to send request even in offline mode
+ * @param	{Boolean}		options.changeState		Change connection mode if request failed
+ * @param	{Boolean}		options.reRequest		Re-send this request if connection back to online
+ * @param	{Boolean}		options.withCredentials
+ * @param	{Number}		options.timeout			Request timeout in second
+ * @param	{Boolean}		options.formEncodeURL	Encode form
+ * @param	{Function}		callout					On request success handler
+ * @param	{Function}		error					On errored handler
+ * @returns	{Promise<Object|String>}	A Promise thats resolve on request complete
  */
 function myajax({
 	url = "/",
