@@ -482,18 +482,18 @@ function waitFor(checker = async () => {}, handler = () => {}, retry = 10, timeo
 
 			if (!result) {
 				retryNth++;
-				clog("DEBG", `[${retryNth}] check failed`);
+				clog("DEBG", `waitFor(): [${retryNth}/${retry}] check failed! recheck in ${timeout}ms...`);
 
 				if (retryNth >= retry) {
 					doCheck = false;
 					onFail(retryNth);
-					reject(retryNth);
+					reject(`waitFor(): check failed after ${retryNth} check!`);
 				}
 
 				return;
 			}
 
-			clog("DEBG", `[${retryNth}] check passed`);
+			clog("DEBG", `[${retryNth}/${retry}] check passed!`);
 			doCheck = false;
 			await handler(result);
 			resolve(result);
