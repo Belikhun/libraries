@@ -56,7 +56,8 @@ class Scrollable {
 					break;
 			}
 
-			this.container.appendChild(this.content);
+			if (!this.container.contains(this.content))
+				this.container.appendChild(this.content);
 		} else {
 			this.container = document.createElement("div");
 			this.container.id = container.id;

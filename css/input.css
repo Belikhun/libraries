@@ -317,18 +317,27 @@ body.dark .formGroup[data-color="red"] > .formField:focus {
     border-radius: 4px 0 0 4px;
 }
 
+.sq-input > .outline > .label {
+    flex-shrink: 1;
+}
+
 .sq-input > .outline > .label > label {
     position: relative;
     display: inline-block;
 
     top: 0;
+    left: 0;
     transform: translateY(14px);
+    
     font-family: "Calibri", "Segoe UI", "sans-serif";
     font-size: 18px;
     font-weight: 700;
     color: var(--normal-color);
     text-transform: uppercase;
     letter-spacing: .1px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     
     user-select: none;
     pointer-events: none;
@@ -376,6 +385,38 @@ body.dark .formGroup[data-color="red"] > .formField:focus {
 
 .sq-input > .input:focus + .outline > .trailing {
     border-right-width: 2px;
+}
+
+/* Animated */
+
+.sq-input[animated] {
+    width: 160px;
+    opacity: 0;
+
+    --duration: 0.55s;
+	--delay: 0s;
+
+    transition: all var(--duration) cubic-bezier(0.22, 0.68, 0, 1) var(--delay);
+}
+
+.sq-input[animated] > .outline > .label > label {
+    left: -10px;
+
+    transition:
+        left var(--duration) cubic-bezier(0.22, 0.68, 0, 1) var(--delay),
+        color 0.2s ease,
+        transform 0.15s ease-out;
+}
+
+.sq-input[animated].show,
+form.show .sq-input[animated] {
+    width: 100%;
+	opacity: 1;
+}
+
+.sq-input[animated].show > .outline > .label > label,
+form.show .sq-input[animated] > .outline > .label > label {
+    left: 0;
 }
 
 /* Default */
