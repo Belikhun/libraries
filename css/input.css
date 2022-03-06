@@ -387,6 +387,32 @@ body.dark .formGroup[data-color="red"] > .formField:focus {
     border-right-width: 2px;
 }
 
+.sq-input.message {
+    margin-bottom: 30px;
+}
+
+.sq-input > .message {
+    position: absolute;
+    display: none;
+
+    left: 0;
+    top: calc(100% + 6px);
+    color: #d31010;
+}
+
+.sq-input > .message::before {
+    content: "\f06a";
+
+    margin-right: 6px;
+    font-family: "Font Awesome Free";
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.sq-input.message > .message {
+    display: block;
+}
+
 /* Animated */
 
 .sq-input[animated] {
@@ -545,7 +571,7 @@ body.dark .flatInput::placeholder {
     width: 100%;
     height: 100%;
 
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-weight: 900;
     font-size: 18px;
     font-style: normal;
@@ -558,7 +584,7 @@ body.dark .flatInput::placeholder {
     transition: opacity 0.2s ease-out;
 }
 
-.imageInput > label:hover::after {
+.imageInput:hover > label::after {
     opacity: 1;
 }
 
@@ -602,6 +628,123 @@ body.dark .flatInput::placeholder {
 /* Dark Icon Input */
 body.dark ::-webkit-calendar-picker-indicator {
     filter: invert(1);
+}
+
+/** ===================== LIST INPUT ===================== */
+
+.listInput {
+    display: flex;
+    flex-direction: column;
+
+    margin: 10px 0;
+}
+
+.listInput > label {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.listInput > .inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+.listInput > .inputs > .input {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+
+    margin-bottom: 5px;
+    padding-right: 20px;
+    border-radius: 8px;
+
+    counter-increment: listItems;
+    background-color: rgb(245, 245, 245);
+}
+
+.listInput > .inputs > .input::before {
+    content: counter(listItems);
+    position: absolute;
+    top: 25px;
+    left: 18px;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+}
+
+.listInput > .inputs > .input > .input {
+    position: relative;
+    display: block;
+    flex-grow: 1;
+
+    width: auto;
+    margin-left: 20px;
+    margin-right: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    
+    font-family: inherit;
+    font-weight: 400;
+    font-size: 18px;
+    border: unset;
+    background-color: transparent;
+}
+
+.listInput > .inputs > .input > textarea.input {
+    height: 160px;
+    word-wrap: break-word;
+    resize: none;
+}
+
+.listInput > .inputs > .input > .input:focus {
+    outline: none;
+}
+
+.listInput > .inputs > .input > icon {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.listInput > .inputs > .input > icon:hover {
+    color: rgb(255, 22, 73);
+}
+
+.listInput > .add {
+    position: relative;
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: space-between;
+	
+	padding: 8px 20px;
+	box-sizing: border-box;
+	background-color: rgba(0, 0, 0, 0.1);
+	
+	color: black;
+	font-family: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 0.6px;
+	text-align: center;
+	text-decoration: none;
+
+	border: unset;
+	border-radius: 8px;
+	cursor: pointer;
+	overflow: hidden;
+	user-select: none;
+}
+
+.listInput > .add:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.listInput > .add::before {
+    content: "\f055";
+    font-family: "Font Awesome Free";
+    font-size: 20px;
+    font-weight: 600;
 }
 
 /** ===================== SQ-SELECT ===================== */
@@ -735,7 +878,7 @@ body.dark ::-webkit-calendar-picker-indicator {
     left: 8px;
     transform: translateY(-50%);
 
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 16px;
     font-weight: 600;
 	text-align: center;

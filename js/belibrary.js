@@ -734,6 +734,7 @@ function makeTree(tag, classes, child = {}, path = "") {
 			customNode.dataset.path = currentPath;
 			container.appendChild(customNode);
 			container[key] = item;
+			
 			continue;
 		}
 
@@ -2166,6 +2167,7 @@ function createInput({
 			id,
 			placeholder: label,
 			autocomplete: autofill ? "on" : "off",
+			autofill: autofill ? "on" : "off",
 			spellcheck: !!spellcheck,
 			required
 		},
@@ -2178,7 +2180,9 @@ function createInput({
 			}},
 
 			trailing: { tag: "span", class: ["notch", "trailing"] }
-		}}
+		}},
+
+		message: { tag: "div", class: "message" }
 	});
 
 	container.dataset.color = color;
@@ -2212,12 +2216,27 @@ function createInput({
 	}
 
 	// Events
+	let currentColor = color;
 	let onInputHandlers = [];
 	let onChangeHandlers = [];
+	let validateHandlers = [];
 
 	container.input.addEventListener("input", (e) => onInputHandlers.forEach(f => f(container.input.value, e)));
 	container.input.addEventListener("change", (e) => onChangeHandlers.forEach(f => f(container.input.value, e)));
 	container.input.value = value;
+
+	// Event for validating input.
+	container.input.addEventListener("input", () => {
+		for (let handler of validateHandlers) {
+			if (!handler()) {
+				container.dataset.color = "red";
+				break;
+			}
+		}
+
+		container.classList.remove("message");
+		container.dataset.color = currentColor;
+	});
 
 	return {
 		group: container,
@@ -2228,7 +2247,9 @@ function createInput({
 		set({
 			value,
 			label,
-			options
+			options,
+			color,
+			message
 		}) {
 			if (typeof options === "object" && container.input.tagName.toLowerCase() === "select") {
 				emptyNode(container.input);
@@ -2250,12 +2271,32 @@ function createInput({
 
 			if (label)
 				container.input.innerText = label;
+
+			if (typeof color === "string") {
+				container.dataset.color = color;
+				currentColor = color;
+			}
+			
+			if (typeof message === "string") {
+				container.classList.add("message");
+				container.dataset.color = "red";
+				container.message.innerText = message;
+			} else if (message === false) {
+				container.classList.remove("message");
+			}
+		},
+
+		validate(f) {
+			if (typeof f !== "function")
+				throw { code: -1, description: `createInput(${type}).onInput(): Not a valid function` }
+
+			validateHandlers.push(f);
 		},
 
 		/**
 		 * @param {function} f
 		 */
-		onInput: (f) => {
+		onInput(f) {
 			if (typeof f !== "function")
 				throw { code: -1, description: `createInput(${type}).onInput(): Not a valid function` }
 
@@ -2266,12 +2307,107 @@ function createInput({
 		/**
 		 * @param {function} f
 		 */
-		onChange: (f) => {
+		onChange(f) {
 			if (typeof f !== "function")
 				throw { code: -1, description: `createInput(${type}).onChange(): Not a valid function` }
 
 			onChangeHandlers.push(f);
 			f(container.input.value, null);
+		}
+	}
+}
+
+function createListInput({
+	label = "Sample List Input",
+	type = "text",
+	addText = "Thêm Hàng Mới",
+	values = []
+}) {
+	let container = document.createElement("div");
+	container.classList.add("listInput");
+
+	let labelNode = document.createElement("label");
+	labelNode.innerText = label;
+
+	let inputsNode = document.createElement("div");
+	inputsNode.classList.add("inputs");
+	
+	let addButton = document.createElement("button");
+	addButton.type = "button";
+	addButton.classList.add("add");
+	addButton.innerText = addText;
+
+	container.append(labelNode, inputsNode, addButton);
+
+	/** @type {HTMLInputElement[]} */
+	let inputs = []
+
+	const addInput = (value) => {
+		let node = document.createElement("div");
+		node.classList.add("input");
+
+		let input;
+		if (type === "textarea") {
+			input = document.createElement(type);
+		} else {
+			input = document.createElement("input");
+			input.type = type;
+		}
+
+		input.classList.add("input");
+		input.value = value;
+
+		let remove = document.createElement("icon");
+		remove.dataset.icon = "minusCircle";
+
+		node.append(input, remove);
+		inputsNode.appendChild(node);
+		let index = inputs.push(input) - 1;
+
+		remove.addEventListener("click", () => {
+			inputsNode.removeChild(node);
+			inputs.splice(index, 1);
+		});
+	}
+
+	const clearAll = () => {
+		emptyNode(inputsNode);
+		inputs = [];
+	}
+
+	const getValues = () => {
+		return inputs
+			.map(i => i.value)
+			.filter(i => i.length > 0);
+	}
+
+	const set = ({ label, values } = {}) => {
+		if (typeof label === "string")
+			labelNode.innerText = label;
+
+		if (typeof values === "object" && values !== null && values.length) {
+			clearAll();
+
+			for (let value of values)
+				addInput(value);
+		}
+	}
+
+	addButton.addEventListener("click", () => addInput(""));
+	set({ values });
+
+	return {
+		group: container,
+		set,
+		clearAll,
+
+		/** @return	{String[]} */
+		get values() {
+			return getValues();
+		},
+
+		set values(values) {
+			set({ values });
 		}
 	}
 }
@@ -2844,8 +2980,10 @@ function createImageInput({
 		if (file) {
 			image.src = URL.createObjectURL(file);
 			container.clear.classList.add("show");
-		} else
+		} else {
+			image.src = src;
 			container.clear.classList.remove("show");
+		}
 	});
 
 	container.clear.addEventListener("click", () => {
@@ -2855,12 +2993,17 @@ function createImageInput({
 	});
 
 	container.reset.addEventListener("click", async (e) => {
-		container.reset.disabled = true;
+		container.reset.loading(true);
 
-		for (let f of resetHandlers)
-			await f(e);
+		try {
+			for (let f of resetHandlers)
+				await f(e);
+		} catch(e) {
+			// Do nothing.
+			clog("ERRR", `createImageInput(${id}): reset image failed with error`, e);
+		}
 
-		container.reset.disabled = false;
+		container.reset.loading(false);
 	});
 
 	container.input.dispatchEvent(new Event("change"));

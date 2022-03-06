@@ -47,7 +47,7 @@ body.embeded .menu {
     color: #a5a5a5;
     background-color: #F5F5F6;
     line-height: 50px;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 18px;
     font-weight: 600;
     text-align: center;
@@ -172,7 +172,7 @@ body.embeded .menu {
     top: 50%;
     transform: translateY(-50%);
     color: gray;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 14px;
     font-weight: 600;
 
@@ -208,7 +208,7 @@ body.embeded .menu {
     top: 50%; 
     transform: translateY(-50%);
     color: gray;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 18px;
     font-weight: 600;
 
@@ -272,7 +272,7 @@ body.embeded .menu {
 .menu .group .item.lr.warning .right::after {
     position: relative;
     display: inline-block;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 17px;
     font-weight: 900;
     color: black;
@@ -355,7 +355,7 @@ body.embeded .menu {
 
 .menu .group.repo::after {
     content: "\f09b";
-    font-family: "Font Awesome 5 Brands";
+    font-family: "Font Awesome Brands";
 }
 
 .menu .group.wiki::after {

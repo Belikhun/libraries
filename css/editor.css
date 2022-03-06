@@ -106,28 +106,28 @@
 
 .editor > .header > .left > icon[data-icon="js"]::after {
 	content: "\f3b9";
-	font-family: "Font Awesome 5 Brands";
+	font-family: "Font Awesome Brands";
 	font-weight: 100;
 	color: rgb(189, 151, 0);
 }
 
 .editor > .header > .left > icon[data-icon="html"]::after {
 	content: "\f13b";
-	font-family: "Font Awesome 5 Brands";
+	font-family: "Font Awesome Brands";
 	font-weight: 100;
 	color: rgb(218, 98, 6);
 }
 
 .editor > .header > .left > icon[data-icon="css"]::after {
 	content: "\f38b";
-	font-family: "Font Awesome 5 Brands";
+	font-family: "Font Awesome Brands";
 	font-weight: 100;
 	color: rgb(6, 121, 230);
 }
 
 .editor > .header > .left > icon[data-icon="md"]::after {
 	content: "\f60f";
-	font-family: "Font Awesome 5 Brands";
+	font-family: "Font Awesome Brands";
 	font-weight: 100;
 }
 

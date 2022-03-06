@@ -162,7 +162,7 @@
 
 	right: 20px;
 
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 18px;
     font-weight: 600;
 	text-align: center;
@@ -536,7 +536,7 @@
 
 .smenuContainer > .main > .navigator > .button[data-icon="repo"]::after {
     content: "\f09b";
-    font-family: "Font Awesome 5 Brands";
+    font-family: "Font Awesome Brands";
 }
 
 .smenuContainer > .main > .navigator > .button[data-icon="wiki"]::after {
@@ -700,7 +700,7 @@
     content: "\f111";
     position: relative;
     display: block;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 12px;
     font-weight: 600;
     color: gray;
@@ -821,7 +821,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, calc(-50% - 22px));
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-weight: 900;
     font-size: 72px;
     color: rgb(170, 170, 170);

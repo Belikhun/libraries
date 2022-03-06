@@ -389,7 +389,7 @@ body.dark tag {
 	left: 50%;
 	
 	transform: translate(-50%, -50%);
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-weight: 900;
     font-size: 18px;
 	font-style: normal;
@@ -493,7 +493,7 @@ tip::before {
 	content: "\f128";
 	position: relative;
 
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 8px;
     font-weight: 600;
 	text-align: center;
@@ -608,7 +608,7 @@ icon::after {
 	content: "\f111";
 	position: relative;
 
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 20px;
     font-weight: 600;
 	text-align: center;
@@ -865,7 +865,7 @@ icon[data-icon="laptop"]::after {
 }
 
 icon[data-icon="hive"]::after {
-	font-family: "Font Awesome 5 Brands";
+	font-family: "Font Awesome Brands";
 	content: "\e07f";
 }
 
@@ -936,7 +936,7 @@ icon[data-icon="compass"]::after {
 	display: inline-block;
 	
     margin-right: 15px;
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome Free";
     font-size: 17px;
     font-weight: 900;
     color: black;
