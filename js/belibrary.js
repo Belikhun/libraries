@@ -2594,7 +2594,7 @@ function createSelectInput({
 				item.classList.add("item");
 				item.dataset.value = key;
 				item.innerText = options[key];
-				options[key] = item;
+				currentOptions[key] = item;
 
 				if (typeof sounds === "object")
 					sounds.applySound(item, ["soundhoversoft"]);
@@ -2617,8 +2617,6 @@ function createSelectInput({
 
 				container.select.list.appendChild(item);
 			}
-
-			currentOptions = options;
 		}
 
 		if (typeof fixed === "boolean") {
