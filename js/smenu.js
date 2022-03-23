@@ -826,7 +826,7 @@ const smenu = {
 				if (savedValue === null)
 					value = (typeof value === "number") ? value : defaultValue;
 				else
-					value = parseInt(savedValue);
+					value = parseFloat(savedValue);
 
 				this.slider = createSlider({ color, value, min, max, step });
 				this.slider.input.disabled = disabled;
