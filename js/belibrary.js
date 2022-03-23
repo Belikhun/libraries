@@ -2061,6 +2061,14 @@ class Animator {
 	 * @param {Function}	animate 			Function To Handle Animation
 	 */
 	constructor(duration, timingFunction, animate) {
+		if (duration < 0) {
+			clog("WARN", `Animator(): duration is less than 0! (${duration}s). This animation will be completed instantly.`);
+
+			animate(1);
+			this.completeHandlers.forEach(f => f());
+			return;
+		}
+
 		this.duration = duration;
 		this.timingFunction = timingFunction;
 		this.animate = animate;
