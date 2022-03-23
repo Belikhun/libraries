@@ -475,7 +475,7 @@ function waitFor(checker = async () => {}, handler = () => {}, retry = 10, timeo
 			let result = false;
 
 			try {
-				result = await checker(retryNth + 1).catch();
+				result = await checker(retryNth + 1);
 			} catch(e) {
 				result = false;
 			}
@@ -811,8 +811,11 @@ function checkServer(ip, callback = () => {}) {
 	})
 }
 
-function time(date = new Date()) {
-	return date.getTime() / 1000;
+function time(date) {
+	if (date instanceof Date)
+		return date.getTime() / 1000;
+
+	return Date.now() / 1000;
 }
 
 /**
