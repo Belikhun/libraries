@@ -14,7 +14,7 @@
 
 	padding-top: var(--header-height);
 
-	font-family: Consolas;
+	font-family: var(--code-font);
 	font-weight: bolder;
 	font-size: 17px;
 	tab-size: 4;
@@ -147,7 +147,7 @@
 }
 
 .editor > .header > .right > .pos {
-	font-family: "Consolas";
+	font-family: var(--code-font);
 	font-size: 13px;
 	margin-right: 40px;
 }

@@ -29,7 +29,7 @@
     box-sizing: border-box;
     border-left: 1px solid rgba(82, 82, 82, 0.3);
     
-    font-family: "Consolas";
+    font-family: var(--code-font);
     font-weight: bold;
     font-size: 17px;
     text-align: left;

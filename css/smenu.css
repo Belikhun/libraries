@@ -120,7 +120,7 @@
 .smenuContainer > .main > .wrapper > .smenu > .title {
 	margin: 30px 20px 0;
 
-	font-family: Nunito;
+	font-family: var(--secondary-font);
 	font-weight: 500;
 	font-size: 32px;
 	line-height: 34px;
@@ -189,7 +189,7 @@
     margin: 20px 20px 10px;
     box-sizing: border-box;
 
-    font-family: Nunito;
+    font-family: var(--secondary-font);
     font-size: 18px;
     font-weight: 600;
     text-align: right;
@@ -226,7 +226,7 @@
 }
 
 .smenuContainer > .main > .wrapper > .smenu > .group > .child > .title {
-	font-family: Nunito;
+	font-family: var(--secondary-font);
 	font-size: 14px;
 	font-weight: 900;
 	text-transform: uppercase;
@@ -359,7 +359,7 @@
 }
 
 .smenuContainer > .main > .wrapper > .smenu > .group > .child > .component.slider > .header > .preview {
-	font-family: Consolas;
+	font-family: var(--code-font);
 	font-size: 16px;
 	font-weight: bold;
 }
@@ -394,7 +394,7 @@
 .smenuContainer > .main > .wrapper > .smenu > .group > .child > .component.footer > .name {
 	margin-top: 5px;
 
-	font-family: Nunito;
+	font-family: var(--secondary-font);
 	font-weight: 900;
 	font-size: 14px;
 	letter-spacing: .4px;

@@ -24,7 +24,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Black"), local("SegoeUIBlack"),
         url("SegoeUIBlack.woff2") format("woff2");
     font-weight: 900;
@@ -32,7 +32,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Light Italic"), local("SegoeUI-LightItalic"),
         url("SegoeUI-LightItalic.woff2") format("woff2");
     font-weight: 300;
@@ -40,7 +40,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Bold Italic"), local("SegoeUI-BoldItalic"),
         url("SegoeUI-BoldItalic.woff2") format("woff2");
     font-weight: bold;
@@ -48,7 +48,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Light"), local("SegoeUI-Light"),
         url("SegoeUI-Light.woff2") format("woff2");
     font-weight: 300;
@@ -56,15 +56,15 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
-    src: local("Segoe UI"), local("SegoeUI"),
+    font-family: var(--primary-font);
+    src: local(var(--primary-font)), local("SegoeUI"),
         url("SegoeUI.woff2") format("woff2");
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Bold"), local("SegoeUI-Bold"),
         url("SegoeUI-Bold.woff2") format("woff2");
     font-weight: bold;
@@ -72,7 +72,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Semibold Italic"), local("SegoeUI-SemiboldItalic"),
         url("SegoeUI-SemiboldItalic.woff2") format("woff2");
     font-weight: 600;
@@ -80,7 +80,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Italic"), local("SegoeUI-Italic"),
         url("SegoeUI-Italic.woff2") format("woff2");
     font-weight: normal;
@@ -88,7 +88,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Semibold"), local("SegoeUI-Semibold"),
         url("SegoeUI-Semibold.woff2") format("woff2");
     font-weight: 600;
@@ -96,7 +96,7 @@
 }
 
 @font-face {
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     src: local("Segoe UI Black Italic"), local("SegoeUIBlack-Italic"),
         url("SegoeUIBlack-Italic.woff2") format("woff2");
     font-weight: 900;

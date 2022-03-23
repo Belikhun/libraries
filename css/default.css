@@ -39,17 +39,26 @@
 	--osc-color-darkRed:		#440505;
 	--osc-color-lightBlue:		#daf3ff;
 	--osc-color-navyBlue:		#333D79;
+
+	--primary-font: "Segoe UI";
+	--secondary-font: Nunito;
+	--code-font: Consolas;
 }
 
 body {
 	position: relative;
 	display: block;
-	font-family: "Segoe UI", Calibri, Geneva, Verdana, sans-serif;
-	font-size: 15px;
-	color: rgb(42, 42, 42);
-	margin: unset;
+
 	width: 100vw;
 	height: 100vh;
+	margin: unset;
+
+	font-family:
+		var(--primary-font),
+		var(--secondary-font),
+		Calibri, Geneva, Verdana, sans-serif;
+	font-size: 15px;
+	color: rgb(42, 42, 42);
 	overflow: auto;
 }
 
@@ -96,7 +105,7 @@ code {
 
 	max-width: 100%;
 	margin: unset;
-	font-family: "Consolas";
+	font-family: var(--code-font);
 	font-weight: bold;
 	color: rgb(22, 22, 22);
 	
@@ -153,7 +162,7 @@ timer {
     position: relative;
 	display: inline-block;
 	
-    font-family: "Segoe UI", "Calibri";
+    font-family: var(--primary-font), "Calibri";
     font-weight: bold;
     font-size: 21px;
     letter-spacing: .5px;
@@ -449,7 +458,7 @@ body.dark .lazyload::before,
 	padding: 4px 6px;
 	white-space: pre;
 
-	font-family: Nunito;
+	font-family: var(--secondary-font);
 	font-size: 14px;
 	font-weight: normal;
 	letter-spacing: .2px;
@@ -1252,7 +1261,7 @@ body.dark .md2html code {
 .popupContainer > .popupWindow > .header > .text {
 	margin-top: 10px;
 
-	font-family: Nunito;
+	font-family: var(--secondary-font);
 	font-weight: 800;
 	font-style: italic;
 	font-size: 21px;

@@ -25,7 +25,7 @@
     outline: none;
 
     color: #424242;
-    font-family: "Segoe UI", "Open Sans", "Calibri", "sans-serif";
+    font-family: var(--primary-font), "Open Sans", "Calibri", "sans-serif";
     font-size: 14px;
 
     user-select: none;
@@ -56,7 +56,7 @@
     display: block;
     top: 2px;
 
-    font-family: "Open Sans", "Calibri", "Segoe UI", "sans-serif";
+    font-family: "Open Sans", "Calibri", var(--primary-font), "sans-serif";
     font-size: 11px;
     font-weight: 700;
     color: #5a5b5f;
@@ -261,7 +261,7 @@ body.dark .formGroup[data-color="red"] > .formField:focus {
 
     width: 100%;
     color: black;
-    font-family: "Segoe UI", "Open Sans", "Calibri", "sans-serif";
+    font-family: var(--primary-font), "Open Sans", "Calibri", "sans-serif";
     font-size: 16px;
 
     margin: 14px 20px;
@@ -329,7 +329,7 @@ body.dark .formGroup[data-color="red"] > .formField:focus {
     left: 0;
     transform: translateY(14px);
     
-    font-family: "Calibri", "Segoe UI", "sans-serif";
+    font-family: "Calibri", var(--primary-font), "sans-serif";
     font-size: 18px;
     font-weight: 700;
     color: var(--normal-color);
@@ -515,7 +515,7 @@ body.dark .sq-input[data-color="red"] > .input {
     padding: 0 10px;
     box-sizing: border-box;
 
-    font-family: Nunito, "Segoe UI";
+    font-family: var(--secondary-font), var(--primary-font);
     font-weight: 400;
     font-size: 14px;
 

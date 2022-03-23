@@ -153,7 +153,7 @@
 }
 
 .chartJSData > .xValue {
-	font-family: "Nunito";
+	font-family: var(--secondary-font);
 	font-size: 12px;
 	font-weight: 800;
 	font-style: italic;

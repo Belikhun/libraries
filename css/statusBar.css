@@ -32,7 +32,7 @@
     bottom: 0;
     background-color: #21252B;
     color: rgb(157, 165, 180);
-    font-family: "Segoe UI";
+    font-family: var(--primary-font);
     font-size: 10px;
     z-index: 9999;
     transition: background-color 0.6s ease;
@@ -121,7 +121,7 @@
     position: relative;
     height: 100%;
     line-height: 22px;
-    font-family: "Consolas";
+    font-family: var(--code-font);
 }
 
 .statusBar .center .time {
