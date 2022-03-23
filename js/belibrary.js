@@ -2062,10 +2062,9 @@ class Animator {
 	 */
 	constructor(duration, timingFunction, animate) {
 		if (duration < 0) {
-			clog("WARN", `Animator(): duration is less than 0! (${duration}s). This animation will be completed instantly.`);
+			clog("WARN", `Animator(): duration is a negative number! (${duration}s). This animation will be completed instantly.`);
 
 			animate(1);
-			this.completeHandlers.forEach(f => f());
 			return;
 		}
 
