@@ -906,6 +906,8 @@ function humanReadableTime(date, {
 
 function formatTime(seconds, {
 	ended = "Đã kết thúc",
+	now = "bây giờ",
+	prefix = "",
 	surfix = "",
 	minimal = false,
 	endedCallback = () => {}
@@ -914,7 +916,7 @@ function formatTime(seconds, {
 		res = [];
 
 	if (seconds === 0)
-		return "bây giờ";
+		return now;
 
 	if (seconds < 0) {
 		endedCallback();
@@ -935,7 +937,7 @@ function formatTime(seconds, {
 			}
 		}
 
-	return (res.length > 1)
+	return prefix + (res.length > 1)
 		? res.join(", ").replace(/,([^,]*)$/, " và" + "$1")
 		: res[0];
 }
@@ -2595,7 +2597,7 @@ function createSelectInput({
 				item.classList.add("item");
 				item.dataset.value = key;
 				item.innerText = options[key];
-				options[key] = item;
+				currentOptions[key] = item;
 
 				if (typeof sounds === "object")
 					sounds.applySound(item, ["soundhoversoft"]);
@@ -2618,8 +2620,6 @@ function createSelectInput({
 
 				container.select.list.appendChild(item);
 			}
-
-			currentOptions = options;
 		}
 
 		if (typeof fixed === "boolean") {
