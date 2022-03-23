@@ -20,7 +20,7 @@ const tooltip = {
 
 	hooks: [],
 
-	__sizeOberving: false,
+	__sizeObserving: false,
 	__wait: false,
 	__currentHook: null,
 
@@ -107,7 +107,7 @@ const tooltip = {
 				this.container.style.height = this.content.clientHeight + "px";
 			}).observe(this.content);
 
-			this.__sizeOberving = true;
+			this.__sizeObserving = true;
 		}
 
 		//* BUILT IN HOOKS
@@ -273,7 +273,7 @@ const tooltip = {
 	/**
 	 * Show the tooltip on node
 	 * 
-	 * @param {String|Object}	data			Text to show
+	 * @param {String|Object}	data			Text/Element to show
 	 * @param {HTMLElement}		showOnNode		Node to show text on
 	 * @param {Boolean}			noPadding		Remove padding around tooltip
 	 * @param {Object}			hook			Hook called this function, for calling destroy handler
@@ -305,9 +305,7 @@ const tooltip = {
 
 		this.container.classList.remove("hide");
 		this.showing = true;
-
 		this.fixedWidth = false;
-		this.content.style.width = null;
 
 		await nextFrameAsync();
 		this.container.classList.add("show");
@@ -345,7 +343,7 @@ const tooltip = {
 		requestAnimationFrame(() => {
 			this.container.style.animation = null;
 
-			if (!this.__sizeOberving) {
+			if (!this.__sizeObserving) {
 				this.container.style.width = this.content.clientWidth + "px";
 				this.container.style.height = this.content.clientHeight + "px";
 			}

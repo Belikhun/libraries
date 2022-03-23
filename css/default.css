@@ -417,7 +417,7 @@ body.dark .lazyload::before,
 	background-color: rgba(92, 92, 92, 0.4);
 	backdrop-filter: saturate(80%) blur(6px);
 	pointer-events: none;
-	overflow: hidden;
+	overflow: visible;
 	z-index: 9999999;
 	opacity: 0;
 
@@ -444,7 +444,7 @@ body.dark .lazyload::before,
 	flex-direction: row;
 	align-items: center;
 
-	width: auto;
+	width: fit-content;
 	max-width: 90vw;
 	padding: 4px 6px;
 	white-space: pre;
