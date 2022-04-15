@@ -260,7 +260,14 @@ function myajax({
 							}
 						}
 
-						let errorObj = { code: 3, description: `HTTP ${this.status}: ${statusText} (${method} ${url})`, data: response }
+						let errorObj = {
+							code: 3,
+							description: (response.description)
+								? `HTTP ${this.status} ${statusText}: ${response.description} (${method} ${url})`
+								: `HTTP ${this.status} ${statusText} (${method} ${url})`,
+							data: response
+						}
+
 						error(errorObj);
 						reject(errorObj);
 
