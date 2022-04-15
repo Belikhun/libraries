@@ -38,8 +38,14 @@ function parseException(error, inStack = false) {
 		let stack = error.stack;
 		file = stack.split("\n")[1];
 		file = file.slice(file.indexOf("at ") + 3, file.length);
-	} else if (typeof error.data === "object" && typeof error.data.file === "string" && typeof error.data.line === "number")
+	} else if (
+		error.data
+		&& typeof error.data === "object"
+		&& typeof error.data.file === "string"
+		&& typeof error.data.line === "number"
+	) {	
 		file = `${error.data.file}:${error.data.line}`;
+	}
 
 	if (file)
 		description += ` tại ${file}`;
@@ -52,7 +58,7 @@ function parseException(error, inStack = false) {
 	let stack = []
 
 	if (!inStack) {
-		while (typeof _e.data === "object") {
+		while (_e.data && typeof _e.data === "object") {
 			let err = parseException(_e.data, true);
 
 			// If no error detail found in the end of the
