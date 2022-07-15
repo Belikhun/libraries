@@ -675,13 +675,34 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
 }
 
 /**
+ * Object represent the DOM structure will be passed into `makeTree()`
+ * @typedef {{
+ * 	id: String
+ * 	text: String
+ * 	for: String
+ * 	data: Object<string, string>
+ * 	attribute: Object<string, string>
+ * 	class: string | string[]
+ * 	child: Object<string, TreeObject>
+ * } & HTMLElement} TreeObject
+ */
+
+/**
+ * Object represent structure returned by `makeTree()`
+ * @typedef {{
+ * 	[x: string]: TreeDOM
+ * } & HTMLElement} TreeDOM
+ */
+
+/**
+ * This function build an HTML DOM Tree with the specified Object.
  * This is the replacement of `buildElementTree()`
  * 
  * @param	{String}			tag			Tag Name
  * @param	{String|String[]}	classes		Classes
- * @param	{Object}			child		Child List
+ * @param	{TreeObject}		child		Child List
  * @param	{String}			path		Path (optional)
- * @returns	{HTMLElement}
+ * @returns	{TreeDOM}
  */
 function makeTree(tag, classes, child = {}, path = "") {
 	let container = document.createElement(tag);
