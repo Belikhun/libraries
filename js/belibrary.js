@@ -678,6 +678,7 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  * Object represent the DOM structure will be passed into `makeTree()`
  * @typedef {{
  * 	id: String
+ * 	tag: String
  * 	text: String
  * 	for: String
  * 	data: Object<string, string>
