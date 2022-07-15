@@ -684,7 +684,7 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  * 	attribute: Object<string, string>
  * 	class: string | string[]
  * 	child: Object<string, TreeObject>
- * } & HTMLElement} TreeObject
+ * }} TreeObject
  */
 
 /**
@@ -695,13 +695,12 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  */
 
 /**
- * This function build an HTML DOM Tree with the specified Object.
  * This is the replacement of `buildElementTree()`
  * 
- * @param	{String}			tag			Tag Name
- * @param	{String|String[]}	classes		Classes
- * @param	{TreeObject}		child		Child List
- * @param	{String}			path		Path (optional)
+ * @param	{String}						tag			Tag Name
+ * @param	{String|String[]}				classes		Classes
+ * @param	{Object<string, TreeObject>}	child		Child List
+ * @param	{String}						path		Path (optional)
  * @returns	{TreeDOM}
  */
 function makeTree(tag, classes, child = {}, path = "") {
