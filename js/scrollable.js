@@ -12,7 +12,7 @@
  * @version	v1.0
  * @license	MIT
  */
-class Scrollable {
+ class Scrollable {
 	/**
 	 * @param {HTMLElement}		container		Container
 	 */
@@ -112,7 +112,8 @@ class Scrollable {
 		this.dragInit = false;
 		this.animator = null;
 		this.disabled = false;
-		let ticking = false;
+		this.ticking = false;
+		this.clamping = false;
 
 		/**
 		 * Stop Propagating to parent scrollable even when scroll content
@@ -147,17 +148,17 @@ class Scrollable {
 				event.stopPropagation();
 				event.preventDefault();
 	
-				if (!ticking) {
+				if (!this.ticking) {
 					requestAnimationFrame(() => {
 						if (this.smooth)
 							this.animationUpdate({ event });
 						else
 							this.update({ event });
 	
-						ticking = false;
+						this.ticking = false;
 					});
 	
-					ticking = true;
+					this.ticking = true;
 				}
 			}
 		}, { passive: false });
@@ -370,7 +371,7 @@ class Scrollable {
 			this.vBar.classList.remove("hide", "none");
 			this.vBar.thumb.style.height = `${tHeight}px`;
 			this.vBar.thumb.style.top = `${(top / height) * (s.height - tHeight)}px`;
-		} else {
+		} else if (!this.clamping) {
 			this.vBar.classList.add("hide");
 			this.vHideTimeout = setTimeout(() => this.vBar.classList.add("none"), 1000);
 		}
@@ -380,7 +381,7 @@ class Scrollable {
 			this.hBar.classList.remove("hide", "none");
 			this.hBar.thumb.style.width = `${tWidth}px`;
 			this.hBar.thumb.style.left = `${(left / width) * (s.width - tWidth)}px`;
-		} else {
+		} else if (!this.clamping) {
 			this.hBar.classList.add("hide");
 			this.hHideTimeout = setTimeout(() => this.hBar.classList.add("none"), 1000);
 		}
@@ -543,10 +544,12 @@ class Scrollable {
 					
 				this.updateScrollbar();
 				this.content.clampValue = clampValue;
+				this.clamping = true;
 			} else {
 				this.content.style.transform = null;
 				this.content.clampValue = 0;
 				this.content[horizontal ? "scrollLeft" : "scrollTop"] = current;
+				this.clamping = false;
 			}
 		});
 

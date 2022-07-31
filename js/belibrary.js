@@ -970,6 +970,55 @@ function formatTime(seconds, {
 		: res[0];
 }
 
+/**
+ * Generate readable relative time
+ * @param	{Number}	timestamp			UNIX time
+ * @param	{Object}	options
+ * @param	{Number}	options.to			Relative to (default now)
+ * @param	{Boolean}	options.returnNode	Return time as node
+ * @return	{HTMLElement|String}
+ */
+function relativeTime(timestamp, {
+	to = time(),
+	returnNode = false
+} = {}) {
+	let string;
+
+	if (timestamp === to) {
+		string = "mới đây";
+	} else {
+		const units = { năm: 31536000, ngày: 86400, giờ: 3600, phút: 60, giây: 1 }
+		let delta = Math.abs(timestamp - to);
+		let future = timestamp > to;
+	
+		let unit, value;
+		for (unit of Object.keys(units)) {
+			value = delta / units[unit];
+			
+			if (value > 1)
+				break;
+		}
+	
+		if (unit === "ngày" && value === 1) {
+			string = (future) ? "ngày mai" : "hôm qua";
+		} else if (unit === "năm" && value === 1) {
+			string = (future) ? "năm sau" : "năm ngoái";
+		} else {
+			string = `${value.toFixed(0)} ${unit} ${future ? "sau" : "trước"}`;
+		}
+	}
+
+	if (returnNode) {
+		let node = document.createElement("relative-time");
+		node.setAttribute("timestamp", timestamp);
+		node.title = humanReadableTime(new Date(timestamp * 1000));
+		node.innerText = string;
+		return node;
+	}
+
+	return string;
+}
+
 function liveTime(element, start = time(new Date()), {
 	type = "full",
 	count = "up",
