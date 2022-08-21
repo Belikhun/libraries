@@ -2145,19 +2145,19 @@ class Animator {
 			return;
 		}
 
-		this.duration = duration;
+		this.duration = duration * 1000;
 		this.timingFunction = timingFunction;
 		this.animate = animate;
 
 		/** @type {Function[]} */
 		this.completeHandlers = []
 
-		this.start = time();
+		this.start = performance.now();
 		this.animationFrameID = requestAnimationFrame(() => this.update());
 	}
 
 	update() {
-		let tPoint = (time() - this.start) / this.duration;
+		let tPoint = (performance.now() - this.start) / this.duration;
 
 		// Safe executing update function to prevent stopping
 		// animation entirely

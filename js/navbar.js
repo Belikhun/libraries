@@ -78,6 +78,12 @@ const navbar = {
 		});
 	},
 
+	/**
+	 * Insert navbar's component into a specific location on the navbar
+	 * @param	{Object}						component
+	 * @param	{"left" | "right" | "center"}	location 
+	 * @param	{Number}						order 
+	 */
 	insert(component, location, order) {
 		if (typeof component !== "object" || !component.container)
 			throw { code: -1, description: `navbar.insert(): not a valid component` }
@@ -87,7 +93,7 @@ const navbar = {
 
 		this.block[location].appendChild(component.container);
 
-		if (order)
+		if (typeof order === "number")
 			component.container.style.order = order;
 	},
 
