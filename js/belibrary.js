@@ -2837,6 +2837,10 @@ function createChoiceInput({
 				container.appendChild(node);
 				choiceNodes[key] = node;
 				node.addEventListener("click", () => setValue(key));
+
+				if (typeof sounds === "object") {
+					sounds.applySound(node, ["soundhover", "soundselect"]);
+				}
 			}
 		}
 

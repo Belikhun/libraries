@@ -78,7 +78,7 @@
 
 	transition:
 		filter 1s cubic-bezier(0.06, 0.81, 0, 0.98),
-		transform 1.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+		transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sq-btn::before,
@@ -204,6 +204,10 @@ body.dark .sq-btn > icon::after {
 }
 
 .sq-btn:active {
+	transition:
+		filter 1s cubic-bezier(0.06, 0.81, 0, 0.98),
+		transform 1.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+	
 	transform: scale(0.9);
 }
 

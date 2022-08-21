@@ -14,7 +14,7 @@
 }
 
 .formGroup > .formField {
-    position: relative;
+    position: relative;sq
 
     width: 100%;
     margin-top: 4px;
@@ -934,11 +934,21 @@ body.dark .sq-selector[data-color="pink"] {
 
 	transition:
 		border-color 0.1s ease-out,
+        padding 0.8s cubic-bezier(0.16, 1, 0.3, 1),
 		background-color 0.1s ease-out;
 }
 
 .sq-choice > icon:hover {
 	border-color: var(--active);
+}
+
+.sq-choice > icon:active {
+    transition:
+		border-color 0.1s ease-out,
+        padding 1.2s cubic-bezier(0.215, 0.61, 0.355, 1),
+		background-color 0.1s ease-out;
+    
+    padding: 10px 40px;
 }
 
 .sq-choice > icon.active {

@@ -14,6 +14,8 @@ const sounds = {
 	LOCATION: "/assets/sounds",
 
 	sounds: {
+		cursorUp: { path: "cursor-up.mp3", require: ["master"] },
+		cursorDown: { path: "cursor-down.mp3", require: ["master"] },
 		checkOff: { path: "check-off.mp3", require: ["btnClick"] },
 		checkOn: { path: "check-on.mp3", require: ["btnClick"] },
 		confirm: { path: "generic-confirm.mp3", require: ["others"] },
@@ -88,8 +90,13 @@ const sounds = {
 			set({ p: 10 + p*0.85, m: "sounds", d: `Loading: ${t}`, c });
 		}, { clog });
 
-		set({ p: 95, m: "sounds", d: "Scanning" });
+		set({ p: 90, m: "sounds", d: "Scanning" });
 		this.scan();
+
+		set({ p: 95, m: "sounds", d: "Attaching Default Events" });
+
+		window.addEventListener("mousedown", () => this.soundToggle(this.sounds.cursorDown));
+		window.addEventListener("mouseup", () => this.soundToggle(this.sounds.cursorUp));
 
 		set({ p: 100, m: "sounds", d: "Done" });
 		this.initialized = true;
@@ -148,7 +155,7 @@ const sounds = {
 
 			sound.addEventListener("error", e => {
 				clog("ERRR", `Error loading sound: ${url}`, e);
-				reject(e);
+				reject({ code: -1, description: `Error loading sound: ${url}`, data: e });
 			})
 		})
 	},
@@ -261,7 +268,9 @@ const sounds = {
 	},
 	
 	/**
-	 * @param {HTMLElement}		item
+	 * Apply sounds event to a node
+	 * @param	{HTMLElement}	item
+	 * @param	{String[]}		flags
 	 */
 	applySound(item, flags) {
 		if (!item.nodeType || item.nodeType <= 0 || item.dataset.soundApplied || this.disabled)
@@ -278,10 +287,10 @@ const sounds = {
 			item.addEventListener("mouseenter", (e) => e.isTrusted ? this.soundToggle(this.sounds.hoverSoft) : 0);
 
 		if (typeof item.dataset.soundselect !== "undefined")
-			item.addEventListener("mousedown", (e) => e.isTrusted ? this.soundToggle(this.sounds.select) : 0);
+			item.addEventListener("mouseup", (e) => e.isTrusted ? this.soundToggle(this.sounds.select) : 0);
 
 		if (typeof item.dataset.soundselectsoft !== "undefined")
-			item.addEventListener("mousedown", (e) => e.isTrusted ? this.soundToggle(this.sounds.selectSoft) : 0);
+			item.addEventListener("mouseup", (e) => e.isTrusted ? this.soundToggle(this.sounds.selectSoft) : 0);
 
 		if (typeof item.dataset.soundchange !== "undefined")
 			item.addEventListener("change", (e) => e.isTrusted ? this.soundToggle(this.sounds.sliderSlide) : 0);
