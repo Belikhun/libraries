@@ -287,11 +287,19 @@
 }
 
 .navigationBar > .group > .component.iconBtn:hover > .clickBox {
-	background-color: rgba(102, 102, 102, 0.2);
+	transition: background-color 0.2s ease;
+}
+
+.navigationBar > .group > .component.iconBtn:hover > .clickBox {
+	background-color: rgba(44, 44, 44, 0.1);
 }
 
 .navigationBar > .group > .component.iconBtn.active > .clickBox {
-	background-color: rgba(204, 204, 204, 0.2);
+	background-color: rgba(44, 44, 44, 0.3);
+}
+
+.navigationBar > .group > .component.iconBtn > .clickBox:active {
+	background-color: rgba(44, 44, 44, 0.6);
 }
 
 /** COMPONENTS: MENUBUTTON */
@@ -977,11 +985,11 @@ body.dark .navigationBar > .group .clickable.active:hover {
 }
 
 body.dark .navigationBar > .group .clickable:hover {
-	background-color: rgb(48, 48, 48);
+	background-color: rgb(54, 54, 54);
 }
 
 body.dark .navigationBar > .group .clickable:active {
-	background-color: rgb(65, 65, 65);
+	background-color: rgb(78, 78, 78);
 }
 
 body.dark .navigationBar > .group > .component > .subWindow {
@@ -1047,11 +1055,15 @@ body.dark .navigationBar > .group > .component.menuBtn > .hamburger > span {
 /** COMPONENTS: ICONBUTTON */
 
 body.dark .navigationBar > .group > .component.iconBtn:hover > .clickBox {
-	background-color: rgba(102, 102, 102, 0.2);
+	background-color: rgba(102, 102, 102, 0.4);
 }
 
 body.dark .navigationBar > .group > .component.iconBtn.active > .clickBox {
-	background-color: rgba(150, 150, 150, 0.2);
+	background-color: rgba(194, 194, 194, 0.4);
+}
+
+body.dark .navigationBar > .group > .component.iconBtn > .clickBox:active {
+	background-color: rgba(228, 228, 228, 0.6);
 }
 
 /** COMPONENTS: ACCOUNT */

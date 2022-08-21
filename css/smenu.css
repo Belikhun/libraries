@@ -152,15 +152,15 @@
 }
 
 .smenuContainer > .main > .wrapper > .smenu > .searchBox > .flatInput {
-	width: calc(100% - 20px);
-	margin: 0 10px;
+	width: calc(100% - 40px);
+	margin: 0 20px;
 }
 
 .smenuContainer > .main > .wrapper > .smenu > .searchBox::after {
 	content: "\f002";
 	position: absolute;
 
-	right: 20px;
+	right: 30px;
 
     font-family: "Font Awesome Free";
     font-size: 18px;
