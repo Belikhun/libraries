@@ -267,7 +267,7 @@ tooltip.addHook({
 })
 
 wavec.init(waveccc);
-let waveTest = new wavec.Container();
+let waveTest = new WaveContainer();
 waveTest.content = "wave container";
 
 let waveTog = createButton("toggle");
