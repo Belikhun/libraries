@@ -927,13 +927,11 @@ body.dark .md2html code {
 .popupContainer > .popupWindow > .header > icon {
 	position: relative;
 	display: block;
-	transform: translateY(-5px);
-}
-
-.popupContainer > .popupWindow > .header > icon::after {
+	
 	font-size: 68px;
 	line-height: unset;
 	color: #1b1b1b;
+	transform: translateY(-5px);
 }
 
 .popupContainer > .popupWindow > .header > .text {

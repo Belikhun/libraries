@@ -374,3 +374,7 @@ icon[data-icon="microscope"]::after {
 icon[data-icon="bookReader"]::after {
 	content: "\f5da";
 }
+
+icon[data-icon="calendar"]::after {
+	content: "\f133";
+}

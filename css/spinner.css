@@ -13,6 +13,7 @@
 	
 	width: 16px;
 	height: 16px;
+	--width: 3px;
 	--color: rgb(44, 44, 44);
 }
 
@@ -24,7 +25,7 @@
 	width: 100%;
 	height: 100%;
 
-	border-width: 3px;
+	border-width: var(--width);
 	border-style: solid;
 	border-radius: 50%;
 	border-color: var(--color);
@@ -65,6 +66,9 @@ body.dark .simpleSpinner,
 
 	width: 64px;
 	height: 64px;
+
+	--background: rgba(44, 44, 44, 0.6);
+	--color: rgb(238, 238, 238);
 }
 
 .spinner::before {
@@ -74,7 +78,7 @@ body.dark .simpleSpinner,
 
 	width: 100%;
 	height: 100%;
-	background-color: rgba(44, 44, 44, 0.6);
+	background-color: var(--background);
 	border-radius: 15px;
 
 	animation: rotate-90deg 1s cubic-bezier(0.22, 1, 0.36, 1) 0s infinite;
@@ -93,20 +97,17 @@ body.dark .simpleSpinner,
 	border-width: 5px;
 	border-style: solid;
 	border-radius: 50%;
-	border-color: rgb(238, 238, 238);
+	border-color: var(--color);
 	border-right-color: transparent;
 	box-sizing: border-box;
 
 	animation: simple-rotate 1s linear 0s infinite;
 }
 
-body.dark .spinner::before {
-	background-color: rgba(194, 194, 194, 0.6);
-}
-
-body.dark .spinner::after {
-	border-color: rgb(24, 24, 24);
-	border-right-color: transparent;
+body.dark .spinner,
+.spinner.light {
+	--background: rgba(194, 194, 194, 0.6);
+	--color: rgb(24, 24, 24);
 }
 
 /* Material Design Spinner */
@@ -175,4 +176,103 @@ body.dark .spinner::after {
 	90% {
 		stroke: #ffeb3b;
 	}
+}
+
+/* Heartbeat Text */
+.heartbeat {
+	position: relative;
+	width: fit-content;
+	--color: black;
+	--duration: 2s;
+}
+
+.heartbeat::before {
+	content: "";
+	position: absolute;
+	display: block;
+
+	bottom: -2px;
+	height: 3px;
+	left: 0;
+	right: 100%;
+
+	background-color: var(--color);
+	animation-name: unset;
+	animation-duration: var(--duration);
+	animation-timing-function: ease-in;
+	animation-fill-mode: forwards;
+	animation-iteration-count: 1;
+}
+
+.heartbeat.beat::before {
+	animation-name: heartbeat;
+}
+
+@keyframes heartbeat {
+	0%, 100% {
+		left: 0;
+		right: 100%;
+		animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+	}
+
+	20% {
+		left: 0;
+		right: 0;
+		animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	45%, 50% {
+		left: calc(100% - 16px);
+		right: 0;
+		animation-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+	}
+
+	75% {
+		left: 0;
+		right: 0;
+		animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	}
+}
+
+/** ======================== LOADING OVERLAY ======================== **/
+
+.loadingOverlay {
+	position: absolute;
+	display: none;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+
+	z-index: 10;
+	background-color: rgba(255, 255, 255, 0.8);
+
+	transition: opacity 0.3s ease;
+	opacity: 0;
+}
+
+.loadingOverlay.show {
+	display: block;
+}
+
+.loadingOverlay.loading {
+	transition: opacity 0.8s ease;
+	opacity: 1;
+}
+
+.loadingOverlay > .spinner {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(1);
+	transition: transform 0.3s ease;
+}
+
+.loadingOverlay.loading > .spinner {
+	transform: translate(-50%, -50%) scale(1.3);
+	transition: transform 0.8s ease;
+}
+
+body.dark .loadingOverlay {
+	background-color: rgba(24, 24, 24, 0.8);
 }

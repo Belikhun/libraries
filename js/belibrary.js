@@ -730,6 +730,9 @@ function makeTree(tag, classes, child = {}, path = "") {
 	let keys = Object.keys(child);
 
 	for (let key of keys) {
+		if (typeof child[key] !== "object" || child[key] === null || child[key] === undefined)
+			continue;
+
 		let item = child[key];
 		let currentPath = (path === "")
 			? key
@@ -2195,6 +2198,63 @@ class Animator {
 	}
 }
 
+class LoadingOverlay {
+	/**
+	 * Construct a new loading overlay instance inside specified
+	 * container.
+	 * @param {HTMLElement}	[container] 
+	 */
+	constructor(container) {
+		this.container = document.createElement("div");
+		this.container.classList.add("loadingOverlay");
+
+		this.spinner = document.createElement("div");
+		this.spinner.classList.add("spinner");
+
+		this.container.appendChild(this.spinner);
+		if (container && container.classList)
+			container.appendChild(this.container);
+
+		this.isLoading = false;
+		this.hideTimeout = undefined;
+	}
+
+	/**
+	 * Set loading state
+	 * @param	{Boolean}	loading
+	 */
+	set loading(loading) {
+		this.setLoading(loading);
+	}
+
+	get loading() {
+		return this.isLoading;
+	}
+
+	/**
+	 * Set loading state
+	 * @param	{Boolean}	loading
+	 */
+	async setLoading(loading) {
+		if (this.isLoading === loading)
+			return;
+
+		this.isLoading = loading;
+
+		clearTimeout(this.hideTimeout);
+		if (loading) {
+			this.container.classList.add("show");
+			await nextFrameAsync();
+			this.container.classList.add("loading");
+		} else {
+			this.container.classList.remove("loading");
+			this.hideTimeout = setTimeout(() => {
+				this.container.classList.remove("show");
+			}, 300);
+		}
+	}
+}
+
 if (typeof $ !== "function")
 	/**
 	 * A shorthand of querySelector
@@ -3368,8 +3428,8 @@ const cookie = {
 
 /**
  * Log to console, with sparkles!
- * @param	{String}				level	Log level
- * @param	{...String|Object}		args	Log info
+ * @param	{"OKAY" | "INFO" | "WARN" | "ERRR" | "CRIT" | "DEBG"}	level	Log level
+ * @param	{...String|Object}										args	Log info
  */
 function clog(level, ...args) {
 	// We only want to log DEBG level in development mode

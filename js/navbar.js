@@ -185,9 +185,7 @@ const navbar = {
 			this.windowNode.dataset.id = this.id;
 			this.color = color;
 
-			this.overlayNode = document.createElement("overlay");
-			this.overlayNode.classList.add("overlay");
-			this.overlayNode.innerHTML = `<div class="spinner"></div>`;
+			this.overlay = new LoadingOverlay();
 
 			this.contentNode = document.createElement("div");
 			this.contentNode.classList.add("content");
@@ -195,7 +193,7 @@ const navbar = {
 
 			new ResizeObserver(() => this.update()).observe(this.contentNode);
 	
-			this.windowNode.append(this.overlayNode, this.contentNode);
+			this.windowNode.append(this.overlay.container, this.contentNode);
 			this.container.appendChild(this.windowNode);
 			navbar.subWindowLists.push(this);
 		}
@@ -286,7 +284,7 @@ const navbar = {
 		 * @param {Boolean} loading
 		 */
 		set loading(loading) {
-			this.overlayNode.classList[loading ? "add" : "remove"]("show");
+			this.overlay.loading = loading;
 		}
 
 		/**

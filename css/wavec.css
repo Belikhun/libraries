@@ -20,6 +20,7 @@
 	overflow: hidden;
 
 	--container-padding: 100px;
+	--content-padding: 80px;
 }
 
 .waveContainer.hide {
@@ -178,25 +179,6 @@
 	transform: unset;
 }
 
-.waveContainer > .container > .contentBox > .wrapper {
-	position: absolute;
-    display: none;
-    align-items: center;
-    justify-content: center;
-
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(245, 245, 245, 0.8);
-
-    z-index: 10;
-}
-
-.waveContainer > .container.loading > .contentBox > .wrapper {
-	display: flex;
-}
-
 .waveContainer > .container > .contentBox > .header {
 	position: relative;
 	display: flex;
@@ -205,16 +187,15 @@
 	flex-grow: 0;
 	flex-shrink: 0;
 
-	padding: 20px 50px;
+	padding: 20px var(--content-padding);
 	z-index: 10;
 
 	background: #FFEEEE;
 	background: var(--header);
 }
 
-.waveContainer > .container > .contentBox > .header > icon::after {
-	margin: 0 10px;
-
+.waveContainer > .container > .contentBox > .header > icon {
+	margin-right: 10px;
 	font-size: 34px;
 	line-height: 36px;
 }
@@ -240,7 +221,7 @@
 	width: 48px;
 	height: 36px;
 
-	margin: 0 10px;
+	margin-left: 20px;
 	border-radius: 6px;
 	cursor: pointer;
 	background-color: rgb(255, 255, 255);
@@ -291,6 +272,7 @@
 @media only screen and (max-width: 1000px) {
 	.waveContainer {
 		--container-padding: 0px;
+		--content-padding: 20px;
 	}
 }
 

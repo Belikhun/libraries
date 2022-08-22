@@ -65,9 +65,7 @@ class WaveContainer {
 			wave: { tag: "div", class: "wave", html: `<span></span>`.repeat(4) },
 
 			contentBox: { tag: "div", class: "contentBox", child: {
-				wrapper: { tag: "div", class: "wrapper", child: {
-					spinner: { tag: "span", class: "spinner" }
-				}},
+				loading: new LoadingOverlay(),
 
 				header: { tag: "div", class: "header", child: {
 					icon: { tag: "icon" },
@@ -228,10 +226,7 @@ class WaveContainer {
 	 * @param {Boolean} loading
 	 */
 	set loading(loading) {
-		if (loading)
-			this.container.classList.add("loading");
-		else
-			this.container.classList.remove("loading");
+		this.container.contentBox.loading.loading = loading;
 	}
 
 	/**

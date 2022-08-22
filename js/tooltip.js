@@ -6,6 +6,23 @@
 //? |-----------------------------------------------------------------------------------------------|
 
 const tooltip = {
+	/**
+	 * @typedef {{
+	 * 	target: HTMLElement
+	 * 	value: String
+	 * 	update: Function
+	 * }} TooltipHookHandlerOptions
+	 * 
+	 * @typedef {{
+	 * 	on: "dataset" | "attribute"
+	 * 	key: String
+	 * 	handler(options: TooltipHookHandlerOptions): String
+	 * 	destroy()
+	 * 	priority: Number
+	 * 	noPadding: Boolean
+	 * }} TooltipHook
+	 */
+
 	initialized: false,
 	container: HTMLDivElement.prototype,
 	content: HTMLDivElement.prototype,
@@ -14,15 +31,20 @@ const tooltip = {
 	fixedWidth: false,
 	showing: false,
 	showTime: 100,
+	scanDelay: 500,
 	
 	/** @type {HTMLElement} */
 	nodeToShow: null,
 
+	/** @type {TooltipHook[]} */
 	hooks: [],
+	
+	/** @type {TooltipHook} */
+	__currentHook: null,
 
 	__sizeObserving: false,
 	__wait: false,
-	__currentHook: null,
+	__scanTimeout: undefined,
 
 	processor: {
 		dataset: {
@@ -44,7 +66,7 @@ const tooltip = {
 			 * Scan for targets and attach event listener
 			 * with specified hook
 			 * 
-			 * @param	{Object}	hook	Hook to scan for elements
+			 * @param	{TooltipHook}	hook	Hook to scan for elements
 			 */
 			attach(hook) {
 				let targets = document.querySelectorAll(`[data-${hook.key}]:not([data-tooltip-checked])`);
@@ -81,7 +103,11 @@ const tooltip = {
 		}
 	},
 
-	init() {
+	/**
+	 * Initialize tooltip module
+	 * @param	{HTMLElement}	[container]		Container to watch for tooltip elements
+	 */
+	init(container) {
 		// Check mobile phone
 		if (checkAgentMobile()) {
 			clog("WARN", "tooltip: this module will be disabled on mobile device due to performance reason. Initialize aborted.");
@@ -98,8 +124,10 @@ const tooltip = {
 		document.body.insertBefore(this.container, document.body.childNodes[0]);
 
 		//* EVENTS
-		new MutationObserver(() => this.scan())
-			.observe(document.body, { childList: true, subtree: true });
+		new MutationObserver(() => {
+			clearTimeout(this.__scanTimeout);
+			this.__scanTimeout = setTimeout(() => this.scan(), this.scanDelay);
+		}).observe(container || document.body, { childList: true, subtree: true });
 
 		if (typeof ResizeObserver === "function") {
 			new ResizeObserver(() => {
@@ -143,6 +171,10 @@ const tooltip = {
 		this.initialized = true;
 	},
 
+	/**
+	 * Register a new hook
+	 * @param {TooltipHook} options 
+	 */
 	addHook({
 		on = null,
 		key = null,
@@ -161,7 +193,7 @@ const tooltip = {
 			throw { code: -1, description: `tooltip.addHook(): \"handler\" is not a valid function` }
 
 		if (typeof destroy !== "function")
-			throw { code: -1, description: `tooltip.addHook(): \"handler\" is not a valid function` }
+			throw { code: -1, description: `tooltip.addHook(): \"destroy\" is not a valid function` }
 
 		if (typeof priority !== "number")
 			throw { code: -1, description: `tooltip.addHook(): \"priority\" is not a valid number` }
@@ -182,6 +214,8 @@ const tooltip = {
 	 * data need to show
 	 */
 	scan() {
+		clog("DEBG", "tooltip.scan(): scanning for new elements to attach");
+
 		for (let hook of this.hooks)
 			this.processor[hook.on].attach(hook);
 	},
@@ -190,7 +224,7 @@ const tooltip = {
 	 * Try to get value from target with specified hook
 	 * 
 	 * @param	{HTMLElement}	target
-	 * @param	{Object}		hook
+	 * @param	{TooltipHook}	hook
 	 * @returns	{String|null}
 	 */
 	getValue(target, hook) {
@@ -206,7 +240,7 @@ const tooltip = {
 	/**
 	 * Attach tooltip mouse event to Element (if possible)
 	 * @param	{HTMLElement}		target
-	 * @param	{Object}			hook	Hook to try attach to
+	 * @param	{TooltipHook}		hook	Hook to try attach to
 	 */
 	attachEvent(target, hook) {
 		let hooks = (typeof hook === "object")
