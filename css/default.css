@@ -135,6 +135,10 @@ body.dark code {
 	color: white;
 }
 
+.title, h1, h2, h3, h4, h5, h6 {
+	font-family: var(--heading-font);
+}
+
 .parallelogram {
 	position: relative;
 	display: inline-block;

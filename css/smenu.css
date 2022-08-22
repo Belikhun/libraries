@@ -120,12 +120,10 @@
 .smenuContainer > .main > .wrapper > .smenu > .title {
 	margin: 30px 20px 0;
 
-	font-family: var(--heading-font);
 	font-weight: 500;
 	font-size: 32px;
 	line-height: 34px;
 	text-align: right;
-
 	color: rgb(46, 46, 46);
 }
 
@@ -189,7 +187,6 @@
     margin: 20px 20px 10px;
     box-sizing: border-box;
 
-    font-family: var(--heading-font);
     font-size: 18px;
     font-weight: 600;
     text-align: right;
@@ -226,7 +223,6 @@
 }
 
 .smenuContainer > .main > .wrapper > .smenu > .group > .child > .title {
-	font-family: var(--heading-font);
 	font-size: 14px;
 	font-weight: 900;
 	text-transform: uppercase;

@@ -378,3 +378,7 @@ icon[data-icon="bookReader"]::after {
 icon[data-icon="calendar"]::after {
 	content: "\f133";
 }
+
+icon[data-icon="left"]::after {
+	content: "\f060";
+}
