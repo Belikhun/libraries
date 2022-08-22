@@ -157,7 +157,7 @@ body.dark .simpleTable:not(.light) tbody tr:not(:last-child) td,
     border-bottom-right-radius: 5px;
 }
 
-.generalTable > tbody > tr:not(.header):hover > td {
+.generalTable.generalTable > tbody > tr:not(.header):hover > td {
 	background-color: var(--hover);
 }
 
