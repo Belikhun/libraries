@@ -2204,9 +2204,14 @@ class LoadingOverlay {
 	 * container.
 	 * @param {HTMLElement}	[container] 
 	 */
-	constructor(container) {
+	constructor(container, {
+		index
+	} = {}) {
 		this.container = document.createElement("div");
 		this.container.classList.add("loadingOverlay");
+
+		if (index)
+			this.container.style.zIndex = index;
 
 		this.spinner = document.createElement("div");
 		this.spinner.classList.add("spinner");
