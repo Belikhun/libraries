@@ -41,7 +41,7 @@
 	--osc-color-navyBlue:		#333D79;
 
 	--primary-font: "Segoe UI";
-	--secondary-font: Nunito;
+	--heading-font: Nunito;
 	--code-font: Consolas;
 }
 
@@ -55,7 +55,7 @@ body {
 
 	font-family:
 		var(--primary-font),
-		var(--secondary-font),
+		var(--heading-font),
 		Calibri, Geneva, Verdana, sans-serif;
 	font-size: 15px;
 	color: rgb(42, 42, 42);
@@ -458,7 +458,7 @@ body.dark .lazyload::before,
 	padding: 4px 6px;
 	white-space: pre;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-size: 14px;
 	font-weight: normal;
 	letter-spacing: .2px;
@@ -939,7 +939,7 @@ body.dark .md2html code {
 .popupContainer > .popupWindow > .header > .text {
 	margin-top: 10px;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 800;
 	font-style: italic;
 	font-size: 21px;

@@ -53,6 +53,13 @@
 	height: 100%;
 	transform: translateX(-50%);
 
+	--background: rgb(255, 255, 255);
+	--wave1: var(--osc-color-red);
+	--wave2: var(--osc-color-green);
+	--wave3: var(--osc-color-blue);
+	--wave4: var(--osc-color-pink);
+	--header: linear-gradient(to right, #ffefba, #ffffff);
+
 	overflow: hidden;
 }
 
@@ -84,17 +91,19 @@
 	position: absolute;
 
 	top: 100%;
-	left: 0;
+	left: var(--delta);
 	width: calc(100% * 1.4142);
 	height: calc(100vh + 100px);
 	
 	--rotate: 0deg;
 	--position: 0;
+	--delta: -100px;
+
 	transform-origin: top left;
 	transform: translateY(var(--position)) rotate(var(--rotate));
 
 	transition:
-		transform 0.5s cubic-bezier(0.12, 0, 0.39, 0) 0.05s;
+		transform 0.3s ease-out 0.5s;
 }
 
 .waveContainer > .container.show > .wave > span {
@@ -104,32 +113,30 @@
 
 .waveContainer > .container > .wave > span:nth-child(1) {
 	--rotate: 13deg;
-	background-color: var(--osc-color-red);
+	background-color: var(--wave1);
 }
 
 .waveContainer > .container > .wave > span:nth-child(2) {
 	left: unset;
-	right: 0;
+	right: var(--delta);
 
 	transform-origin: top right;
 	--rotate: -7deg;
-	background-color: var(--osc-color-green);
+	background-color: var(--wave2);
 }
 
 .waveContainer > .container > .wave > span:nth-child(3) {
-	left: unset;
-	right: 0;
 	--rotate: 4deg;
-	background-color: var(--osc-color-blue);
+	background-color: var(--wave3);
 }
 
 .waveContainer > .container > .wave > span:nth-child(4) {
 	left: unset;
-	right: 0;
+	right: var(--delta);
 
 	transform-origin: top right;
 	--rotate: -2deg;
-	background-color: var(--osc-color-pink);
+	background-color: var(--wave4);
 }
 
 .waveContainer > .container.show > .wave > span:nth-child(1) {
@@ -158,7 +165,7 @@
 	width: 100%;
 	height: 100%;
 	transform: translateY(100%);
-	background-color: rgb(255, 255, 255);
+	background-color: var(--background);
 
 	transition:
 		transform 0.5s ease-in;
@@ -198,27 +205,27 @@
 	flex-grow: 0;
 	flex-shrink: 0;
 
-	padding: 40px 50px 20px;
+	padding: 20px 50px;
 	z-index: 10;
 
 	background: #FFEEEE;
-	background: linear-gradient(to right, #ffefba, #ffffff);
+	background: var(--header);
 }
 
 .waveContainer > .container > .contentBox > .header > icon::after {
 	margin: 0 10px;
 
-	font-size: 32px;
+	font-size: 34px;
 	line-height: 36px;
 }
 
 .waveContainer > .container > .contentBox > .header > .title {
 	flex-grow: 1;
-	margin: 0 10px;
+	margin: 0 20px;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 400;
-	font-size: 18px;
+	font-size: 22px;
 	letter-spacing: .5px;
 }
 
@@ -236,18 +243,18 @@
 	margin: 0 10px;
 	border-radius: 6px;
 	cursor: pointer;
-	background-color: rgba(204, 204, 204, 0.2);
+	background-color: rgb(255, 255, 255);
 
 	transition: background-color 0.2s ease;
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > icon::after {
-	color: rgb(136, 136, 136);
+	color: rgb(94, 94, 94);
 	transition: color 0.2s ease;
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > icon:hover {
-	background-color: rgba(116, 116, 116, 0.2);
+	background-color: rgb(236, 236, 236);
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > icon:hover::after {
@@ -255,15 +262,15 @@
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > .back:hover {
-	background-color: rgba(66, 136, 248, 0.2);
+	background-color: rgb(229, 239, 255);
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > .back:hover::after {
-	color: rgba(14, 123, 212, 0.82);
+	color: rgba(13, 101, 173, 0.82);
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > .close:hover {
-	background-color: rgba(235, 77, 77, 0.2);
+	background-color: rgb(255, 223, 223);
 }
 
 .waveContainer > .container > .contentBox > .header > .buttons > .close:hover::after {
@@ -287,26 +294,35 @@
 	}
 }
 
+.waveContainer > .container[data-color="purple"] {
+	--wave1: #654CB1;
+	--wave2: #A394D1;
+	--wave3: #2D293C;
+	--wave4: #3A334C;
+	--header: #dcd3f7;
+}
+
 /** ============================ DARK MODE ============================ **/
 
-body.dark .waveContainer > .container > .contentBox {
-	background-color: rgb(22, 22, 22);
+body.dark .waveContainer > .container {
+	--background: #302E38;
+	--header: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+}
+
+body.dark .waveContainer > .container[data-color="purple"] {
+	--header: #1C1B26;
 }
 
 body.dark .waveContainer > .container > .contentBox > .wrapper {
 	background-color: rgba(24, 24, 24, 0.85);
 }
 
-body.dark .waveContainer > .container > .contentBox > .header {
-	background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-}
-
 body.dark .waveContainer > .container > .contentBox > .header > .buttons > icon {
-	background-color: rgba(34, 34, 34, 0.2);
+	background-color: rgba(49, 49, 49, 0.8);
 }
 
 body.dark .waveContainer > .container > .contentBox > .header > .buttons > icon::after {
-	color: rgb(170, 170, 170);
+	color: rgb(224, 224, 224);
 }
 
 body.dark .waveContainer > .container > .contentBox > .header > .buttons > icon:hover {
@@ -314,7 +330,7 @@ body.dark .waveContainer > .container > .contentBox > .header > .buttons > icon:
 }
 
 body.dark .waveContainer > .container > .contentBox > .header > .buttons > icon:hover::after {
-	color: rgba(252, 252, 252, 0.82);
+	color: white;
 }
 
 body.dark .waveContainer > .container > .contentBox > .header > .buttons > .back:hover {

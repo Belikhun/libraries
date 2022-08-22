@@ -27,13 +27,7 @@ icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-}
 
-icon::after {
-	content: "\f111";
-	position: relative;
-
-	font-family: "Font Awesome Free";
 	font-size: 20px;
 	font-weight: 600;
 	text-align: center;
@@ -41,12 +35,19 @@ icon::after {
 	color: #36414B;
 }
 
+icon::after {
+	content: "\f111";
+	position: relative;
+
+	font-family: "Font Awesome Free";
+}
+
 icon:focus::after {
 	text-decoration: none;
 }
 
-icon.light::after,
-body.dark icon::after {
+icon.light,
+body.dark icon {
 	color: #dfdfdf;
 }
 
@@ -344,4 +345,32 @@ icon[data-icon="compass"]::after {
 
 icon[data-icon="news"]::after {
 	content: "\f1ea";
+}
+
+icon[data-icon="paragraph"]::after {
+	content: "\f1dd";
+}
+
+icon[data-icon="laptopCode"]::after {
+	content: "\f5fc";
+}
+
+icon[data-icon="personChalkboard"]::after {
+	content: "\e53d";
+}
+
+icon[data-icon="userGraduate"]::after {
+	content: "\f501";
+}
+
+icon[data-icon="bell"]::after {
+	content: "\f0f3";
+}
+
+icon[data-icon="microscope"]::after {
+	content: "\f610";
+}
+
+icon[data-icon="bookReader"]::after {
+	content: "\f5da";
 }

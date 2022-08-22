@@ -153,7 +153,7 @@
 }
 
 .chartJSData > .xValue {
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-size: 12px;
 	font-weight: 800;
 	font-style: italic;

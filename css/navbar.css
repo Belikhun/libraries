@@ -83,14 +83,14 @@
 .navigationBar > .navTip > .title {
 	margin-top: 4px;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 900;
 	font-size: 18px;
 	line-height: 20px;
 }
 
 .navigationBar > .navTip > .description {
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-size: 14px;
 	font-weight: 500;
 }
@@ -265,7 +265,7 @@
 
 .navigationBar > .group > .component.title > .title {
 	margin-left: 10px;
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 800;
 }
 
@@ -423,7 +423,7 @@
 
 .navigationBar > .group > .component.account > .name {
 	margin-left: 10px;
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 800;
 	color: white;
 }
@@ -534,7 +534,7 @@
 }
 
 .navigationBar > .group > .component.account > .subWindow > .content > .accountSettings > .header > .details > .name {
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-size: 24px;
 	font-weight: 900;
 	letter-spacing: .4px;
@@ -634,7 +634,7 @@
 .navigationBar > .group > .component.account > .subWindow > .content > .accountSettings > .edit > form > .title {
 	width: 100%;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-size: 18px;
 	font-weight: 900;
 	letter-spacing: .4px;
@@ -795,7 +795,7 @@
 	margin-top: 3px;
 	padding: unset;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 900;
 	white-space: nowrap;
 	letter-spacing: .4px;
@@ -912,7 +912,7 @@
 .navigationBar > .group > .component.announcement > .subWindow > .content > .announcementDetail > .level {
 	margin-top: 20px;
 
-	font-family: var(--secondary-font);
+	font-family: var(--heading-font);
 	font-weight: 900;
 	font-size: 22px;
 	letter-spacing: .4px;

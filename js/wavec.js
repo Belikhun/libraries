@@ -55,8 +55,15 @@ class WaveContainer {
 		 */
 		this.reloadHandlers = []
 
+		/**
+		 * Scrollable instance
+		 * @type {Scrollable}
+		 */
+		this.scrollable = []
+
 		this.container = makeTree("div", ["container", "hide"], {
 			wave: { tag: "div", class: "wave", html: `<span></span>`.repeat(4) },
+
 			contentBox: { tag: "div", class: "contentBox", child: {
 				wrapper: { tag: "div", class: "wrapper", child: {
 					spinner: { tag: "span", class: "spinner" }
@@ -81,16 +88,18 @@ class WaveContainer {
 		this.container.contentBox.header.icon.dataset.icon = icon;
 		this.container.contentBox.header.buttons.close.dataset.icon = "close";
 		this.container.contentBox.header.buttons.reload.dataset.icon = "reload";
+		this.container.contentBox.header.buttons.reload.style.display = "none";
 		
 		if (typeof sounds === "object") {
 			sounds.applySound(this.container.contentBox.header.buttons.close, ["soundhoversoft", "soundselectsoft"]);
 			sounds.applySound(this.container.contentBox.header.buttons.reload, ["soundhoversoft", "soundselectsoft"]);
 		}
 		
-		if (typeof Scrollable === "function")
-			new Scrollable(this.container.contentBox, {
+		if (typeof Scrollable === "function") {
+			this.scrollable = new Scrollable(this.container.contentBox, {
 				content: this.container.contentBox.content
 			});
+		}
 		
 		this.content = content;
 		this.showing = false;
@@ -127,6 +136,7 @@ class WaveContainer {
 		if (typeof f !== "function")
 			throw { code: -1, description: `WaveContainer().onReload(): not a valid function` }
 
+		this.container.contentBox.header.buttons.reload.style.display = null;
 		return this.reloadHandlers.push(f);
 	}
 
@@ -164,23 +174,22 @@ class WaveContainer {
 
 		await nextFrameAsync();
 		this.container.classList.remove("show");
+		wavec.active.splice(this.stackPos, 1);
 
-		// Only hide the wavec layer if there is one active
+		// Hide the wavec layer if there are no active
 		// container left
-		if (wavec.active.length === 1)
+		if (wavec.active.length === 0)
 			wavec.layer.classList.remove("show");
 
 		this.toggleHandlers.forEach(f => f(false));
 		this.hideTimeout = setTimeout(() => {
 			this.container.classList.add("hide");
 
-			// Only hide the wavec main container if there
-			// is one active container left
-			if (wavec.active.length === 1)
+			// Hide the wavec container if there are no active
+			// container left
+			if (wavec.active.length === 0)
 				wavec.container.classList.add("hide");
-			
-			wavec.active.splice(this.stackPos, 1);
-		}, 540);
+		}, 1050);
 	}
 
 	toggle() {
@@ -191,6 +200,12 @@ class WaveContainer {
 	}
 
 	setToggler(button) {
+		if (button && button.click instanceof navbar.Clickable) {
+			button.click.onClick((v) => v ? this.show() : this.hide());
+			this.onToggle((v) => button.click.setActive(v));
+			return;
+		}
+
 		if (!button.container || typeof button.onClick !== "function")
 			throw { code: -1, description: `WaveContainer.setToggler(): not a valid Button` }
 

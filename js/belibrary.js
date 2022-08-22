@@ -162,11 +162,12 @@ function myajax({
 			}
 		}
 
-		let queryKey = Object.keys(query);
-		for (let key of queryKey)
-			url += `${(queryKey[0] === key) ? "?" : ""}${key}=${query[key]}${(queryKey[queryKey.length - 1] !== key) ? "&" : ""}`;
-			
-		url = encodeURI(url);
+		let builtQuery = []
+		for (let key of Object.keys(query))
+			builtQuery.push(`${key}=` + encodeURIComponent(query[key]));
+		
+		url += (builtQuery.length > 0) ? `?${builtQuery.join("&")}` : "";
+		// url = encodeURI(url);
 
 		xhr.upload.addEventListener("progress", e => onUpload(e), false);
 		xhr.addEventListener("progress", e => onDownload(e), false);
@@ -2957,10 +2958,18 @@ function createSlider({
 }
 
 /**
+ * @typedef {{
+ * 	changeText(text: string)
+ * 	loading(loading: boolean)
+ * 	background?: triBg.prototype
+ * } & HTMLButtonElement} SQButton
+ */
+
+/**
  * Create Button Element, require button.css
- * @param	{String}	text		Button Label
- * @param	{String}	color		Button Color
- * @returns	{HTMLButtonElement}		Button Element
+ * @param	{String}	text	Button Label
+ * @param	{String}	color	Button Color
+ * @returns	{SQButton}			Button Element
  */
 function createButton(text, {
 	color = "blue",
@@ -3027,13 +3036,14 @@ function createButton(text, {
 		}
 	}
 
-	if (complex && style !== "flat")
+	if (complex && style !== "flat") {
 		button.background = triBg(button, {
 			scale: 1.6,
 			speed: 8,
 			color: color,
 			triangleCount
 		});
+	}
 
 	if (typeof sounds === "object")
 		sounds.applySound(button, ["soundhover", "soundselect"]);

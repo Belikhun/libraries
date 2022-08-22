@@ -555,4 +555,18 @@
 
 		this.animator.onComplete(() => this.animator = null);
 	}
+
+	scrollTo(top = 0, {
+		duration = 0.6,
+		timing = Easing.OutQuart
+	}) {
+		return new Promise((resolve) => {
+			let begin = this.content.scrollTop;
+
+			new Animator(duration, timing, (t) => {
+				let c = begin + (top - begin) * t;
+				this.content.scrollTop = c;
+			}).onComplete(() => resolve());
+		});
+	}
 }

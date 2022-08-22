@@ -515,7 +515,7 @@ body.dark .sq-input[data-color="red"] > .input {
     padding: 0 10px;
     box-sizing: border-box;
 
-    font-family: var(--secondary-font), var(--primary-font);
+    font-family: var(--heading-font), var(--primary-font);
     font-weight: 400;
     font-size: 14px;
 

@@ -362,9 +362,10 @@ const navbar = {
 			this.setActive(active);
 
 			requestAnimationFrame(() => {
-				for (let item of this.handlers)
+				for (let item of this.handlers) {
 					if (typeof item === "function")
 						item(active);
+				}
 			});
 		}
 

@@ -73,7 +73,7 @@ body.embeded .menu {
     box-sizing: border-box;
 
     color: #2980b9;
-    font-family: var(--secondary-font);
+    font-family: var(--heading-font);
     font-size: 14px;
     text-align: right;
     letter-spacing: .8px;
