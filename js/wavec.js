@@ -133,9 +133,27 @@ class WaveContainer {
 	onReload(f) {
 		if (typeof f !== "function")
 			throw { code: -1, description: `WaveContainer().onReload(): not a valid function` }
-
+			
 		this.container.contentBox.header.buttons.reload.style.display = null;
 		return this.reloadHandlers.push(f);
+	}
+
+	/**
+	 * @name WaveContainerOnScrollHandler
+	 * @function
+	 * @global
+	 * @param {Event} event	Event
+	 */
+	
+	/**
+	 * Attach scroll listener to content box
+	 * @param {WaveContainerOnScrollHandler} f 
+	 */
+	onScroll(f) {
+		if (typeof f !== "function")
+			throw { code: -1, description: `WaveContainer().onScroll(): not a valid function` }
+
+		this.container.contentBox.content.addEventListener("scroll", (e) => f(e))
 	}
 
 	show() {
