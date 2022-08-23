@@ -637,6 +637,7 @@ body.dark ::-webkit-calendar-picker-indicator {
     flex-direction: column;
 
     margin: 10px 0;
+    font-family: var(--primary-font);
 }
 
 .listInput > label {
@@ -666,8 +667,10 @@ body.dark ::-webkit-calendar-picker-indicator {
 .listInput > .inputs > .input::before {
     content: counter(listItems);
     position: absolute;
-    top: 25px;
+    top: 50%;
     left: 18px;
+
+    transform: translateY(-50%);
     font-size: 14px;
     font-weight: bold;
     color: black;
@@ -686,7 +689,7 @@ body.dark ::-webkit-calendar-picker-indicator {
     
     font-family: inherit;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 16px;
     border: unset;
     background-color: transparent;
 }

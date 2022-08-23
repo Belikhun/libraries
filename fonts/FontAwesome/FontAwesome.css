@@ -382,3 +382,7 @@ icon[data-icon="calendar"]::after {
 icon[data-icon="left"]::after {
 	content: "\f060";
 }
+
+icon[data-icon="minusCircle"]::after {
+	content: "\f056";
+}

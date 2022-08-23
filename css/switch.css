@@ -399,12 +399,12 @@ body.dark .sq-checkbox[data-color="pink"]:hover > input:checked ~ .checkmark {
     left: calc(100% - 13px);
 }
 
-.sq-switch > input:disabled + .track {
+.sq-switch > input:disabled + .track.track {
     cursor: not-allowed;
     border-color: var(--disabled);
 }
 
-.sq-switch > input:disabled + .track::before {
+.sq-switch > input:disabled + .track.track::before {
     background-color: var(--disabled);
 }
 

@@ -2555,6 +2555,7 @@ function createListInput({
 		group: container,
 		set,
 		clearAll,
+		addInput,
 
 		/** @return	{String[]} */
 		get values() {
@@ -2569,6 +2570,7 @@ function createListInput({
 
 /**
  * Create Checkbox Element, require switch.css
+ * @author Belikhun
  */
 function createCheckbox({
 	label = "Sample Checkbox",
@@ -2613,14 +2615,33 @@ function createCheckbox({
 }
 
 /**
+ * @typedef {{
+ * 	group: HTMLDivElement
+ * 	input: HTMLInputElement
+ * 	title: HTMLElement
+ * 	label: HTMLElement
+ * 	value: Boolean
+ * 	disabled: Boolean
+ * }} SQSwitch
+ * 
  * Create Switch Element, require switch.css
+ * @param	{Object}			options
+ * @param	{String}			options.label
+ * @param	{Boolean}			options.value
+ * @param	{"pink" | "blue"}	options.color
+ * @param	{String}			options.type
+ * @param	{String}			options.id
+ * @param	{Boolean}			options.disabled
+ * @return	{SQSwitch}
+ * @author	Belikhun
  */
  function createSwitch({
 	label = "Sample Switch",
 	value = false,
 	color = "blue",
 	type = "checkbox",
-	id = `switch_${randString(8)}`
+	id = `switch_${randString(8)}`,
+	disabled = false
 } = {}) {
 	let container = document.createElement("div");
 	container.classList.add("checkboxContainer");
@@ -2638,6 +2659,7 @@ function createCheckbox({
 	input.id = id;
 	input.type = type;
 	input.checked = value;
+	input.disabled = disabled;
 
 	if (typeof sounds === "object")
 		sounds.applySound(input, ["soundcheck"]);
@@ -2655,7 +2677,31 @@ function createCheckbox({
 		group: container,
 		input,
 		title,
-		label: switchLabel
+		label: switchLabel,
+
+		/**
+		 * Update switch value
+		 * @param {Boolean} value
+		 */
+		set value(value) {
+			input.checked = value;
+		},
+
+		get value() {
+			return input.checked;
+		},
+
+		/**
+		 * Update switch disabled state
+		 * @param {Boolean} disabled
+		 */
+		set disabled(disabled) {
+			input.disabled = disabled;
+		},
+
+		get disabled() {
+			return input.disabled;
+		}
 	}
 }
 
