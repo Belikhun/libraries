@@ -2270,7 +2270,7 @@ if (typeof $ !== "function")
 		let r = document.querySelector(query);
 
 		if (!r)
-			clog("WARN", `Could not find any element with query: ${query}`);
+			clog("DEBG", `Could not find any element with query: ${query}`);
 
 		return r;
 	}
@@ -3032,9 +3032,19 @@ function createSlider({
 
 /**
  * Create Button Element, require button.css
- * @param	{String}	text	Button Label
- * @param	{String}	color	Button Color
- * @returns	{SQButton}			Button Element
+ * @param	{String}				text				Button Label
+ * @param	{Object}				options				Button Options
+ * @param	{String}				options.color
+ * @param	{String}				options.element		HTML Element
+ * @param	{String}				options.type		HTML Button Type
+ * @param	{"default" | "round"}	options.style
+ * @param	{String | String[]}		[options.classes]
+ * @param	{String}				[options.icon]
+ * @param	{"left" | "right"}		[options.align]
+ * @param	{Boolean}				[options.complex]
+ * @param	{Number}				[options.triangleCount]
+ * @param	{Boolean}				[options.disabled]
+ * @returns	{SQButton}									Button Element
  */
 function createButton(text, {
 	color = "blue",
