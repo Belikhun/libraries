@@ -45,7 +45,21 @@ tests.scenes.smenu = {
 	},
 
 	dispose() {
-		
+		this.store.infoGroup = undefined;
+		this.store.niceGroup = undefined;
+		this.store.loremGroup = undefined;
+		this.store.footerGroup = undefined;
+
+		smenu.container = undefined;
+		smenu.groupLists = []
+		smenu.initialized = false;
+		smenu.hiding = true;
+		smenu.collapsing = true;
+		smenu.containerHideTimeout = null;
+		smenu.mainHideTimeout = null;
+		smenu.activePanel = null;
+		smenu.showHandlers = []
+		smenu.hideHandlers = []
 	},
 
 	initialize: {

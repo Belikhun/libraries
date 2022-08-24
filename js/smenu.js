@@ -13,7 +13,9 @@
  * @license	MIT
  */
 const smenu = {
-	container: HTMLElement.prototype,
+	/** @type {HTMLElement} */
+	container: undefined,
+	
 	initialized: false,
 	groupLists: [],
 
