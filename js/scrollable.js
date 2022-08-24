@@ -559,7 +559,7 @@
 	scrollTo(top = 0, {
 		duration = 0.6,
 		timing = Easing.OutQuart
-	}) {
+	} = {}) {
 		return new Promise((resolve) => {
 			let begin = this.content.scrollTop;
 

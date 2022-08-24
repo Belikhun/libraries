@@ -2305,7 +2305,8 @@ function createInput({
 	autofill = true,
 	spellcheck = false,
 	options = {},
-	animated = false
+	animated = false,
+	disabled = false
 } = {}) {
 	// Check valid input type can be used in this api. Will throw an error when input type is invalid
 	// Some types are not included because there are api to create that specific input
@@ -2376,6 +2377,7 @@ function createInput({
 	let onChangeHandlers = [];
 	let validateHandlers = [];
 
+	container.input.disabled = disabled;
 	container.input.addEventListener("input", (e) => onInputHandlers.forEach(f => f(container.input.value, e)));
 	container.input.addEventListener("change", (e) => onChangeHandlers.forEach(f => f(container.input.value, e)));
 	container.input.value = value;
@@ -2439,6 +2441,24 @@ function createInput({
 			} else if (message === false) {
 				container.classList.remove("message");
 			}
+		},
+
+		/** @return	{String} */
+		get value() {
+			return container.input.value;
+		},
+
+		set value(value) {
+			this.set({ value });
+		},
+
+		/** @return	{Boolean} */
+		get disabled() {
+			return container.input.disabled;
+		},
+
+		set disabled(disabled) {
+			container.input.disabled = disabled;
 		},
 
 		validate(f) {
@@ -2635,7 +2655,7 @@ function createCheckbox({
  * @return	{SQSwitch}
  * @author	Belikhun
  */
- function createSwitch({
+function createSwitch({
 	label = "Sample Switch",
 	value = false,
 	color = "blue",
@@ -2766,6 +2786,35 @@ function createSelectInput({
 			show();
 	}
 
+	const add = (key, value) => {
+		let item = document.createElement("div");
+		item.classList.add("item");
+		item.dataset.value = key;
+		item.innerText = value;
+		currentOptions[key] = item;
+
+		if (typeof sounds === "object")
+			sounds.applySound(item, ["soundhoversoft"]);
+
+		item.addEventListener("click", () => {
+			if (activeNode)
+				activeNode.classList.remove("active");
+			
+			activeNode = item;
+			activeValue = item.dataset.value;
+			item.classList.add("active");
+			container.current.value.innerText = item.innerText;
+			changeHandlers.forEach(f => f(item.dataset.value));
+
+			if (typeof sounds === "object")
+				sounds.soundToggle(sounds.sounds.valueChange);
+
+			hide(true);
+		});
+
+		container.select.list.appendChild(item);
+	}
+
 	const set = ({
 		icon,
 		color,
@@ -2788,34 +2837,8 @@ function createSelectInput({
 			activeValue = undefined;
 			currentOptions = {}
 
-			for (let key of Object.keys(options)) {
-				let item = document.createElement("div");
-				item.classList.add("item");
-				item.dataset.value = key;
-				item.innerText = options[key];
-				currentOptions[key] = item;
-
-				if (typeof sounds === "object")
-					sounds.applySound(item, ["soundhoversoft"]);
-
-				item.addEventListener("click", () => {
-					if (activeNode)
-						activeNode.classList.remove("active");
-					
-					activeNode = item;
-					activeValue = item.dataset.value;
-					item.classList.add("active");
-					container.current.value.innerText = item.innerText;
-					changeHandlers.forEach(f => f(item.dataset.value));
-
-					if (typeof sounds === "object")
-						sounds.soundToggle(sounds.sounds.valueChange);
-
-					hide(true);
-				});
-
-				container.select.list.appendChild(item);
-			}
+			for (let key of Object.keys(options))
+				add(key, options[key]);
 		}
 
 		if (typeof fixed === "boolean") {
@@ -2841,10 +2864,26 @@ function createSelectInput({
 	return {
 		group: container,
 		showing,
-		value: () => activeValue,
 		show,
 		hide,
 		set,
+		add,
+
+		/**
+		 * Get active value
+		 * @return {String}
+		 */
+		get value() {
+			return activeValue;
+		},
+
+		/**
+		 * Set active value
+		 * @param {String} value
+		 */
+		set value(value) {
+			set({ value });
+		},
 
 		onChange: (f) => {
 			if (typeof f !== "function")
@@ -2882,9 +2921,24 @@ function checkAgentMobile() {
 	return toMatch.some((i) => navigator.userAgent.match(i));
 }
 
+/**
+ * @typedef {{
+ * 	[x: String]: {
+ * 		icon: String
+ * 		title: String
+ * 	}
+ * }} ChoiceInputChoices
+ * 
+ * Create choice input with icons
+ * @param	{Object}				options
+ * @param	{"blue" | "pink"}		options.color
+ * @param	{ChoiceInputChoices}	options.choices
+ * @param	{String}				options.value
+ * @param	{String | String[]}		options.classes
+ */
 function createChoiceInput({
 	color,
-	choice,
+	choices,
 	value,
 	classes
 } = {}) {
@@ -2926,46 +2980,81 @@ function createChoiceInput({
 		changeHandlers.forEach(f => f(value));
 	}
 
+	const add = ({ key, icon, title }) => {
+		let node = document.createElement("icon");
+		node.dataset.icon = icon || "circle";
+		
+		if (typeof title === "string")
+			node.title = title;
+
+		container.appendChild(node);
+		choiceNodes[key] = node;
+		node.addEventListener("click", () => setValue(key));
+
+		if (typeof sounds === "object")
+			sounds.applySound(node, ["soundhover", "soundselect"]);
+	}
+
+	/**
+	 * Update input options
+	 * @param	{Object}				options
+	 * @param	{"blue" | "pink"}		options.color
+	 * @param	{ChoiceInputChoices}	options.choices
+	 * @param	{String}				options.value
+	 */
 	const set = ({
 		color,
-		choice,
+		choices,
 		value
 	} = {}) => {
 		if (typeof color === "string")
 			container.dataset.color = color;
 
-		if (typeof choice === "object") {
+		if (typeof choices === "object") {
 			choiceNodes = {}
 			activeNode = null;
 			activeValue = null;
+			emptyNode(container);
 
-			for (let key of Object.keys(choice)) {
-				let node = document.createElement("icon");
-				node.dataset.icon = choice[key].icon || "circle";
-				
-				if (typeof choice[key].title === "string")
-					node.title = choice[key].title;
-
-				container.appendChild(node);
-				choiceNodes[key] = node;
-				node.addEventListener("click", () => setValue(key));
-
-				if (typeof sounds === "object") {
-					sounds.applySound(node, ["soundhover", "soundselect"]);
-				}
-			}
+			for (let key of Object.keys(choices))
+				add({ key, icon: choices[key].icon, title: choices[key].title });
 		}
 
 		if (typeof value !== "undefined")
 			setValue(value);
 	}
 
-	set({ color, choice, value });
+	set({ color, choices, value });
 
 	return {
 		container,
 		group: container,
+		add,
 		set,
+
+		/**
+		 * Set value
+		 * @param	{String}	value
+		 */
+		set value(value) {
+			set({ value });
+		},
+
+		/**
+		 * Get value
+		 * @return	{String}
+		 */
+		get value() {
+			return activeValue;
+		},
+
+		/**
+		 * All choice nodes
+		 * @return	{Object<string, HTMLElement>}
+		 */
+		get choices() {
+			return choiceNodes;
+		},
 
 		onChange(f) {
 			if (typeof f !== "function")
@@ -2981,7 +3070,8 @@ function createSlider({
 	value = 0,
 	min = 0,
 	max = 10,
-	step = 1
+	step = 1,
+	disabled = false
 } = {}) {
 	let container = buildElementTree("div", "osc-slider", [
 		{ type: "input", name: "input" },
@@ -2990,7 +3080,6 @@ function createSlider({
 		{ type: "span", class: "rightTrack", name: "right" }
 	]);
 
-	let mouseDownTick = 0;
 	let o = container.obj;
 	o.dataset.color = color;
 	o.dataset.soundhover = true;
@@ -3003,12 +3092,9 @@ function createSlider({
 	o.input.max = max;
 	o.input.step = step;
 	o.input.value = value;
+	o.input.disabled = disabled;
 
 	const update = (e) => {
-		mouseDownTick++;
-		if (mouseDownTick > 1)
-			o.classList.add("dragging");
-
 		let valP = (e.target.value - min) / (max - min);
 
 		o.thumb.style.left = `calc(20px + (100% - 40px) * ${valP})`;
@@ -3031,23 +3117,42 @@ function createSlider({
 
 	// Event train
 	o.input.addEventListener("input", (e) => {
-		inputHandlers.forEach(f => f(parseFloat(e.target.value), e));
+		let value = parseFloat(e.target.value);
+
+		for (let handler of inputHandlers)
+			handler(value, e);
+
 		update(e);
 	});
 
-	o.input.addEventListener("change", (e) => changeHandlers.forEach(f => f(parseFloat(e.target.value), e)));
-	o.addEventListener("mouseup", () => {
-		o.classList.remove("dragging");
-		mouseDownTick = 0;
+	o.input.addEventListener("change", (e) => {
+		let value = parseFloat(e.target.value);
+
+		for (let handler of changeHandlers)
+			handler(value, e);
 	});
+
+	o.addEventListener("mouseup", () => o.classList.remove("dragging"));
 
 	return {
 		group: container.tree,
 		input: o.input,
 
-		setValue(value) {
+		/**
+		 * Set slider's value
+		 * @param {Number} value
+		 */
+		set value(value) {
 			o.input.value = value;
 			o.input.dispatchEvent(new Event("input"));
+		},
+
+		get value() {
+			return parseFloat(o.input.value);
+		},
+
+		setValue(value) {
+			this.value = value;
 		},
 
 		onInput(f) {
