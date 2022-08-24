@@ -438,13 +438,11 @@ let navTitle = navbar.title({
 		title: "title",
 		description: "click to get more information!"
 	}
-})
+});
 
 let navSwitch = navbar.switch({
 	color: "dark"
 });
-
-
 
 let home = navSwitch.button({
 	icon: "home",
