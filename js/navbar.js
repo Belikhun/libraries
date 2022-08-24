@@ -34,6 +34,7 @@ const navbar = {
 	/** @type {HTMLElement} */
 	underlay: undefined,
 
+	instances: [],
 	subWindowLists: [],
 
 	init(container) {
@@ -91,6 +92,9 @@ const navbar = {
 	 * @param	{Number}						order 
 	 */
 	insert(component, location, order) {
+		if (this.instances.includes(component))
+			return;
+
 		if (typeof component !== "object" || !component.container)
 			throw { code: -1, description: `navbar.insert(): not a valid component` }
 
@@ -98,6 +102,7 @@ const navbar = {
 			throw { code: -1, description: `navbar.insert(): not a valid location` }
 
 		this.block[location].appendChild(component.container);
+		this.instances.push(component);
 
 		if (typeof order === "number")
 			component.container.style.order = order;

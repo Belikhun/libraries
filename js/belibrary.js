@@ -2214,6 +2214,7 @@ class Animator {
 		this.duration = duration * 1000;
 		this.timingFunction = timingFunction;
 		this.animate = animate;
+		this.completed = false;
 
 		/** @type {Function[]} */
 		this.completeHandlers = []
@@ -2240,12 +2241,23 @@ class Animator {
 			this.animationFrameID = requestAnimationFrame(() => this.update());
 		else {
 			this.animate(1);
-			this.completeHandlers.forEach(f => f());
+			this.completed = true;
+			this.completeHandlers.forEach(f => f(true));
 		}
 	}
 
 	cancel() {
 		cancelAnimationFrame(this.animationFrameID);
+		this.completeHandlers.forEach(f => f(false));
+	}
+
+	complete() {
+		return new Promise((resolve) => {
+			if (this.completed)
+				resolve();
+
+			this.onComplete(() => resolve());
+		});
 	}
 
 	/**

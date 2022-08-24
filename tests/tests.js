@@ -98,14 +98,20 @@ const tests = {
 
 	/**
 	 * @typedef {{
-	 * 	[x: String]: {
-	 * 		[x: String]: (step: TestFrameworkStep) => Promise<Boolean>
-	 * 		store: {
-	 * 			node: HTMLElement
-	 * 			buttons: SQButton[]
-	 * 		}
-	 * 		parent: Object
-	 * 	} & TestFrameworkGroupOptions
+	 * 	[x: String]: (step: TestFrameworkStep) => Promise<Boolean>
+	 * 	store: {
+	 * 		node: HTMLElement
+	 * 		buttons: SQButton[]
+	 * 	}
+	 * 	parent: ScenesTree
+	 * } & TestFrameworkGroupOptions} GroupsTree
+	 * 
+	 * @typedef {{
+	 * 	[x: String]: GroupsTree
+	 *	store: {
+	 * 		node: HTMLElement
+	 * 		buttons: SQButton[]
+	 * 	}
 	 * } & TestFrameworkSceneOptions} ScenesTree
 	 * 
 	 * @type {Object<string, ScenesTree>}

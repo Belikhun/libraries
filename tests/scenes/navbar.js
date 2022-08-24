@@ -44,12 +44,15 @@ tests.scenes.navbar = {
 			navbar.block.left = undefined;
 			navbar.block.middle = undefined;
 			navbar.block.right = undefined;
+			navbar.instances = []
 			navbar.subWindowLists = []
 		},
 
 		"add title"(step) {
-			if (this.store.title)
+			if (this.store.title) {
+				navbar.insert(this.store.title, "left");
 				return step.SKIPPED;
+			}
 
 			this.store.title = navbar.title({
 				icon: `https://img.favpng.com/14/1/17/computer-icons-png-favpng-WnFp1ghSUbNp7Es4gtQY7PZBe.jpg`,
@@ -64,8 +67,10 @@ tests.scenes.navbar = {
 		},
 
 		"add switches"(step) {
-			if (this.store.switch)
+			if (this.store.switch) {
+				navbar.insert(this.store.switch, "left");
 				return step.SKIPPED;
+			}
 
 			this.store.switch = navbar.switch({ color: "whitesmoke" });
 			this.store.switches = [
@@ -99,8 +104,12 @@ tests.scenes.navbar = {
 		},
 
 		"add icon buttons"(step) {
-			if (this.store.iconButtons.length > 0)
+			if (this.store.iconButtons.length > 0) {
+				for (let btn of this.store.iconButtons)
+					navbar.insert(btn, "right");
+
 				return step.SKIPPED;
+			}
 
 			this.store.iconButtons = [
 				navbar.iconButton({
@@ -174,14 +183,20 @@ tests.scenes.navbar = {
 			}
 		},
 
-		"tooltip should show on deactivated buttons"(step) {
+		async "tooltip should show on deactivated buttons"(step) {
 			this.store.switches[0].button.dispatchEvent(new Event("mouseenter"));
 			step.AssertEqual("showing", this.store.switches[0].navtip.showing, true);
+
+			await delayAsync(200);
+			this.store.switches[0].button.dispatchEvent(new Event("mouseleave"));
 		},
 
-		"tooltip should hide on activated buttons"(step) {
-			this.store.iconButtons[0].container.dispatchEvent(new Event("mouseenter"));
-			step.AssertEqual("showing", this.store.iconButtons[0].navtip.showing, false);
+		async "tooltip should hide on activated buttons"(step) {
+			this.store.iconButtons[3].container.dispatchEvent(new Event("mouseenter"));
+			step.AssertEqual("showing", this.store.iconButtons[3].navtip.showing, false);
+
+			await delayAsync(200);
+			this.store.iconButtons[3].container.dispatchEvent(new Event("mouseleave"));
 		},
 
 		async "click all icon buttons again"() {

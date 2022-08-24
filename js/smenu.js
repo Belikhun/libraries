@@ -70,11 +70,12 @@ const smenu = {
 			searchTimeout = setTimeout(() => this.filter(e.target.value), 200);
 		});
 
-		if (typeof Scrollable === "function")
+		if (typeof Scrollable === "function") {
 			this.scroll = new Scrollable(this.container.main.wrapper, {
 				content: this.container.main.wrapper.smenu,
 				scrollbar: false
 			});
+		}
 		
 		this.container.main.navigator.addEventListener("mouseenter",
 			() => navExpandTimeout = setTimeout(() => {
@@ -213,9 +214,12 @@ const smenu = {
 	},
 
 	/**
+	 * Search/filter components
 	 * @param {String}		keyword
 	 */
 	filter(keyword) {
+		this.container.main.wrapper.smenu.search.input.value = keyword;
+
 		let tags = keyword
 			.toLocaleLowerCase()
 			.split(" ");
@@ -319,7 +323,7 @@ const smenu = {
 			}
 		}
 
-		scrollTo() {
+		async scrollTo() {
 			let _c = smenu.container.main.wrapper.smenu;
 			let maxScroll = _c.scrollHeight - _c.offsetHeight;
 
@@ -342,11 +346,10 @@ const smenu = {
 					anm.animator.cancel();
 
 			this.animator = new Animator(0.6, Easing.OutExpo, (t) => _c.scrollTop = current + (target - current) * t);
+			await this.animator.complete();
 
-			this.animator.onComplete(() => {
-				this.animator = null;
-				smenu.scroll.disabled = false;
-			});
+			this.animator = null;
+			smenu.scroll.disabled = false;
 		}
 	},
 
@@ -1151,6 +1154,7 @@ const smenu = {
 
 			this.container.classList.remove("hide");
 			smenu.activePanel = this;
+			this.showing = true;
 
 			if (typeof sounds === "object")
 				sounds.toggle();
@@ -1161,7 +1165,7 @@ const smenu = {
 			});
 		}
 
-		hide(callShowMenu = true) {
+		async hide(callShowMenu = true) {
 			clearTimeout(this.hideTimeout);
 
 			this.container.classList.remove("show");
@@ -1173,7 +1177,12 @@ const smenu = {
 			if (callShowMenu)
 				smenu.show(false);
 
-			this.hideTimeout = setTimeout(() => this.container.classList.add("hide"), 600);
+			this.hideTimeout = setTimeout(() => {
+				this.container.classList.add("hide")
+				this.showing = false;
+			}, 600);
+
+			await delayAsync(600);
 		}
 	}
 }

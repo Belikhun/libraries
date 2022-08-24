@@ -574,12 +574,12 @@ class TestFrameworkStep {
 	 * @throws	{AssertFailed}
 	 */
 	AssertEqual(what, which, equal) {
-		if (which === equal)
+		if (which == equal)
 			return true;
 		
 		let message = (equal === "")
 			? `${which} is not empty string`
-			: `${which} !== ${equal}`
+			: `${which} != ${equal}`
 
 		throw new AssertFailed(what, message);
 	}
