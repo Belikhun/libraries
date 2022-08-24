@@ -8,19 +8,21 @@
 */
 
 .waveContainer {
-	position: absolute;
+	position: relative;
 	display: block;
-
-	top: 0;
-	left: 0;
-	bottom: 0;
-	right: 0;
-
 	z-index: 20;
 	overflow: hidden;
 
 	--container-padding: 100px;
 	--content-padding: 80px;
+}
+
+.waveContainer:not(.relative) {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
 }
 
 .waveContainer.hide {
@@ -66,6 +68,10 @@
 
 .waveContainer > .container.hide {
 	display: none;
+}
+
+.waveContainer > .container.full {
+	width: 100%;
 }
 
 .waveContainer > .container > .wave {

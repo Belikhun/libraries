@@ -40,8 +40,9 @@ const wavec = {
 class WaveContainer {
 	constructor(content, {
 		color = "default",
-		icon = "circle",
-		title = "sample container"
+		icon,
+		title,
+		full = false
 	} = {}) {
 		/**
 		 * Handlers for toggle event
@@ -69,7 +70,7 @@ class WaveContainer {
 
 				header: { tag: "div", class: "header", child: {
 					icon: { tag: "icon" },
-					titleNode: { tag: "t", class: "title", text: title },
+					titleNode: { tag: "t", class: "title", text: title || "sample container" },
 
 					buttons: { tag: "span", class: "buttons", child: {
 						close: { tag: "icon", class: "close" },
@@ -81,16 +82,24 @@ class WaveContainer {
 			}}
 		});
 
+		if (full)
+			this.container.classList.add("full");
+
 		wavec.container.appendChild(this.container);
 		this.container.dataset.color = color;
-		this.container.contentBox.header.icon.dataset.icon = icon;
-		this.container.contentBox.header.buttons.close.dataset.icon = "close";
-		this.container.contentBox.header.buttons.reload.dataset.icon = "reload";
-		this.container.contentBox.header.buttons.reload.style.display = "none";
-		
-		if (typeof sounds === "object") {
-			sounds.applySound(this.container.contentBox.header.buttons.close, ["soundhoversoft", "soundselectsoft"]);
-			sounds.applySound(this.container.contentBox.header.buttons.reload, ["soundhoversoft", "soundselectsoft"]);
+
+		if (icon || title) {
+			this.container.contentBox.header.icon.dataset.icon = icon || "circle";
+			this.container.contentBox.header.buttons.close.dataset.icon = "close";
+			this.container.contentBox.header.buttons.reload.dataset.icon = "reload";
+			this.container.contentBox.header.buttons.reload.style.display = "none";
+			
+			if (typeof sounds === "object") {
+				sounds.applySound(this.container.contentBox.header.buttons.close, ["soundhoversoft", "soundselectsoft"]);
+				sounds.applySound(this.container.contentBox.header.buttons.reload, ["soundhoversoft", "soundselectsoft"]);
+			}
+		} else {
+			this.container.contentBox.header.style.display = "none";
 		}
 		
 		if (typeof Scrollable === "function") {
@@ -116,11 +125,15 @@ class WaveContainer {
 		if (color)
 			this.container.dataset.color = color;
 
-		if (icon)
+		if (icon) {
 			this.container.contentBox.header.icon.dataset.icon = icon;
-
-		if (title)
+			this.container.contentBox.header.style.display = null;
+		}
+		
+		if (title) {
 			this.container.contentBox.header.titleNode.innerText = title;
+			this.container.contentBox.header.style.display = null;
+		}
 	}
 
 	onToggle(f) {

@@ -1866,8 +1866,12 @@ function scaleValue(value, from, to) {
  * 
  * Create alot of triangle in the background of element
  *
- * @param	{Element}	element	Target Element
- * @param	{String}	color	Color
+ * @param	{Element}	element					Target Element
+ * @param	{Object}	options
+ * @param	{Number}	options.speed			Triangle speed
+ * @param	{String}	options.color			Triangle color
+ * @param	{Number}	options.scale			How large the triangle is
+ * @param	{Number}	options.triangleCount	How many triangles?
  */
 function triBg(element, {
 	speed = 34,
@@ -1884,6 +1888,8 @@ function triBg(element, {
 			? randBetween(0.96, 1.05, false)
 			: randBetween(0.9, 1.2, false))
 
+	let currentSpeed = speed;
+	let currentScale = scale;
 	let current = element.querySelector(":scope > .triBgContainer");
 
 	if (current)
@@ -1900,7 +1906,7 @@ function triBg(element, {
 		let scaleStep = [50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000]
 
 		for (let i = 0; i < scaleStep.length; i++)
-			if (scaleStep[i] >= (container.offsetHeight + (0.866 * 30 * 2 * scale))) {
+			if (scaleStep[i] >= (container.offsetHeight + (0.866 * 30 * 2 * currentScale))) {
 				container.dataset.anim = scaleStep[i];
 				return;
 			}
@@ -1909,29 +1915,37 @@ function triBg(element, {
 	}
 
 	(new ResizeObserver(() => updateSize())).observe(container);
-	updateSize();
 
-	for (let i = 0; i < triangleCount; i++) {
-		let randScale = randBetween(0.4, 2.0, false) * scale;
-		let width = 15 * randScale;
-		let height = 0.866 * (30 * randScale);
-		let randBright = getRandBright(color);
-		let randLeftPos = randBetween(0, 98, false);
-		let delay = randBetween(-speed / 2, speed / 2, false);
+	const generate = (count) => {
+		emptyNode(container);
+		triangleCount = count;
+		updateSize();
 
-		let triangle = document.createElement("span");
-		triangle.style.filter = `brightness(${randBright})`;
-		triangle.style.borderWidth = `0 ${width}px ${height}px`;
-		triangle.style.left = `calc(${randLeftPos}% - ${width}px)`;
-		triangle.style.animationDelay = `${delay}s`;
-		triangle.style.animationDuration = `${speed / randScale}s`;
-
-		container.appendChild(triangle);
+		for (let i = 0; i < count; i++) {
+			let randScale = randBetween(0.4, 2.0, false) * currentScale;
+			let width = 15 * randScale;
+			let height = 0.866 * (30 * randScale);
+			let randBright = getRandBright(color);
+			let randLeftPos = randBetween(0, 98, false);
+			let delay = randBetween(-currentSpeed / 2, currentSpeed / 2, false);
+	
+			let triangle = document.createElement("span");
+			triangle.style.filter = `brightness(${randBright})`;
+			triangle.style.borderWidth = `0 ${width}px ${height}px`;
+			triangle.style.left = `calc(${randLeftPos}% - ${width}px)`;
+			triangle.style.animationDelay = `${delay}s`;
+			triangle.style.animationDuration = `${currentSpeed / randScale}s`;
+	
+			container.appendChild(triangle);
+		}
 	}
 
+	generate(triangleCount);
 	element.insertBefore(container, element.firstChild);
 
 	return {
+		generate,
+
 		setColor(color) {
 			element.dataset.triColor = color;
 
@@ -1939,6 +1953,54 @@ function triBg(element, {
 				let randBright = getRandBright(color);
 				triangle.style.filter = `brightness(${randBright})`;
 			}
+		},
+
+		set({ scale, speed, count } = {}) {
+			let reGen = false;
+
+			if (typeof scale === "number") {
+				currentScale = scale;
+				reGen = true;
+			}
+
+			if (typeof speed === "number") {
+				currentSpeed = speed;
+				reGen = true;
+			}
+
+			if (typeof count === "number") {
+				triangleCount = count;
+				reGen = true;
+			}
+
+			if (reGen)
+				this.generate(triangleCount);
+		},
+
+		/**
+		 * Set triangle's color
+		 * @param {String} color 
+		 */
+		set color(color) {
+			this.setColor(color);
+		},
+
+		/**
+		 * Set triangle's scale
+		 * @param {Number} scale 
+		 */
+		set scale(scale) {
+			currentScale = scale;
+			this.generate(triangleCount);
+		},
+
+		/**
+		 * Set triangle's speed
+		 * @param {String} speed 
+		 */
+		set speed(speed) {
+			currentSpeed = speed;
+			this.generate(triangleCount);
 		}
 	}
 }
@@ -3222,7 +3284,7 @@ function createButton(text, {
 			break;
 		
 		case "object":
-			if (classes.length && classes.length > 0)
+			if (classes.length && classes.length >= 0)
 				button.classList.add(...classes);
 			else
 				throw { code: -1, description: `createButton(): Invalid or empty "classes" type: ${typeof classes}` }
@@ -3535,6 +3597,14 @@ function createProgressBar({
 	return {
 		group: container,
 		set,
+		
+		/**
+		 * Set progress value
+		 * @param {Number} value
+		 */
+		set value(value) {
+			set({ progress: value })
+		},
 
 		/**
 		 * Set ProgressBar's Progress

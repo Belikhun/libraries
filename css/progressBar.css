@@ -163,23 +163,23 @@
 /*? Colors */
 
 .progressBar > .bar[data-color="blue"] {
-    background-color: #3498db;
+    background-color: var(--osc-color-blue);
 }
 
 .progressBar > .bar[data-color="green"] {
-    background-color: #2cd40e;
+    background-color: var(--osc-color-green);
 }
 
 .progressBar > .bar[data-color="red"] {
-    background-color: #f36251;
+    background-color: var(--osc-color-red);
 }
 
 .progressBar > .bar[data-color="yellow"] {
-    background-color: #d3a200;
+    background-color: var(--osc-color-yellow);
 }
 
 .progressBar > .bar[data-color="pink"] {
-    background-color: #eb36df;
+    background-color: var(--osc-color-pink);
 }
 
 /*? Dark */
