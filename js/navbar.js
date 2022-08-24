@@ -34,8 +34,6 @@ const navbar = {
 	/** @type {HTMLElement} */
 	underlay: undefined,
 
-	/** @type {HTMLElement} */
-	subWindow: undefined,
 	subWindowLists: [],
 
 	init(container) {
@@ -52,30 +50,38 @@ const navbar = {
 			this.container.appendChild(this.block[key]);
 		}
 
-		this.tooltip.container = document.createElement("div");
-		this.tooltip.container.classList.add("navTip");
-		this.tooltip.title = document.createElement("t");
-		this.tooltip.title.classList.add("title");
-		this.tooltip.description = document.createElement("t");
-		this.tooltip.description.classList.add("description");
-		this.tooltip.container.append(this.tooltip.title, this.tooltip.description);
+		if (!this.tooltip.container) {
+			this.tooltip.container = document.createElement("div");
+			this.tooltip.container.classList.add("navTip");
+			this.tooltip.title = document.createElement("t");
+			this.tooltip.title.classList.add("title");
+			this.tooltip.description = document.createElement("t");
+			this.tooltip.description.classList.add("description");
+			this.tooltip.container.append(this.tooltip.title, this.tooltip.description);
+		}
 
-		this.underlay = document.createElement("div");
-		this.underlay.classList.add("underlay");
-		this.underlay.addEventListener("click", () => {
-			for (let item of this.subWindowLists)
-				item.hide(false);
+		if (!this.underlay) {
+			this.underlay = document.createElement("div");
+			this.underlay.classList.add("underlay");
 
-			this.setUnderlay(false);
-		});
+			this.underlay.addEventListener("click", () => {
+				for (let item of this.subWindowLists)
+					item.hide(false);
+	
+				this.setUnderlay(false);
+			});
+
+			// I don't want to add duplicate event listener
+			// so just putting here to make sure it only fire
+			// once
+			window.addEventListener("resize", () => {
+				for (let item of this.subWindowLists)
+					if (item.showing)
+						item.update();
+			});
+		}
 
 		this.container.append(this.tooltip.container, this.underlay);
-
-		window.addEventListener("resize", () => {
-			for (let item of this.subWindowLists)
-				if (item.showing)
-					item.update();
-		});
 	},
 
 	/**
@@ -126,13 +132,15 @@ const navbar = {
 				if (this.locked || this.disabled || !this.title || !this.description || node.classList.contains("active"))
 					return;
 
-				let leftPos = node.getBoundingClientRect().left;
+				let contPos = navbar.container.getBoundingClientRect();
+				let leftPos = node.getBoundingClientRect().left - contPos.left;
 				let rightPos = leftPos + node.offsetWidth;
 
-				if ((rightPos / window.innerWidth) > 0.8) {
+				if ((rightPos / navbar.container.clientWidth) > 0.8) {
 					this.tooltip.container.classList.add("flip");
 					this.tooltip.container.style.left = null;
-					this.tooltip.container.style.right = `${window.innerWidth - rightPos}px`;
+					this.tooltip.container.style.right =
+						`${navbar.container.clientWidth - rightPos}px`;
 				} else {
 					this.tooltip.container.classList.remove("flip");
 					this.tooltip.container.style.left = `${leftPos}px`;
