@@ -2328,6 +2328,9 @@ class LoadingOverlay {
 		} else {
 			this.container.classList.remove("loading");
 			this.hideTimeout = setTimeout(() => {
+				// Just to make sure when this is called before the wait for
+				// next frame is complete.
+				this.container.classList.remove("loading");
 				this.container.classList.remove("show");
 			}, 300);
 		}
