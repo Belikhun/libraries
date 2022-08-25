@@ -82,26 +82,26 @@ const HTTP_STATUS_MESSAGES = {
 /**
  * An AJAX function designed for my API
  * 
- * @param	{Object}		options					Request Options
- * @param	{String}		options.url				Request URL
- * @param	{String}		options.method			Request Method
- * @param	{Object}		options.query			Query/Param
- * @param	{Object}		options.form			Form Data
- * @param	{Object}		options.json			JSON Object
- * @param	{String}		options.raw				Raw data to send in request body
- * @param	{Object}		options.header			Headers
- * @param	{String}		options.type			Response type
- * @param	{Function}		options.onUpload		Update upload progress
- * @param	{Function}		options.onDownload		Update download progress
- * @param	{Boolean}		options.force			Force to send request even in offline mode
- * @param	{Boolean}		options.changeState		Change connection mode if request failed
- * @param	{Boolean}		options.reRequest		Re-send this request if connection back to online
- * @param	{Boolean}		options.withCredentials
- * @param	{Number}		options.timeout			Request timeout in second
- * @param	{Boolean}		options.formEncodeURL	Encode form
- * @param	{Function}		callout					On request success handler
- * @param	{Function}		error					On errored handler
- * @returns	{Promise<Object|String>}	A Promise thats resolve on request complete
+ * @param	{Object}													options					Request Options
+ * @param	{String}													options.url				Request URL
+ * @param	{"GET" | "POST" | "PUT" | "DELETE"}							[options.method="GET"]	Request Method
+ * @param	{Object<string, string>}									[options.query]			Query/Param
+ * @param	{Object<string, string>}									[options.form]			Form Data
+ * @param	{Object<string, string>}									[options.json]			JSON Object
+ * @param	{String}													[options.raw]			Raw data to send in request body
+ * @param	{Object<string, string>}									[options.header]		Headers
+ * @param	{"json" | "text"}											[options.type="json"]	Response type
+ * @param	{(e: ProgressEvent<XMLHttpRequestEventTarget>)}				[options.onUpload]		Update upload progress
+ * @param	{(e: ProgressEvent<XMLHttpRequestEventTarget>)}				[options.onDownload]	Update download progress
+ * @param	{Boolean}													[options.force]			Force to send request even in offline mode
+ * @param	{Boolean}													[options.changeState]	Change connection mode if request failed
+ * @param	{Boolean}													[options.reRequest]		Re-send this request if connection back to online
+ * @param	{Boolean}													[options.withCredentials]
+ * @param	{Number}													[options.timeout]		Request timeout in second
+ * @param	{Boolean}													[options.formEncodeURL]	Encode form
+ * @param	{Function}													callout					On request success handler
+ * @param	{({ code: Number, description: String, data: Object })}		error					On errored handler
+ * @returns	{Promise<Object|String>}									A Promise thats resolve on request complete
  */
 function myajax({
 	url = "/",
@@ -3736,6 +3736,13 @@ function clog(level, ...args) {
 	// n | 1 2 3 4 5 6 7 8 9 10 11
 	for (let i = 1; i <= text.length; i++) {
 		item = text[i - 1];
+
+		if (typeof item === "boolean")
+			item = item ? "true" : "false";
+
+		if (typeof item === "undefined")
+			item = "undefined";
+
 		if (typeof item === "string" || typeof item === "number") {
 			if (i > 4)
 				str += `${item} `;

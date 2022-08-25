@@ -75,7 +75,7 @@ tests.scenes.smenu = {
 			});
 
 			let noteChild = new smenu.Child({
-				label: "sempai,"
+				label: "senpai,"
 			}, this.parent.store.infoGroup);
 
 			this.parent.store.note = new smenu.components.Note({

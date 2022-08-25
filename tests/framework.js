@@ -23,6 +23,7 @@ class TestFramework {
 	 */
 	constructor(container, {
 		autoplay = false,
+		autoNextScene = false,
 		timeout = 500
 	} = {}) {
 		if (typeof container !== "object" || !container.classList)
@@ -30,7 +31,15 @@ class TestFramework {
 
 		this.container = container;
 		this.autoplay = autoplay;
+		this.autoNextScene = autoNextScene;
 		this.timeout = timeout;
+		this.isPlaying = false;
+		this.total = 0;
+		this.passed = 0;
+		this.skipped = 0;
+		this.failed = 0;
+		this.broken = 0;
+		this.errored = 0;
 
 		/** @type {TestFrameworkScene[]} */
 		this.scenes = []
@@ -54,6 +63,17 @@ class TestFramework {
 						checked: this.autoplay
 					}
 				}},
+
+				autoscene: { tag: "span", class: ["input", "autoscene"], child: {
+					label: { tag: "span", class: "label", text: "autoplay next scene" },
+					input: {
+						tag: "input",
+						type: "checkbox",
+						checked: this.autoNextScene
+					}
+				}},
+
+				fulltest: { tag: "button", class: ["input", "fulltest"], text: "full test" },
 
 				timeout: { tag: "span", class: ["input", "timeout"], child: {
 					label: { tag: "span", class: "label", text: "timeout" },
@@ -94,6 +114,16 @@ class TestFramework {
 				this.activeScene.autoplay();
 		});
 
+		this.view.header.autoscene.input.addEventListener("input", () => {
+			this.autoNextScene = this.view.header.autoscene.input.checked;
+		});
+
+		this.view.header.fulltest.addEventListener("click", async (e) => {
+			e.target.disabled = true;
+			await this.run();
+			e.target.disabled = false;
+		});
+
 		this.view.header.timeout.input.addEventListener("input", () => {
 			this.timeout = parseInt(this.view.header.timeout.input.value);
 			this.view.header.timeout.value.innerText = this.timeout + "ms";
@@ -108,6 +138,43 @@ class TestFramework {
 
 	get field() {
 		return this.view.panel.field;
+	}
+
+	async run(from = 0) {
+		if (this.isPlaying)
+			return;
+
+		// From 0 mean we are performing full test.
+		// Value different from 0 probally mean this
+		// function is bubbled from a scene.
+		if (from === 0) {
+			this.total = 0;
+			this.passed = 0;
+			this.skipped = 0;
+			this.failed = 0;
+			this.broken = 0;
+			this.errored = 0;
+		}
+
+		this.isPlaying = true;
+		for (let i = from; i < this.scenes.length; i++) {
+			if (this.scenes[i].isPlaying)
+				throw { code: -1, description: `TestFramework().run(): conflicting running scene detected!` }
+
+			clog("DEBG", `TestFramework().run(): activate scene ${i}`);
+			await this.scenes[i].activate(false);
+			clog("DEBG", `TestFramework().run(): run scene ${i}`);
+			await this.scenes[i].run();
+		}
+
+		this.isPlaying = false;
+
+		// Report result
+		if (from === 0) {
+			clog("OKAY", `TestFramework().run(): FULL TEST COMPLETED!`);
+			for (let key of ["total", "passed", "skipped", "failed", "broken", "errored"])
+				clog("OKAY", `TestFramework().run():  + ${pleft(key, 8, true)} = ${pleft(this[key], 2)}`);
+		}
 	}
 
 	/**
@@ -175,7 +242,7 @@ class TestFrameworkScene {
 		this.button.disabled = false;
 	}
 
-	async activate() {
+	async activate(autoplay = true) {
 		if (this.instance.activeScene === this)
 			return;
 
@@ -209,7 +276,9 @@ class TestFrameworkScene {
 
 		this.button.disabled = false;
 		this.button.classList.add("active");
-		this.autoplay();
+
+		if (autoplay)
+			this.autoplay();
 	}
 
 	async dispose() {
@@ -252,6 +321,11 @@ class TestFrameworkScene {
 		}
 
 		this.isPlaying = false;
+
+		if (this.instance.autoNextScene && !this.instance.isPlaying) {
+			let index = this.instance.scenes.indexOf(this);
+			this.instance.run(index + 1);
+		}
 	}
 
 	resetGroups() {
@@ -320,7 +394,7 @@ class TestFrameworkGroup {
 
 	async setup() {
 		this.button.disabled = true;
-		this.scene.instance.stepsNode.appendChild(this.button);
+		this.instance.stepsNode.appendChild(this.button);
 
 		try {
 			await this.setupHandler(this);
@@ -328,6 +402,7 @@ class TestFrameworkGroup {
 				await step.setup();
 		} catch(e) {
 			this.disabled = true;
+			this.instance.errored += 1;
 			this.button.classList.add("errored");
 			clog("ERRR", `TestFrameworkGroup(${this.id}).setup(): error occured while setting up group`, e);
 			return;
@@ -345,6 +420,9 @@ class TestFrameworkGroup {
 	}
 
 	async dispose() {
+		if (this.disabled)
+			return;
+		
 		this.button.disabled = true;
 		clog("INFO", `TestFrameworkGroup(${this.id}).dispose(): disposing group`);
 
@@ -363,7 +441,7 @@ class TestFrameworkGroup {
 		this.reset();
 
 		for (let step of this.steps) {
-			await delayAsync(this.scene.instance.timeout);
+			await delayAsync(this.instance.timeout);
 
 			if (!await step.run())
 				break;
@@ -374,7 +452,7 @@ class TestFrameworkGroup {
 		this.isRunning = false;
 
 		// Autoplay enabled
-		if (this.scene.instance.autoplay && !this.scene.isPlaying) {
+		if (this.instance.autoplay && !this.scene.isPlaying) {
 			let index = this.scene.groups.indexOf(this);
 			this.scene.run(index + 1);
 		}
@@ -398,6 +476,10 @@ class TestFrameworkGroup {
 
 	get field() {
 		return this.scene.field;
+	}
+
+	get instance() {
+		return this.scene.instance;
 	}
 }
 
@@ -460,6 +542,7 @@ class TestFrameworkStep {
 		await nextFrameAsync();
 
 		this.status = "running";
+		this.instance.total += 1;
 		this.button.disabled = true;
 		let result;
 
@@ -476,10 +559,12 @@ class TestFrameworkStep {
 
 			if (e instanceof AssertFailed) {
 				this.status = "failed";
+				this.instance.failed += 1;
 				this.detail = e.toString();
 				clog("ERRR", "TestFrameworkStep().run():", e.toString());
 			} else {
 				this.status = "broken";
+				this.instance.broken += 1;
 				clog("EXCP", `TestFrameworkStep().run(): test ${this.path} generated an exception!`, e);
 				errorHandler(e);
 			}
@@ -490,16 +575,19 @@ class TestFrameworkStep {
 			if (result === false) {
 				this.failed = true;
 				this.status = "failed";
+				this.instance.failed += 1;
 				clog("ERRR", `TestFrameworkStep().run(): test ${this.path} failed!`);
 			} else if (result === this.SKIPPED) {
 				this.failed = false;
 				this.status = "skipped";
+				this.instance.skipped += 1;
 				clog("INFO", `TestFrameworkStep().run(): test ${this.path} skipped!`);
 			}
 		}
 
 		if (!this.failed && this.status === "running") {
 			this.status = "passed";
+			this.instance.passed += 1;
 			clog("OKAY", `TestFrameworkStep().run(): test ${this.path} passed!`);
 		}
 
@@ -592,7 +680,7 @@ class TestFrameworkStep {
 	 * @throws	{AssertFailed}
 	 */
 	AssertIs(what, which) {
-		if (which === true)
+		if ((!!which) === true)
 			return true;
 		
 		throw new AssertFailed(what, "is not satisfied");

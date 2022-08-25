@@ -83,7 +83,7 @@
 	flex-direction: column;
 	flex-grow: 0;
 	flex-shrink: 0;
-	width: 300px;
+	width: 200px;
 
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -270,9 +270,13 @@
 	display: block;
 	flex-grow: 1;
 
+	--global-background: white;
+
 	margin: 10px;
 	border-radius: 16px;
-	background-color: white;
+	background-color: var(--global-background);
+
+	font-family: var(--primary-font), var(--heading-font), "Calibri", Tahoma, Geneva, Verdana, sans-serif;
 	color: black;
 	overflow: hidden;
 }
@@ -292,10 +296,13 @@
 }
 
 #app > .viewer > .panel > .field.dark {
-	background-color: rgb(46, 46, 46);
+	--global-background: rgb(46, 46, 46);
 }
 
-#app > .viewer > .panel > .field.gray,
+#app > .viewer > .panel > .field.gray {
+	--global-background: rgb(238, 238, 238);
+}
+
 #app > .viewer > .panel > .field .bg-gray {
 	background-color: rgb(238, 238, 238);
 }

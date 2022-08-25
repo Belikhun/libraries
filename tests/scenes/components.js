@@ -357,6 +357,11 @@ tests.scenes.components = {
 			}
 		},
 
+		"all messages should be showing"(step) {
+			for (let [i, input] of this.store.inputs.entries())
+				step.AssertIs(`input ${i + 1}`, input.group.classList.contains("message"));
+		},
+
 		async "set random values"() {
 			for (let i of this.store.inputs) {
 				i.input.focus();
