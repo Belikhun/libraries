@@ -20,11 +20,13 @@ class TestFramework {
 	 * @param	{Object}		options 
 	 * @param	{Boolean}		autoplay	Auto perform tests
 	 * @param	{Number}		timeout		Delay in each steps 
+	 * @param	{Boolean}		logSteps	Write step log into local storage
 	 */
 	constructor(container, {
 		autoplay = false,
 		autoNextScene = false,
-		timeout = 500
+		timeout = 500,
+		logSteps = false
 	} = {}) {
 		if (typeof container !== "object" || !container.classList)
 			throw { code: -1, description: `TestFramework(): not a valid container!` }
@@ -34,6 +36,7 @@ class TestFramework {
 		this.autoNextScene = autoNextScene;
 		this.timeout = timeout;
 		this.isPlaying = false;
+		this.logSteps = logSteps;
 		this.total = 0;
 		this.passed = 0;
 		this.skipped = 0;
@@ -154,6 +157,8 @@ class TestFramework {
 			this.failed = 0;
 			this.broken = 0;
 			this.errored = 0;
+			localStorage.removeItem("test.framework.logs");
+			this.log("start");
 		}
 
 		this.isPlaying = true;
@@ -172,9 +177,28 @@ class TestFramework {
 		// Report result
 		if (from === 0) {
 			clog("OKAY", `TestFramework().run(): FULL TEST COMPLETED!`);
+			this.log("completed", this.total, this.passed, this.skipped, this.failed, this.broken, this.errored);
+
 			for (let key of ["total", "passed", "skipped", "failed", "broken", "errored"])
 				clog("OKAY", `TestFramework().run():  + ${pleft(key, 8, true)} = ${pleft(this[key], 2)}`);
 		}
+	}
+
+	/**
+	 * Log step to local storage, which selenium will scrape data from
+	 * it when running.
+	 * @param  {...String} steps 
+	 */
+	log(...steps) {
+		if (!this.logSteps)
+			return;
+
+		let logs = localStorage.getItem("test.framework.logs");
+		logs = (logs) ? JSON.parse(logs) : []
+
+		logs.push(steps);
+		localStorage.setItem("test.framework.logs", JSON.stringify(logs));
+		clog("DEBG", `TestFramework().log(): ${steps.join(" ")}`);
 	}
 
 	/**
@@ -222,6 +246,7 @@ class TestFrameworkScene {
 		this.activateHandler = activate;
 		this.disposeHandler = dispose;
 		this.isPlaying = false;
+		this.disabled = false;
 
 		this.button = makeTree("button", ["tests-btn", "scene"], {
 			idValue: { tag: "div", class: "id", text: this.id },
@@ -243,45 +268,58 @@ class TestFrameworkScene {
 	}
 
 	async activate(autoplay = true) {
-		if (this.instance.activeScene === this)
+		if (this.instance.activeScene === this || this.disabled)
 			return;
 
 		this.button.disabled = true;
-		
-		// Dispose currently active scene.
-		if (this.instance.activeScene)
-			await this.instance.activeScene.dispose();
+		this.instance.log("scene", this.id, "activate", "start");
 
-		// Apply classes to field
-		this.field.className = "field";
-		switch (typeof this.classes) {
-			case "string":
-				this.field.classList.add(this.classes);
-				break;
-			
-			case "object":
-				if (this.classes.length && this.classes.length >= 0)
-					this.field.classList.add(...this.classes);
+		try {
+			// Dispose currently active scene.
+			if (this.instance.activeScene)
+				await this.instance.activeScene.dispose();
+	
+			// Apply classes to field
+			this.field.className = "field";
+			switch (typeof this.classes) {
+				case "string":
+					this.field.classList.add(this.classes);
+					break;
+				
+				case "object":
+					if (this.classes.length && this.classes.length >= 0)
+						this.field.classList.add(...this.classes);
+	
+					break;
+			}
+	
+			this.instance.activeScene = this;
+			this.instance.view.panel.steps.sceneName.innerText = this.name;
+			await this.activateHandler(this);
+			emptyNode(this.instance.stepsNode);
+	
+			for (let group of this.groups)
+				await group.setup();
 
-				break;
+			this.button.disabled = false;
+			this.button.classList.add("active");
+		} catch(e) {
+			let error = parseException(e);
+			this.disabled = true;
+			clog("ERRR", `TestFrameworkScene(${this.id}).activate(): an error occured while activating scene`, e);
+			this.button.classList.add("errored");
+			this.button.disabled = true;
+			this.instance.log("scene", this.id, "activate", "errored", error.code, error.description);
 		}
-
-		this.instance.activeScene = this;
-		this.instance.view.panel.steps.sceneName.innerText = this.name;
-		await this.activateHandler(this);
-		emptyNode(this.instance.stepsNode);
-
-		for (let group of this.groups)
-			await group.setup();
-
-		this.button.disabled = false;
-		this.button.classList.add("active");
 
 		if (autoplay)
 			this.autoplay();
 	}
 
 	async dispose() {
+		if (this.disabled)
+			return;
+
 		this.button.disabled = true;
 		clog("INFO", `TestFrameworkScene(${this.id}).dispose(): disposing scene`);
 
@@ -309,7 +347,7 @@ class TestFrameworkScene {
 	}
 
 	async run(from = 0) {
-		if (this.isPlaying)
+		if (this.isPlaying || this.disabled)
 			return;
 
 		this.isPlaying = true;
@@ -549,7 +587,8 @@ class TestFrameworkStep {
 		let topPos = this.button.offsetTop - this.stepsNode.clientHeight + 100;
 		if (this.stepsNode.scrollTop < topPos) {
 			// Scroll to this step if off screen
-			this.instance.stepsScroll.scrollTo(topPos + 300);
+			let maxScroll = this.stepsNode.scrollHeight - this.stepsNode.offsetHeight;
+			this.instance.stepsScroll.scrollTo(Math.min(topPos + 300, maxScroll));
 		}
 
 		try {

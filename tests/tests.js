@@ -15,8 +15,12 @@ const tests = {
 	framework: undefined,
 
 	init() {
+		const params = new URLSearchParams(window.location.search);
+		const autoTest = params.get("autotest") === "true";
+
 		this.framework = new TestFramework(this.container, {
-			timeout: 200
+			timeout: 200,
+			logSteps: autoTest
 		});
 
 		// Register
@@ -37,8 +41,10 @@ const tests = {
 					: () => {},
 				
 				activate: (typeof sceneObj.activate === "function")
-					? async (scene) => await sceneObj.activate(scene)
-					: () => {},
+					? async (scene) => {
+						location.hash = scene.id;
+						await sceneObj.activate(scene);
+					} : (scene) => location.hash = scene.id,
 
 				dispose: (typeof sceneObj.dispose === "function")
 					? async (scene) => await sceneObj.dispose(scene)
@@ -91,9 +97,30 @@ const tests = {
 			}
 		}
 
-		// Activate first scene
-		if (this.framework.scenes[0])
-			this.framework.scenes[0].activate();
+		let hash = location.hash.replace("#", "");
+		let found = false;
+
+		if (hash !== "") {
+			// Find scene with this hash
+			for (let scene of this.framework.scenes) {
+				if (scene.id === hash) {
+					scene.activate();
+					found = true;
+					break;
+				}
+			}
+		}
+
+		if (!found) {
+			// Activate first scene
+			if (this.framework.scenes[0])
+				this.framework.scenes[0].activate();
+		}
+
+		if (autoTest) {
+			// Begin auto testing
+			this.framework.run();
+		}
 	},
 
 	/**

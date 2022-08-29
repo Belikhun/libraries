@@ -94,6 +94,11 @@
 	margin-top: 10px;
 }
 
+#app > .scenes > .scene.errored {
+	background-color: rgb(85, 27, 27);
+	cursor: not-allowed;
+}
+
 #app > .scenes > .scene > .name {
 	font-size: 16px;
 }
