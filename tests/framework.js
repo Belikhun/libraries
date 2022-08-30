@@ -453,6 +453,7 @@ class TestFrameworkGroup {
 		this.disposeHandler = dispose;
 		this.disabled = false;
 		this.isRunning = false;
+		this.failed = false;
 
 		this.button = makeTree("button", ["tests-btn", "group"], {
 			idValue: { tag: "div", class: "id", text: this.id },
@@ -549,6 +550,7 @@ class TestFrameworkGroup {
 
 		this.instance.log("group", this.id, "run", "start");
 		this.isRunning = true;
+		this.failed = false;
 		this.button.classList.add("active");
 		this.button.disabled = true;
 		this.reset();
@@ -556,8 +558,13 @@ class TestFrameworkGroup {
 		for (let step of this.steps) {
 			await delayAsync(this.instance.timeout);
 
+			if (this.failed) {
+				await step.run(true);
+				continue;
+			}
+
 			if (!await step.run())
-				break;
+				this.failed = true;
 		}
 
 		this.button.disabled = false;
@@ -647,11 +654,20 @@ class TestFrameworkStep {
 		this.button.disabled = false;
 	}
 
+	skip() {
+		this.failed = false;
+		this.status = "skipped";
+		this.instance.skipped += 1;
+		clog("INFO", `TestFrameworkStep().skip(): test ${this.path} skipped!`);
+		this.instance.log("step", this.name, "run", "skipped");
+	}
+
 	/**
 	 * Run this step!
+	 * @param	{Boolean}			forceSkip	Force skip this step?
 	 * @return	{Promise<Boolean>}	step passed?
 	 */
-	async run() {
+	async run(forceSkip = false) {
 		this.reset();
 		await nextFrameAsync();
 
@@ -668,49 +684,55 @@ class TestFrameworkStep {
 			this.instance.stepsScroll.scrollTo(Math.min(topPos + 300, maxScroll));
 		}
 
-		try {
-			result = await this.runHandler(this);
-		} catch(e) {
-			this.failed = true;
-
-			if (e instanceof AssertFailed) {
-				this.status = "failed";
-				this.instance.failed += 1;
-				this.detail = e.toString();
-				clog("ERRR", "TestFrameworkStep().run():", e.toString());
-				this.instance.log("step", this.name, "run", "errored", e.toString());
-			} else {
-				let error = parseException(e);
-				this.status = "broken";
-				this.instance.broken += 1;
-				clog("EXCP", `TestFrameworkStep().run(): test ${this.path} generated an exception!`, e);
-				this.instance.log("step", this.name, "run", "broken", error.code, error.description);
-				errorHandler(e);
-			}
-		}
-
-		// Not failed yet, keep checking!
-		if (!this.failed) {
-			if (result === false) {
+		if (forceSkip) {
+			// Step forced to skip, we still mark this step
+			// as not failed.
+			this.skip();
+		} else {
+			try {
+				result = await this.runHandler(this);
+			} catch(e) {
 				this.failed = true;
-				this.status = "failed";
-				this.instance.failed += 1;
-				clog("ERRR", `TestFrameworkStep().run(): test ${this.path} failed!`);
-				this.instance.log("step", this.name, "run", "failed");
-			} else if (result === this.SKIPPED) {
-				this.failed = false;
-				this.status = "skipped";
-				this.instance.skipped += 1;
-				clog("INFO", `TestFrameworkStep().run(): test ${this.path} skipped!`);
-				this.instance.log("step", this.name, "run", "skipped");
+	
+				if (e instanceof AssertFailed) {
+					this.status = "failed";
+					this.instance.failed += 1;
+					this.detail = e.toString();
+					clog("ERRR", "TestFrameworkStep().run():", e.toString());
+					this.instance.log("step", this.name, "run", "errored", e.toString());
+				} else {
+					let error = parseException(e);
+					this.status = "broken";
+					this.instance.broken += 1;
+					clog("EXCP", `TestFrameworkStep().run(): test ${this.path} generated an exception!`, e);
+					this.instance.log("step", this.name, "run", "broken", error.code, error.description);
+					errorHandler(e);
+				}
 			}
-		}
-
-		if (!this.failed && this.status === "running") {
-			this.status = "passed";
-			this.instance.passed += 1;
-			clog("OKAY", `TestFrameworkStep().run(): test ${this.path} passed!`);
-			this.instance.log("step", this.name, "run", "complete");
+	
+			// Not failed yet, keep checking!
+			if (!this.failed) {
+				if (result === false) {
+					this.failed = true;
+					this.status = "failed";
+					this.instance.failed += 1;
+					clog("ERRR", `TestFrameworkStep().run(): test ${this.path} failed!`);
+					this.instance.log("step", this.name, "run", "failed");
+				} else if (result === this.SKIPPED) {
+					this.failed = false;
+					this.status = "skipped";
+					this.instance.skipped += 1;
+					clog("INFO", `TestFrameworkStep().skip(): test ${this.path} skipped!`);
+					this.instance.log("step", this.name, "run", "skipped");
+				}
+			}
+	
+			if (!this.failed && this.status === "running") {
+				this.status = "passed";
+				this.instance.passed += 1;
+				clog("OKAY", `TestFrameworkStep().run(): test ${this.path} passed!`);
+				this.instance.log("step", this.name, "run", "complete");
+			}
 		}
 
 		this.button.disabled = false;
