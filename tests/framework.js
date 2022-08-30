@@ -791,7 +791,7 @@ class TestFrameworkStep {
 			? `${which} is not empty string`
 			: `${which} != ${equal}`
 
-		throw new AssertFailed(what, message);
+		throw new AssertFailed("AssertEqual", what, message);
 	}
 
 	/**
@@ -805,7 +805,7 @@ class TestFrameworkStep {
 		if ((!!which) === true)
 			return true;
 		
-		throw new AssertFailed(what, "is not satisfied");
+		throw new AssertFailed("AssertIs", what, "is not satisfied");
 	}
 
 	/**
@@ -819,13 +819,20 @@ class TestFrameworkStep {
 		if (which !== null)
 			return true;
 		
-		throw new AssertFailed(what, "is null");
+		throw new AssertFailed("AssertNotNull", what, "is null");
 	}
 }
 
 class AssertFailed extends Error {
-	constructor(what, message) {
-		super(`assert failed: \"${what}\" ${message}`);
+	constructor(type, what, message) {
+		let msg = `${type}(): assert failed: \"${what}\" ${message}`;
+
+		super(msg);
+		this.fullMessage = msg;
 		this.what = what;
+	}
+
+	toString() {
+		return this.fullMessage;
 	}
 }
