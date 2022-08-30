@@ -386,3 +386,7 @@ icon[data-icon="left"]::after {
 icon[data-icon="minusCircle"]::after {
 	content: "\f056";
 }
+
+icon[data-icon="flaskVial"]::after {
+	content: "\e4f3";
+}

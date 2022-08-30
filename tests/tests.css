@@ -107,6 +107,8 @@
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
+	flex-shrink: 1;
+    overflow: hidden;
 }
 
 #app > .viewer > .header {
@@ -137,8 +139,13 @@
 }
 
 #app > .viewer > .header > .input > input[type="range"] {
-	width: 500px;
+	width: 100%;
 	height: 4px;
+}
+
+#app > .viewer > .header > .input.timeout {
+	flex-grow: 1;
+	max-width: 560px;
 }
 
 #app > .viewer > .header > .input > .value {
@@ -336,4 +343,53 @@
 
 #app > .viewer > .panel > .field .p-20 {
 	padding: 20px;
+}
+
+@media screen and (max-width: 1110px) {
+	#app {
+		flex-direction: column;
+		zoom: 0.8;
+	}
+
+	#app > .scenes {
+		flex-direction: row;
+		width: auto;
+		border-right: unset;
+		border-bottom: 1px solid rgba(128, 128, 128, 0.4);
+
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
+
+	#app > .scenes > .scene {
+		margin: 10px 0 10px 10px;
+		min-width: 180px;
+	}
+
+	#app > .scenes > .scene:last-child {
+		margin-right: 10px;
+	}
+
+	#app > .scenes > .scene > .name {
+		font-size: 15px;
+	}
+
+	#app > .viewer > .header > .input > .label {
+		font-size: 15px;
+	}
+
+	#app > .viewer > .panel {
+		flex-direction: column;
+	}
+
+	#app > .viewer > .panel > .steps {
+		width: 100%;
+		max-height: 360px;
+		border-right: unset;
+		border-bottom: 1px solid rgba(128, 128, 128, 0.4);
+	}
+
+	#app > .viewer > .panel > .field {
+		zoom: 0.5;
+	}
 }
