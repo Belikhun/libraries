@@ -14,7 +14,7 @@ const tests = {
 	/** @type {TestFramework} */
 	framework: undefined,
 
-	init() {
+	async init() {
 		const params = new URLSearchParams(window.location.search);
 		const autoTest = params.get("autotest") === "true";
 
@@ -51,6 +51,7 @@ const tests = {
 					: () => {}
 			});
 
+			await scene.setup();
 			let groupIDs = Object.keys(sceneObj);
 			for (let groupID of groupIDs) {
 				if (typeof sceneObj[groupID] !== "object")
@@ -97,29 +98,29 @@ const tests = {
 			}
 		}
 
-		let hash = location.hash.replace("#", "");
-		let found = false;
-
-		if (hash !== "") {
-			// Find scene with this hash
-			for (let scene of this.framework.scenes) {
-				if (scene.id === hash) {
-					scene.activate();
-					found = true;
-					break;
-				}
-			}
-		}
-
-		if (!found) {
-			// Activate first scene
-			if (this.framework.scenes[0])
-				this.framework.scenes[0].activate();
-		}
-
 		if (autoTest) {
 			// Begin auto testing
 			this.framework.run();
+		} else {
+			let hash = location.hash.replace("#", "");
+			let found = false;
+	
+			if (hash !== "") {
+				// Find scene with this hash
+				for (let scene of this.framework.scenes) {
+					if (scene.id === hash) {
+						scene.activate();
+						found = true;
+						break;
+					}
+				}
+			}
+	
+			if (!found) {
+				// Activate first scene
+				if (this.framework.scenes[0])
+					this.framework.scenes[0].activate();
+			}
 		}
 	},
 

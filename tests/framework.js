@@ -37,6 +37,8 @@ class TestFramework {
 		this.timeout = timeout;
 		this.isPlaying = false;
 		this.logSteps = logSteps;
+		this.logStart = null;
+		this.logs = []
 		this.total = 0;
 		this.passed = 0;
 		this.skipped = 0;
@@ -157,6 +159,7 @@ class TestFramework {
 			this.failed = 0;
 			this.broken = 0;
 			this.errored = 0;
+			this.logStart = null;
 			localStorage.removeItem("test.framework.logs");
 			this.log("start");
 		}
@@ -181,6 +184,10 @@ class TestFramework {
 
 			for (let key of ["total", "passed", "skipped", "failed", "broken", "errored"])
 				clog("OKAY", `TestFramework().run():  + ${pleft(key, 8, true)} = ${pleft(this[key], 2)}`);
+
+			// Reset
+			this.logStart = null;
+			this.logs = []
 		}
 	}
 
@@ -193,12 +200,13 @@ class TestFramework {
 		if (!this.logSteps)
 			return;
 
-		let logs = localStorage.getItem("test.framework.logs");
-		logs = (logs) ? JSON.parse(logs) : []
+		if (!this.logStart)
+			this.logStart = performance.now();
 
-		logs.push(steps);
-		localStorage.setItem("test.framework.logs", JSON.stringify(logs));
-		clog("DEBG", `TestFramework().log(): ${steps.join(" ")}`);
+		steps.unshift((performance.now() - this.logSteps) / 1000);
+		this.logs.push(steps);
+		localStorage.setItem("test.framework.logs", JSON.stringify(this.logs));
+		clog("DEBG", `TestFramework().log():`, steps);
 	}
 
 	/**
@@ -227,6 +235,8 @@ class TestFramework {
 class TestFrameworkScene {
 	/**
 	 * Construct a new scene
+	 * 
+	 * Remember to call `await .setup()` before using!!!
 	 * @param	{TestFramework}					instance
 	 * @param	{TestFrameworkSceneOptions}		options
 	 */
@@ -254,17 +264,22 @@ class TestFrameworkScene {
 		});
 
 		this.button.addEventListener("click", () => this.activate());
-		this.setup();
 
 		/** @type {TestFrameworkGroup[]} */
 		this.groups = []
 	}
 
 	async setup() {
+		this.instance.log("scene", this.id, "name", this.name);
+
 		this.button.disabled = true;
+		this.instance.log("scene", this.id, "setup", "start");
+
 		this.instance.scenesNode.appendChild(this.button);
 		await this.setupHandler();
+
 		this.button.disabled = false;
+		this.instance.log("scene", this.id, "setup", "complete");
 	}
 
 	async activate(autoplay = true) {
@@ -303,12 +318,15 @@ class TestFrameworkScene {
 
 			this.button.disabled = false;
 			this.button.classList.add("active");
+			this.instance.log("scene", this.id, "activate", "complete");
 		} catch(e) {
 			let error = parseException(e);
 			this.disabled = true;
-			clog("ERRR", `TestFrameworkScene(${this.id}).activate(): an error occured while activating scene`, e);
 			this.button.classList.add("errored");
 			this.button.disabled = true;
+			this.instance.errored += 1;
+
+			clog("ERRR", `TestFrameworkScene(${this.id}).activate(): an error occured while setting up scene`, e);
 			this.instance.log("scene", this.id, "activate", "errored", error.code, error.description);
 		}
 
@@ -322,14 +340,28 @@ class TestFrameworkScene {
 
 		this.button.disabled = true;
 		clog("INFO", `TestFrameworkScene(${this.id}).dispose(): disposing scene`);
+		this.instance.log("scene", this.id, "dispose", "start");
 
-		for (let group of this.groups)
-			await group.dispose();
+		try {
+			for (let group of this.groups)
+				await group.dispose();
+	
+			await this.disposeHandler(this);
+		} catch(e) {
+			let error = parseException(e);
+			this.disabled = true;
+			this.button.classList.add("errored");
+			this.button.disabled = true;
+			this.instance.errored += 1;
 
-		await this.disposeHandler(this);
+			clog("ERRR", `TestFrameworkScene(${this.id}).dispose(): an error occured while disposing scene`, e);
+			this.instance.log("scene", this.id, "dispose", "errored", error.code, error.description);
+			return;
+		}
 		
 		this.button.disabled = false;
 		this.reset();
+		this.instance.log("scene", this.id, "dispose", "complete");
 	}
 
 	async autoplay() {
@@ -351,6 +383,8 @@ class TestFrameworkScene {
 			return;
 
 		this.isPlaying = true;
+		this.instance.log("scene", this.id, "run", "start");
+
 		for (let i = from; i < this.groups.length; i++) {
 			if (this.groups[i].disabled)
 				continue;
@@ -359,6 +393,7 @@ class TestFrameworkScene {
 		}
 
 		this.isPlaying = false;
+		this.instance.log("scene", this.id, "run", "complete");
 
 		if (this.instance.autoNextScene && !this.instance.isPlaying) {
 			let index = this.instance.scenes.indexOf(this);
@@ -431,6 +466,9 @@ class TestFrameworkGroup {
 	}
 
 	async setup() {
+		this.instance.log("group", this.id, "name", this.name);
+
+		this.instance.log("group", this.id, "setup", "start");
 		this.button.disabled = true;
 		this.instance.stepsNode.appendChild(this.button);
 
@@ -439,22 +477,43 @@ class TestFrameworkGroup {
 			for (let step of this.steps)
 				await step.setup();
 		} catch(e) {
+			let error = parseException(e);
 			this.disabled = true;
-			this.instance.errored += 1;
 			this.button.classList.add("errored");
-			clog("ERRR", `TestFrameworkGroup(${this.id}).setup(): error occured while setting up group`, e);
+			this.button.disabled = true;
+			this.instance.errored += 1;
+
+			clog("ERRR", `TestFrameworkGroup(${this.id}).setup(): an error occured while setting up group`, e);
+			this.instance.log("group", this.id, "setup", "errored", error.code, error.description);
 			return;
 		}
 
 		this.button.disabled = false;
+		this.instance.log("group", this.id, "setup", "complete");
 	}
 
 	async activate() {
 		if (this.disabled)
 			return;
 
-		await this.activateHandler(this);
-		await this.run();
+		this.instance.log("group", this.id, "activate", "start");
+
+		try {
+			await this.activateHandler(this);
+			await this.run();
+		} catch(e) {
+			let error = parseException(e);
+			this.disabled = true;
+			this.button.classList.add("errored");
+			this.button.disabled = true;
+			this.instance.errored += 1;
+
+			clog("ERRR", `TestFrameworkGroup(${this.id}).activate(): an error occured while setting up group`, e);
+			this.instance.log("group", this.id, "activate", "errored", error.code, error.description);
+			return;
+		}
+
+		this.instance.log("group", this.id, "activate", "complete");
 	}
 
 	async dispose() {
@@ -463,16 +522,32 @@ class TestFrameworkGroup {
 		
 		this.button.disabled = true;
 		clog("INFO", `TestFrameworkGroup(${this.id}).dispose(): disposing group`);
+		this.instance.log("group", this.id, "dispose", "start");
 
-		this.reset();
-		await this.disposeHandler(this);
+		try {
+			this.reset();
+			await this.disposeHandler(this);
+		} catch(e) {
+			let error = parseException(e);
+			this.disabled = true;
+			this.button.classList.add("errored");
+			this.button.disabled = true;
+			this.instance.errored += 1;
+
+			clog("ERRR", `TestFrameworkGroup(${this.id}).dispose(): an error occured while disposing group`, e);
+			this.instance.log("group", this.id, "activate", "errored", error.code, error.description);
+			return;
+		}
+
 		this.button.disabled = false;
+		this.instance.log("group", this.id, "dispose", "complete");
 	}
 
 	async run() {
 		if (this.disabled || this.isRunning)
 			return false;
 
+		this.instance.log("group", this.id, "run", "start");
 		this.isRunning = true;
 		this.button.classList.add("active");
 		this.button.disabled = true;
@@ -488,6 +563,7 @@ class TestFrameworkGroup {
 		this.button.disabled = false;
 		this.button.classList.remove("active");
 		this.isRunning = false;
+		this.instance.log("group", this.id, "run", "complete");
 
 		// Autoplay enabled
 		if (this.instance.autoplay && !this.scene.isPlaying) {
@@ -579,6 +655,7 @@ class TestFrameworkStep {
 		this.reset();
 		await nextFrameAsync();
 
+		this.instance.log("step", this.name, "run", "start");
 		this.status = "running";
 		this.instance.total += 1;
 		this.button.disabled = true;
@@ -601,10 +678,13 @@ class TestFrameworkStep {
 				this.instance.failed += 1;
 				this.detail = e.toString();
 				clog("ERRR", "TestFrameworkStep().run():", e.toString());
+				this.instance.log("step", this.name, "run", "errored", e.toString());
 			} else {
+				let error = parseException(e);
 				this.status = "broken";
 				this.instance.broken += 1;
 				clog("EXCP", `TestFrameworkStep().run(): test ${this.path} generated an exception!`, e);
+				this.instance.log("step", this.name, "run", "broken", error.code, error.description);
 				errorHandler(e);
 			}
 		}
@@ -616,11 +696,13 @@ class TestFrameworkStep {
 				this.status = "failed";
 				this.instance.failed += 1;
 				clog("ERRR", `TestFrameworkStep().run(): test ${this.path} failed!`);
+				this.instance.log("step", this.name, "run", "failed");
 			} else if (result === this.SKIPPED) {
 				this.failed = false;
 				this.status = "skipped";
 				this.instance.skipped += 1;
 				clog("INFO", `TestFrameworkStep().run(): test ${this.path} skipped!`);
+				this.instance.log("step", this.name, "run", "skipped");
 			}
 		}
 
@@ -628,6 +710,7 @@ class TestFrameworkStep {
 			this.status = "passed";
 			this.instance.passed += 1;
 			clog("OKAY", `TestFrameworkStep().run(): test ${this.path} passed!`);
+			this.instance.log("step", this.name, "run", "complete");
 		}
 
 		this.button.disabled = false;
