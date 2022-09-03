@@ -3525,7 +3525,7 @@ function createTimer(time = 0, {
  * @typedef {{
  * transition: Boolean
  * warningZone: Number
- * blink: "grow" | "fade"
+ * blink: "grow" | "fade" | "none"
  * duration: Number
  * color: "blue" | "pink" | "red" | "green" | "yellow"
  * progress: Number
