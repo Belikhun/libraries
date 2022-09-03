@@ -3521,6 +3521,23 @@ function createTimer(time = 0, {
 	}
 }
 
+/**
+ * @typedef {{
+ * transition: Boolean
+ * warningZone: Number
+ * blink: "grow" | "fade"
+ * duration: Number
+ * color: "blue" | "pink" | "red" | "green" | "yellow"
+ * progress: Number
+ * style: "flat" | "round"
+ * left: String
+ * right: String
+ * }} ProgressBarOptions
+ * 
+ * Create a progress bar node.
+ * 
+ * @param	{ProgressBarOptions}	options
+ */
 function createProgressBar({
 	transition = true,
 	warningZone = 0,
@@ -3549,6 +3566,10 @@ function createProgressBar({
 
 	container.append(bar, warning, leftNode, rightNode);
 
+	/**
+	 * Update progress bar options
+	 * @param {ProgressBarOptions} options 
+	 */
 	const set = ({
 		transition,
 		warningZone,
@@ -3978,6 +3999,14 @@ const popup = {
 			if (typeof sounds !== "undefined")
 				sounds.select();
 		});
+	},
+
+	/**
+	 * Update popup's message
+	 * @param	{String}	message
+	 */
+	set message(message) {
+		this.popupNode.popup.body.top.message.innerText = message;
 	},
 
 	hide() {
