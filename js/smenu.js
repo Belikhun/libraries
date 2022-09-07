@@ -588,6 +588,7 @@ const smenu = {
 				this.defaultValue = defaultValue;
 				this.save = save;
 				this.toast = null;
+				this.init = false;
 
 				if (toast) {
 					this.toast = new ToastInstance(label, false, {
@@ -610,7 +611,7 @@ const smenu = {
 						localStorage.setItem(this.save, value);
 
 					// Show toast
-					if (this.toast) {
+					if (this.toast && this.init) {
 						this.toast.value = value;
 						this.toast.show();
 					}
@@ -636,6 +637,8 @@ const smenu = {
 	
 					child.insert(this);
 				}
+
+				this.init = true;
 			}
 
 			set({
@@ -694,6 +697,7 @@ const smenu = {
 				this.save = save;
 				this.defaultValue = defaultValue;
 				this.toast = null;
+				this.init = false;
 
 				if (toast) {
 					this.toast = new ToastInstance(label, false, {
@@ -706,7 +710,7 @@ const smenu = {
 						localStorage.setItem(this.save, value);
 
 					// Show toast
-					if (this.toast) {
+					if (this.toast && this.init) {
 						this.toast.value = this.choice.names[value] || value;
 						this.toast.show();
 					}
@@ -734,6 +738,8 @@ const smenu = {
 	
 					child.insert(this);
 				}
+
+				this.init = true;
 			}
 
 			onChange(f) {
@@ -874,6 +880,7 @@ const smenu = {
 				this.unit = unit;
 				this.save = save;
 				this.toast = null;
+				this.init = false;
 
 				if (toast) {
 					this.toast = new ToastInstance(label, false, {
@@ -914,6 +921,8 @@ const smenu = {
 	
 					child.insert(this);
 				}
+
+				this.init = true;
 			}
 
 			update(value, showTooltip = true) {
@@ -931,7 +940,7 @@ const smenu = {
 				this.previewNode.innerHTML = sVal;
 
 				// Show toast
-				if (this.toast) {
+				if (this.toast && this.init) {
 					this.toast.value = sVal;
 					this.toast.show();
 				}

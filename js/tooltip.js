@@ -75,9 +75,11 @@ const tooltip = {
 			 * with specified hook
 			 * 
 			 * @param	{TooltipHook}	hook	Hook to scan for elements
+			 * @param	{HTMLElement}	target	Target to scan for elements
 			 */
-			attach(hook) {
-				let targets = document.querySelectorAll(`[data-${hook.key}]:not([data-tooltip-checked])`);
+			attach(hook, target) {
+				let targets = (target || document)
+					.querySelectorAll(`[data-${hook.key}]:not([data-tooltip-checked])`);
 
 				for (let target of targets)
 					tooltip.attachEvent(target, hook);
@@ -100,10 +102,12 @@ const tooltip = {
 			 * Scan for targets and attach event listener
 			 * with specified hook
 			 * 
-			 * @param	{Object}	hook	Hook to scan for elements
+			 * @param	{TooltipHook}	hook	Hook to scan for elements
+			 * @param	{HTMLElement}	target	Target to scan for elements
 			 */
-			attach(hook) {
-				let targets = document.querySelectorAll(`[${hook.key}]:not([data-tooltip-checked])`);
+			attach(hook, target) {
+				let targets = (target || document)
+					.querySelectorAll(`[${hook.key}]:not([data-tooltip-checked])`);
 
 				for (let target of targets)
 					tooltip.attachEvent(target, hook);
@@ -132,10 +136,14 @@ const tooltip = {
 		document.body.insertBefore(this.container, document.body.childNodes[0]);
 
 		//* EVENTS
-		new MutationObserver(() => {
+		new MutationObserver((records) => {
 			clearTimeout(this.__scanTimeout);
 			this.__scanTimeout = setTimeout(() => this.scan(), this.scanDelay);
-		}).observe(container || document.body, { childList: true, subtree: true });
+		}).observe(container || document.body, {
+			childList: true,
+			subtree: true,
+			attributes: false
+		});
 
 		if (typeof ResizeObserver === "function") {
 			new ResizeObserver(() => {
@@ -220,12 +228,11 @@ const tooltip = {
 	/**
 	 * Perform a full scan for element with tooltip
 	 * data need to show
+	 * @param	{HTMLElement}	[target]
 	 */
-	scan() {
-		clog("DEBG", "tooltip.scan(): scanning for new elements to attach");
-
+	scan(target) {
 		for (let hook of this.hooks)
-			this.processor[hook.on].attach(hook);
+			this.processor[hook.on].attach(hook, target);
 	},
 
 	/**

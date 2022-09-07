@@ -1875,8 +1875,9 @@ function flatc(color) {
  */
 function oscColor(color) {
 	const clist = {
+		whitesmoke:		"#f6f6f6",
 		pink:			"#ff66aa",
-		green:			"#88b400",
+		green:			"#49b104",
 		blue:			"#44aadd",
 		yellow:			"#f6c21c",
 		orange:			"#ffa502",
@@ -1886,10 +1887,11 @@ function oscColor(color) {
 		dark:			"#1E1E1E",
 		purple:			"#593790",
 		darkGreen:		"#0c4207",
-		darkBlue:		"#053242",
+		darkBlue:		"#032b3d",
 		darkYellow:		"#444304",
 		darkRed:		"#440505",
-		navyBlue:		"#333D79",
+		lightBlue:		"#daf3ff",
+		navyBlue:		"#333D79"
 	}
 
 	return (clist[color]) ? clist[color] : clist.dark;
@@ -3790,10 +3792,31 @@ const cookie = {
 //? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
 //? |-----------------------------------------------------------------------------------------------|
 
+var clogListeners = []
+
 /**
+ * Register on log event.
+ * @param	{(level: CLogLevel, args: CLogArg[]) => any}	f
+ */
+function onCLOG(f) {
+	if (typeof f !== "function")
+		throw { code: -1, description: `onCLOG(): not a valid function!` }
+
+	clogListeners.push(f);
+}
+
+/**
+ * @typedef {"OKAY" | "INFO" | "WARN" | "ERRR" | "CRIT" | "DEBG"} CLogLevel
+ * @typedef {{
+ * 	color: String
+ * 	text: String
+ * 	padding: Number
+ * 	separate: Boolean
+ * } | string} CLogArg
+ * 
  * Log to console, with sparkles!
- * @param	{"OKAY" | "INFO" | "WARN" | "ERRR" | "CRIT" | "DEBG"}	level	Log level
- * @param	{...String|Object}										args	Log info
+ * @param	{CLogLevel}		level	Log level
+ * @param	{...CLogArg}	args	Log info
  */
 function clog(level, ...args) {
 	// We only want to log DEBG level in development mode
@@ -3816,6 +3839,7 @@ function clog(level, ...args) {
 		CRIT: "gray",
 	}[level])
 
+	/** @type {CLogArg[]} */
 	let text = [
 		{
 			color: flatc("aqua"),
@@ -3843,6 +3867,9 @@ function clog(level, ...args) {
 	text = text.concat(args);
 	let n = 2;
 	let out = new Array();
+
+	/** @type {CLogArg} */
+	let item;
 
 	out[0] = "%c ";
 	out[1] = `padding-left: ${["INFO", "OKAY", "DEBG"].includes(level) ? 10 : 0}px`;
@@ -3896,7 +3923,15 @@ function clog(level, ...args) {
 			console.error(`clog(): unknown type ${typeof item}`, item);
 	}
 
-	document.__onclog(level, rtime, str);
+	for (let f of clogListeners) {
+		try {
+			f(level, args);
+		} catch(e) {
+			console.warn("clog(): error occured while handing listener", e);
+			continue;
+		}
+	}
+
 	switch (level) {
 		case "DEBG":
 			console.debug.apply(this, out);
@@ -4292,9 +4327,6 @@ const mouseCursor = {
 
 //? =================
 //?    SCRIPT INIT
-
-if (typeof document.__onclog === "undefined")
-	document.__onclog = (lv, t, m) => {}
 
 window.addEventListener("mousemove", (e) => mouseCursor.update(e), { passive: true });
 
