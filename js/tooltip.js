@@ -285,7 +285,7 @@ const tooltip = {
 			});
 
 			target.dataset.tooltipListening = true;
-			clog("DEBG", `tooltip.attachEvent(${hook.on} ${hook.key}): event attached to`, target);
+			// clog("DEBG", `tooltip.attachEvent(${hook.on} ${hook.key}): event attached to`, target);
 			break;
 		}
 
