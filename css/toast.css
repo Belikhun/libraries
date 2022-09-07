@@ -11,3 +11,118 @@
  * @license		MIT
  * @copyright	2018-2022 Belikhun
  */
+
+.toast {
+	position: absolute;
+	bottom: 200px;
+	left: 50%;
+	min-width: 240px;
+	
+	--background: rgba(0, 0, 0, 0.7);
+	--hide: cubic-bezier(0.5, 0, 0.75, 0);
+	--show: cubic-bezier(0.25, 1, 0.5, 1);
+
+	color: white;
+	font-family: var(--heading-font);
+	text-align: center;
+	user-select: none;
+
+	transform: translateX(-50%);
+	background-color: var(--background);
+
+	opacity: 0;
+	transition: opacity 1.5s var(--hide);
+}
+
+.toast.hide {
+	display: none;
+}
+
+.toast.show {
+	transition: opacity 0.5s var(--show);
+	opacity: 1;
+}
+
+.toast > .value {
+	font-size: 32px;
+	line-height: 1;
+}
+
+.toast > .top {
+	position: absolute;
+	bottom: 100%;
+	width: 100%;
+	padding: 16px 0 0;
+	
+	border-top-left-radius: 24px;
+	border-top-right-radius: 24px;
+	background-color: var(--background);
+}
+
+.toast > .top > .title {
+	text-transform: uppercase;
+	font-size: 13px;
+	font-weight: bold;
+	letter-spacing: .4px;
+}
+
+.toast > .bottom {
+	position: absolute;
+	top: 100%;
+	width: 100%;
+	padding: 0 0 20px;
+
+	border-bottom-left-radius: 24px;
+	border-bottom-right-radius: 24px;
+	box-sizing: border-box;
+	background-color: var(--background);
+}
+
+.toast > .bottom > .light {
+	display: none;
+	width: 32px;
+	height: 8px;
+	background-color: #5a5a5a;
+	border-radius: 16px;
+	margin: 0 auto 16px;
+}
+
+.toast > .bottom > .light.show {
+	display: block;
+}
+
+.toast > .bottom > .light.active {
+	background-color: #e1f5ff;
+	box-shadow: #66c5f5 0 0 14px 2px;
+}
+
+.toast > .bottom > .hint {
+	color: rgb(146, 146, 146);
+	font-family: var(--primary-font);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .3px;
+	text-transform: uppercase;
+}
+
+.toast > .top > .space,
+.toast > .bottom > .space {
+	display: block;
+	width: 100%;
+	height: 0;
+
+	transition: height 1.5s var(--hide);
+}
+
+.toast.show > .top > .space,
+.toast.show > .bottom > .space {
+	transition: height 0.5s var(--show);
+}
+
+.toast.show > .top > .space {
+	height: 14px;
+}
+
+.toast.show > .bottom > .space  {
+	height: 20px;
+}

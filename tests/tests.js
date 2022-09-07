@@ -17,6 +17,9 @@ const tests = {
 	framework: undefined,
 
 	async init() {
+		// Enable debug logging
+		window.DEBUG = true;
+
 		const params = new URLSearchParams(window.location.search);
 		const autoTest = params.get("autotest") === "true";
 
