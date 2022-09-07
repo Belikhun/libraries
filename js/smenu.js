@@ -259,7 +259,8 @@ const smenu = {
 	Group: class {
 		constructor({
 			icon = "circle",
-			label = "Group"
+			label = "Group",
+			after = null
 		} = {}) {
 			this.id = randString(8);
 			this.animator = null;
@@ -282,11 +283,23 @@ const smenu = {
 				sounds.applySound(this.toggler, ["soundhoversoft", "soundselectsoft"]);
 
 			this.toggler.addEventListener("click", () => this.scrollTo());
-			smenu.container.main.wrapper.smenu.appendChild(this.container);
-			smenu.container.main.navigator.appendChild(this.toggler);
-			requestAnimationFrame(() => smenu.container.main.wrapper.smenu.dispatchEvent(new Event("scroll")));
 
-			smenu.groupLists.push(this);
+			if (after) {
+				insertAfter(this.container, after.container);
+				insertAfter(this.toggler, after.toggler);
+
+				let index = smenu.groupLists.indexOf(after) + 1;
+				if (index < smenu.groupLists.length)
+					smenu.groupLists.splice(index, 0, this);
+				else
+					smenu.groupLists.push(this);
+			} else {
+				smenu.container.main.wrapper.smenu.appendChild(this.container);
+				smenu.container.main.navigator.appendChild(this.toggler);
+				smenu.groupLists.push(this);
+			}
+			
+			requestAnimationFrame(() => smenu.container.main.wrapper.smenu.dispatchEvent(new Event("scroll")));
 		}
 
 		hide() {
@@ -562,7 +575,8 @@ const smenu = {
 				value = null,
 				save = null,
 				defaultValue = false,
-				onChange = null
+				onChange = null,
+				toast = false
 			} = {}, child) {
 				this.container = document.createElement("div");
 				this.container.classList.add("component", "checkbox");
@@ -573,6 +587,13 @@ const smenu = {
 
 				this.defaultValue = defaultValue;
 				this.save = save;
+				this.toast = null;
+
+				if (toast) {
+					this.toast = new ToastInstance(label, false, {
+						hint: save || "không lưu"
+					});
+				}
 
 				this.changeHandlers = []
 				this.checkbox.input.addEventListener("change", async (e) => {
@@ -587,6 +608,12 @@ const smenu = {
 				this.changeHandlers.push((value) => {
 					if (this.save)
 						localStorage.setItem(this.save, value);
+
+					// Show toast
+					if (this.toast) {
+						this.toast.value = value;
+						this.toast.show();
+					}
 
 					if (value !== this.defaultValue)
 						this.container.classList.add("changed");
@@ -632,6 +659,10 @@ const smenu = {
 					this.checkbox.input.disabled = disabled;
 			}
 
+			/**
+			 * Attach change listener for this
+			 * @param	{(value: Boolean) => any}	f
+			 */
 			onChange(f) {
 				if (!f || typeof f !== "function")
 					throw { code: -1, description: "smenu.components.Checkbox().onChange(): not a valid function" }
@@ -649,7 +680,8 @@ const smenu = {
 				value,
 				save,
 				defaultValue,
-				onChange
+				onChange,
+				toast = false
 			} = {}, child) {
 				this.container = document.createElement("div");
 				this.container.classList.add("component", "choice");
@@ -661,10 +693,23 @@ const smenu = {
 				this.container.append(this.labelNode, this.choice.container);
 				this.save = save;
 				this.defaultValue = defaultValue;
+				this.toast = null;
+
+				if (toast) {
+					this.toast = new ToastInstance(label, false, {
+						hint: save || "không lưu"
+					});
+				}
 
 				this.onChange((value) => {
 					if (this.save)
 						localStorage.setItem(this.save, value);
+
+					// Show toast
+					if (this.toast) {
+						this.toast.value = this.choice.names[value] || value;
+						this.toast.show();
+					}
 
 					if (value !== this.defaultValue)
 						this.container.classList.add("changed");
@@ -707,7 +752,7 @@ const smenu = {
 				if (typeof label === "string")
 					this.labelNode.innerHTML = label;
 
-				this.choice.set({ color, choice, value });
+				this.choice.set({ color, choices: choice, value });
 			}
 		},
 
@@ -807,7 +852,8 @@ const smenu = {
 				defaultValue = 1,
 				disabled = false,
 				onChange = null,
-				onInput = null
+				onInput = null,
+				toast = false
 			} = {}, child) {
 				this.container = document.createElement("div");
 				this.container.classList.add("component", "slider");
@@ -827,6 +873,13 @@ const smenu = {
 				this.valueStep = valueStep;
 				this.unit = unit;
 				this.save = save;
+				this.toast = null;
+
+				if (toast) {
+					this.toast = new ToastInstance(label, false, {
+						hint: save || "không lưu"
+					});
+				}
 
 				let savedValue = localStorage.getItem(this.save);
 				if (savedValue === null)
@@ -873,9 +926,15 @@ const smenu = {
 
 				let sVal = (typeof rVal === "boolean")
 					? ((rVal) ? "BẬT" : "TẮT")
-					: rVal + ((this.unit) ? ` <b>${this.unit}</b>` : "");
+					: rVal + ((this.unit) ? ` ${this.unit}` : "");
 
 				this.previewNode.innerHTML = sVal;
+
+				// Show toast
+				if (this.toast) {
+					this.toast.value = sVal;
+					this.toast.show();
+				}
 
 				if (value != this.defaultValue)
 					this.container.classList.add("changed");

@@ -29,6 +29,7 @@
 
 	transform: translateX(-50%);
 	background-color: var(--background);
+	z-index: 100;
 
 	opacity: 0;
 	transition: opacity 1.5s var(--hide);
@@ -46,6 +47,11 @@
 .toast > .value {
 	font-size: 32px;
 	line-height: 1;
+	padding: 0 16px;
+}
+
+.toast > .value.small {
+	font-size: 24px;
 }
 
 .toast > .top {
@@ -82,7 +88,7 @@
 	display: none;
 	width: 32px;
 	height: 8px;
-	background-color: #5a5a5a;
+	background-color: #797979;
 	border-radius: 16px;
 	margin: 0 auto 16px;
 }

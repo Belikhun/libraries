@@ -39,6 +39,14 @@ tests.scenes.toast = {
 			toast.light = null;
 		},
 
+		"change to a lengthy value"() {
+			toast.value = "this is a very loooong value";
+		},
+
+		"toast width is greater than 240"(step) {
+			step.AssertIs("width > 240", toast.view.clientWidth > 240);
+		},
+
 		async hide() {
 			await toast.active.hide();
 		}

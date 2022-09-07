@@ -404,3 +404,7 @@ icon[data-icon="minusCircle"]::after {
 icon[data-icon="flaskVial"]::after {
 	content: "\e4f3";
 }
+
+icon[data-icon="wrench"]::after {
+	content: "\f0ad";
+}

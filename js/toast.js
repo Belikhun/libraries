@@ -61,13 +61,7 @@ const toast = {
 	 */
 	async show(title, value, options = {}) {
 		let instance = new ToastInstance(title, value, options);
-
-		// Only show if there is no active toast.
-		if (!this.showing)
-			await instance.show();
-		else
-			instance.queue();
-		
+		instance.show();		
 		return instance;
 	},
 
@@ -81,9 +75,15 @@ const toast = {
 
 	/**
 	 * Update toast value
-	 * @param	{String}	value
+	 * @param	{String|Boolean}	value
 	 */
 	set value(value) {
+		if (typeof value === "boolean") {
+			this.light = value;
+			value = value ? "bật" : "tắt";
+		}
+
+		this.view.value.classList[value.length > 6 ? "add" : "remove"]("small");
 		this.view.value.innerText = value;
 	},
 
@@ -127,19 +127,13 @@ class ToastInstance {
 	} = {}) {
 		this.title = title;
 		this.hint = hint;
+		this.value = value;
 		this.light = light;
 		this.duration = duration;
 		this.showing = false;
 		this.timeout = null;
 		this.showListeners = []
 		this.hideListeners = []
-
-		if (typeof value === "boolean") {
-			this.light = value;
-			this.value = value ? "bật" : "tắt";
-		} else {
-			this.value = value;
-		}
 	}
 
 	/**
@@ -165,17 +159,44 @@ class ToastInstance {
 	}
 
 	queue() {
+		if (toast.instances.includes(this))
+			return;
+
 		toast.instances.push(this);
+		clog("DEBG", `ToastInstance("${this.title}").queue(): added to queue!`);
 	}
 
 	async show() {
+		if (this.timeout) {
+			clearTimeout(this.timeout);
+			this.timeout = null;
+		}
+
+		// Queue this toast if there is another one showing.
+		if (toast.showing && toast.active !== this) {
+			this.queue();
+			return;
+		}
+
 		toast.title = this.title;
-		toast.value = this.value;
-		toast.light = this.light;
+		toast.value = this.currentValue;
+		toast.light = this.currentLight;
 		toast.hint = this.hint;
 		toast.active = this;
-		toast.instances.splice(toast.instances.indexOf(this), 1);
+
+		if (this.duration > 0) {
+			// Add timeout to automatically hide this toast
+			this.timeout = setTimeout(() => this.hide(), this.duration);
+		}
+
+		if (this.showing)
+			return;
+
 		this.showing = true;
+		clog("DEBG", `ToastInstance("${this.title}").show(): showing!`);
+
+		if (toast.instances.includes(this))
+			toast.instances.splice(toast.instances.indexOf(this), 1);
 
 		if (!toast.showing) {
 			toast.showing = true;
@@ -184,11 +205,6 @@ class ToastInstance {
 			await nextFrameAsync();
 			toast.view.classList.add("show");
 			await delayAsync(500);
-		}
-
-		if (this.duration > 0) {
-			// Add timeout to automatically hide this toast
-			this.timeout = setTimeout(() => this.hide(), this.duration);
 		}
 
 		// Fire listeners
@@ -202,21 +218,58 @@ class ToastInstance {
 		}
 	}
 
+	/**
+	 * Set toast value
+	 * @param	{Boolean|String}	value
+	 */
+	set value(value) {
+		if (typeof value === "boolean") {
+			this.currentLight = value;
+			this.currentValue = value ? "bật" : "tắt";
+		} else {
+			this.currentValue = value;
+			this.currentLight = null;
+		}
+
+		if (toast.active !== this)
+			return;
+
+		toast.value = value;
+		toast.light = this.currentLight;
+	}
+
+	/**
+	 * Set toast light
+	 * @param	{Boolean|null}	light
+	 */
+	set light(light) {
+		this.currentLight = light;
+
+		if (toast.active !== this)
+			return;
+
+		toast.light = light;
+	}
+
 	async hide() {
+		if (!this.showing)
+			return;
+
 		if (this.timeout) {
 			clearTimeout(this.timeout);
 			this.timeout = null;
 		}
 
 		this.showing = false;
+		clog("DEBG", `ToastInstance("${this.title}").hide(): hiding!`);
 
 		if (toast.showing) {
-			toast.active = undefined;
-			toast.showing = false;
-
 			toast.view.classList.remove("show");
 			await delayAsync(1500);
 			toast.view.classList.add("hide");
+			
+			toast.active = undefined;
+			toast.showing = false;
 		}
 
 		// Fire listeners

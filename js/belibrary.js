@@ -358,6 +358,23 @@ function myajax({
 	});
 }
 
+var initGroupHandlers = {}
+
+/**
+ * Attach listener that will be called when a group is initialized.
+ * @param {String}					name
+ * @param {(group: object) => any}	f
+ */
+function onInitGroup(name, f) {
+	if (typeof f !== "function")
+		throw { code: -1, description: `onInitGroup(${name}): not a valid function!` }
+
+	if (!initGroupHandlers[name])
+		initGroupHandlers[name] = []
+
+	initGroupHandlers[name].push(f);
+}
+
 /**
  * Initialize A Group Object
  * @param {Object}		group			The Target Object
@@ -445,6 +462,29 @@ async function initGroup(group, name, set = () => {}) {
 
 				item.initialized = false;
 				continue;
+			}
+
+			if (initGroupHandlers[path]) {
+				clog("INFO", {
+					color: oscColor("pink"),
+					text: truncateString(path, 34),
+					padding: 34,
+					separate: true
+				}, `Handling module listeners...`);
+
+				for (let f of initGroupHandlers[path]) {
+					try {
+						f(item);
+					} catch(e) {
+						clog("WARN", {
+							color: oscColor("pink"),
+							text: truncateString(path, 34),
+							padding: 34,
+							separate: true
+						}, `An error occured when handing listener`, e);
+						continue;
+					}
+				}
 			}
 
 			item.initialized = true;
@@ -2369,6 +2409,15 @@ function emptyNode(node) {
 		node.firstChild.remove();
 }
 
+/**
+ * Insert a node after a node.
+ * @param {HTMLElement} newNode
+ * @param {HTMLElement} existingNode
+ */
+function insertAfter(newNode, existingNode) {
+	existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+}
+
 function sanitizeHTML(html) {
 	let decoder = document.createElement("div");
 	decoder.innerHTML = html;
@@ -3045,6 +3094,7 @@ function createChoiceInput({
 	}
 
 	let choiceNodes = {}
+	let choiceNames = {}
 	let activeNode = null;
 	let activeValue = null;
 	let changeHandlers = []
@@ -3069,8 +3119,10 @@ function createChoiceInput({
 		let node = document.createElement("icon");
 		node.dataset.icon = icon || "circle";
 		
-		if (typeof title === "string")
+		if (typeof title === "string") {
 			node.title = title;
+			choiceNames[key] = title;
+		}
 
 		container.appendChild(node);
 		choiceNodes[key] = node;
@@ -3097,6 +3149,7 @@ function createChoiceInput({
 
 		if (typeof choices === "object") {
 			choiceNodes = {}
+			choiceNames = {}
 			activeNode = null;
 			activeValue = null;
 			emptyNode(container);
@@ -3141,6 +3194,10 @@ function createChoiceInput({
 			return choiceNodes;
 		},
 
+		get names() {
+			return choiceNames;
+		},
+
 		onChange(f) {
 			if (typeof f !== "function")
 				throw { code: -1, description: `createChoiceInput().onChange(): not a valid function` }
@@ -3150,6 +3207,17 @@ function createChoiceInput({
 	}
 }
 
+/**
+ * Create a new slider component
+ * @param {{
+ * 	color: "pink" | "blue"
+ * 	value: Number
+ * 	min: Number
+ * 	max: Number
+ * 	step: Number
+ * 	disabled: Boolean
+ * }} options
+ */
 function createSlider({
 	color = "pink",
 	value = 0,
@@ -3158,21 +3226,20 @@ function createSlider({
 	step = 1,
 	disabled = false
 } = {}) {
-	let container = buildElementTree("div", "osc-slider", [
-		{ type: "input", name: "input" },
-		{ type: "span", class: "leftTrack", name: "left" },
-		{ type: "span", class: "thumb", name: "thumb" },
-		{ type: "span", class: "rightTrack", name: "right" }
-	]);
+	let container = makeTree("div", "osc-slider", {
+		input: { tag: "input", type: "range" },
+		left: { tag: "span", class: "leftTrack" },
+		thumb: { tag: "span", class: "thumb" },
+		right: { tag: "span", class: "rightTrack" }
+	});
 
-	let o = container.obj;
+	let o = container;
 	o.dataset.color = color;
 	o.dataset.soundhover = true;
 
 	if (typeof sounds === "object")
 		sounds.applySound(o);
 
-	o.input.type = "range";
 	o.input.min = min;
 	o.input.max = max;
 	o.input.step = step;
@@ -3217,10 +3284,27 @@ function createSlider({
 			handler(value, e);
 	});
 
-	o.addEventListener("mouseup", () => o.classList.remove("dragging"));
+	let mouseDown = false;
+	let dragging = true;
+
+	const resetDrag = () => {
+		mouseDown = false;
+		dragging = false;
+		o.classList.remove("dragging");
+	}
+
+	o.input.addEventListener("mousedown", () => mouseDown = true);
+	o.input.addEventListener("mouseup", () => resetDrag());
+	o.input.addEventListener("mouseout", () => resetDrag());
+	o.input.addEventListener("mousemove", () => {
+		if (mouseDown && !dragging) {
+			dragging = true;
+			o.classList.add("dragging");
+		}
+	});
 
 	return {
-		group: container.tree,
+		group: container,
 		input: o.input,
 
 		/**
