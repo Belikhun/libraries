@@ -9,10 +9,12 @@
  * CI in github actions. If I'm not wrong, it's very easy
  * to write tests for this framework.
  * 
- * @author	Belikhun
- * @version	1.0
- * @license	MIT
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
+
 class TestFramework {
 	/**
 	 * Test framework instance

@@ -1,9 +1,17 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/belibrary.js                                                                      |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
+/**
+ * /assets/js/belibrary.js
+ * 
+ * My own personal libraries that pack many goodies and
+ * stuff into it.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
 
 const HTTP_STATUS_MESSAGES = {
 	100: `Continue`,
@@ -3832,7 +3840,7 @@ const popup = {
 	/** @type {HTMLElement} */
 	popup: undefined,
 
-	/** @type {HTMLElement} */
+	/** @type {TreeDOM} */
 	popupNode: undefined,
 
 	initialized: false,

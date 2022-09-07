@@ -4,10 +4,12 @@
  * Test framework wrapper, for easier writing tests and
  * stuff...
  * 
- * @author	@Belikhun
- * @version	1.0
- * @license	MIT
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
+
 const tests = {
 	container: $("#app"),
 

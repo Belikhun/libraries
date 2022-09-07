@@ -1,3 +1,17 @@
+/**
+ * /assets/fonts/FontAwesome/FontAwesome.css
+ * 
+ * Font Awesome integration with icon styles.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
+
 @font-face {
 	font-family: 'Font Awesome Brands';
 	font-style: normal;

@@ -5,9 +5,10 @@
  * Scene will be loaded before tests framework and
  * wrapper for integration before scanning.
  * 
- * @author	@Belikhun
- * @version	1.0
- * @license	MIT
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
 
 /** @type {ScenesTree} */

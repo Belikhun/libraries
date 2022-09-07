@@ -1,17 +1,18 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/smenu.js                                                                          |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
-
 /**
- * Settings Menu
+ * /assets/js/smenu.js
  * 
- * @author	@Belikhun
- * @version	v1.0
- * @license	MIT
+ * A beautiful animated settings menu. With grouping, search,
+ * SubPanel and mowe!
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
+
 const smenu = {
 	/** @type {HTMLElement} */
 	container: undefined,

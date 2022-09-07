@@ -1,16 +1,17 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/md2html.js                                                                        |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
-
 /**
- * Simple Markdown to HTML (md2html)
+ * /assets/js/md2html.js
  * 
- * @author	@Belikhun
- * @version	v1.0
+ * A very rough implementation of a markdown to html converter.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
+
 const md2html = {
 	/**
 	 * List of function for handing line parsing

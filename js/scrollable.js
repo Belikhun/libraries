@@ -1,17 +1,17 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/scrollable.js                                                                     |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
-
 /**
- * Provide Smooth Scrolling and Custom Scrollbar
+ * /assets/js/scrollable.js
  * 
- * @author	@Belikhun
- * @version	v1.0
- * @license	MIT
+ * Provide Smooth Scrolling and Custom Scrollbar.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
  */
+
  class Scrollable {
 	/**
 	 * @param {HTMLElement}		container		Container

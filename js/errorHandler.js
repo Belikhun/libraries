@@ -1,9 +1,16 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/errorHandler.js                                                                   |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
+/**
+ * /assets/js/errorHandler.js
+ * 
+ * Handle the damn error for me. Im lazy
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
 
 /**
  * Parse error stack

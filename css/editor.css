@@ -1,11 +1,16 @@
-/*
-? |-----------------------------------------------------------------------------------------------|
-? |  /assets/css/editor.css                                                                       |
-? |                                                                                               |
-? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-? |-----------------------------------------------------------------------------------------------|
-*/
+/**
+ * /assets/css/editor.css
+ * 
+ * The monaco-clone editor. Use with editor.js
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
 
 .editor {
 	position: relative;

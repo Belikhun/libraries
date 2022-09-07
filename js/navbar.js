@@ -1,9 +1,16 @@
-//? |-----------------------------------------------------------------------------------------------|
-//? |  /assets/js/navbar.js                                                                         |
-//? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
-//? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
-//? |-----------------------------------------------------------------------------------------------|
+/**
+ * /assets/js/navbar.js
+ * 
+ * Navbar and navbar's component.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
 
 const navbar = {
 	/** @type {HTMLElement} */
