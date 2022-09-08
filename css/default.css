@@ -848,7 +848,7 @@ body.dark .md2html code {
 		opacity 0.6s ease,
 		bottom 0.6s cubic-bezier(0.5, 0, 0.75, 0);
 
-	z-index: 200;
+	z-index: 98;
 }
 
 .connectionStatePanel.show {
