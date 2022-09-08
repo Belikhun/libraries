@@ -877,7 +877,11 @@ body.dark .md2html code {
 }
 
 .connectionStatePanel > .info {
+	display: flex;
+    flex-direction: column;
+    justify-content: center;
 	flex-grow: 1;
+	
 	padding: 20px 0;
 	color: white;
 	z-index: 1;
