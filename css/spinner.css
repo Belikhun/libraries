@@ -20,6 +20,14 @@
 	height: 16px;
 	--width: 3px;
 	--color: rgb(44, 44, 44);
+	--duration: 0.75s;
+}
+
+.simpleSpinner.big {
+	width: 28px;
+	height: 28px;
+	--width: 6px;
+	--duration: 1s;
 }
 
 .simpleSpinner::before {
@@ -37,7 +45,7 @@
 	border-right-color: transparent;
 	box-sizing: border-box;
 
-	animation: simple-rotate 0.75s linear 0s infinite;
+	animation: simple-rotate var(--duration) linear 0s infinite;
 }
 
 body.dark .simpleSpinner,

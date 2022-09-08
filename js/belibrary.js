@@ -131,23 +131,39 @@ function myajax({
 }, callout = () => {}, error = () => {}) {
 	let argumentsList = arguments;
 
-	return new Promise((resolve, reject) => {
-		if (__connection__.onlineState !== "online" && force === false) {
-			let errorObj = {}
+	// Only change state if request is from origin server.
+	if (!ConnectionState.validHost(url))
+		changeState = false;
 
-			switch (__connection__.onlineState) {
-				case "offline":
-					errorObj = { code: 106, description: "Mất kết nối tới máy chủ" }
-					break;
-				case "ratelimited":
-					errorObj = { code: 32, description: "Rate Limited" }
-					break;
+	return new Promise(async (resolve, reject) => {
+		if (ConnectionState.validHost(url) && ConnectionState.state !== "online" && force === false) {
+			if (ConnectionState.haltRequests) {
+				clog("WARN", {
+					color: flatc("magenta"),
+					text: method
+				}, {
+					color: flatc("pink"),
+					text: url
+				}, `Waiting for connection to back online`);
+
+				await ConnectionState.backOnline();
+			} else {
+				let errorObj = {}
+	
+				switch (ConnectionState.state) {
+					case "offline":
+						errorObj = { code: 106, description: "Mất kết nối tới máy chủ" }
+						break;
+					case "ratelimited":
+						errorObj = { code: 32, description: "Rate Limited" }
+						break;
+				}
+	
+				reject(errorObj);
+				error(errorObj);
+	
+				return;
 			}
-
-			reject(errorObj);
-			error(errorObj);
-
-			return;
 		}
 
 		let xhr = new XMLHttpRequest();
@@ -187,8 +203,36 @@ function myajax({
 
 			if (this.readyState === this.DONE) {
 				if (this.status === 0 && this.responseText === "") {
-					if (changeState === true)
-						__connection__.stateChange("offline");
+					if (changeState === true) {
+						ConnectionState.change("offline");
+
+						if (ConnectionState.haltRequests) {
+							clog("WARN", {
+								color: flatc("magenta"),
+								text: method
+							}, {
+								color: flatc("pink"),
+								text: url
+							}, `Request halted! Waiting for connection to back online to resend request.`);
+			
+							await ConnectionState.backOnline();
+	
+							// Resend previous ajax request
+							clog("DEBG", "Resending Request", argumentsList);
+							let r = null;
+	
+							try {
+								r = await myajax(...argumentsList);
+							} catch(e) {
+								reject(e);
+								return;
+							}
+	
+							// Resolve promise
+							resolve(r);
+							return;
+						}
+					}
 
 					let errorObj = { code: 106, description: "Mất kết nối tới máy chủ" }
 					reject(errorObj);
@@ -249,7 +293,7 @@ function myajax({
 	
 							if (this.status === 429 && response.code === 32 && reRequest === true) {
 								// Wait for :?unratelimited:?
-								await __connection__.stateChange("ratelimited", response);
+								await ConnectionState.change("ratelimited", response);
 								
 								// Resend previous ajax request
 								clog("DEBG", "Resending Request", argumentsList);
@@ -264,7 +308,6 @@ function myajax({
 	
 								// Resolve promise
 								resolve(r);
-	
 								return;
 							}
 						}
@@ -727,7 +770,11 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  * Object represent the DOM structure will be passed into `makeTree()`
  * @typedef {{
  * 	id: String
- * 	tag: String
+ * 	tag: "div" | "span" | "a" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "table" | "thead"
+ * 			| "tbody" | "tr" | "th" | "td" | "input" | "img" | "video" | "audio" | "iframe" | "b"
+ * 			| "canvas" | "code" | "em" | "footer" | "form" | "hr" | "i" | "label" | "ul" | "ol"
+ * 			| "li" | "meta" | "nav" | "option" | "optgroup" | "param" | "picture" | "pre" | "q"
+ * 			| "s" | "script" | "strong" | "style" | "svg" | "textarea"
  * 	text: String
  * 	for: String
  * 	data: Object<string, string>
@@ -855,8 +902,20 @@ function makeTree(tag, classes, child = {}, path = "") {
 	return container;
 }
 
-function checkServer(ip, callback = () => {}) {
-	return new Promise((resolve, reject) => {
+/**
+ * @typedef {{
+ * 	code: Number
+ * 	description: String
+ * 	online: Boolean
+ * 	address: String
+ * }} CheckServerResponse
+ * 
+ * @param	{String}								host 
+ * @param	{(data: CheckServerResponse) => any}	callback 
+ * @returns	{Promise<CheckServerResponse>}
+ */
+function checkServer(host, callback = () => {}) {
+	return new Promise((resolve) => {
 		let xhr = new XMLHttpRequest();
 		let pon = {};
 
@@ -865,18 +924,18 @@ function checkServer(ip, callback = () => {}) {
 				if (this.status === 0) {
 					pon = {
 						code: -1,
-						description: `Server "${ip}" is Offline`,
+						description: `Server "${host}" is Offline`,
 						online: false,
-						address: ip
+						address: host
 					}
 
-					reject(pon);
+					resolve(pon);
 				} else {
 					pon = {
 						code: 0,
-						description: `Server "${ip}" is Online`,
+						description: `Server "${host}" is Online`,
 						online: true,
-						address: ip
+						address: host
 					}
 
 					resolve(pon);
@@ -886,7 +945,7 @@ function checkServer(ip, callback = () => {}) {
 			}
 		})
 
-		xhr.open("GET", ip);
+		xhr.open("GET", `${host}/ping.html`);
 		xhr.send();
 	})
 }
@@ -3806,7 +3865,7 @@ function onCLOG(f) {
 }
 
 /**
- * @typedef {"OKAY" | "INFO" | "WARN" | "ERRR" | "CRIT" | "DEBG"} CLogLevel
+ * @typedef {"OKAY" | "INFO" | "WARN" | "ERRR" | "CRIT" | "DEBG" | "LCNT"} CLogLevel
  * @typedef {{
  * 	color: String
  * 	text: String
@@ -3872,7 +3931,7 @@ function clog(level, ...args) {
 	let item;
 
 	out[0] = "%c ";
-	out[1] = `padding-left: ${["INFO", "OKAY", "DEBG"].includes(level) ? 10 : 0}px`;
+	out[1] = `padding-left: ${["INFO", "OKAY", "DEBG", "LCNT"].includes(level) ? 10 : 0}px`;
 
 	// i | 1   2   3   4   5     6
 	// j | 0   1   2   3   4     5
@@ -4148,27 +4207,130 @@ const popup = {
 	}
 }
 
-const __connection__ = {
+const ConnectionState = {
+	initialized: false,
+	HOST: window.location.origin,
+	NAME: `Trang web`,
+
+	container: document.body,
+
+	/** @type {TreeDOM} */
+	view: undefined,
+
+	viewBG: undefined,
+
+	/** @type {"online" | "offline" | "ratelimited"} */
+	state: "online",
+
 	enabled: true,
-	onlineState: "online",
+	haltRequests: true,
+
 	checkEvery: 2000,
 	checkInterval: null,
 	checkCount: 0,
-	onDisconnected: () => {},
-	onRatelimited: () => {},
-	__checkTime: 0,
-	__sbarItem: null,
-	__listeners: [],
 
-	async stateChange(state = "online", data = {}) {
+	stateListeners: [],
+
+	init() {
+		clog("INFO", `Initializing`, {
+			text: "ConnectionState",
+			color: flatc("blue")
+		});
+
+		this.view = makeTree("div", "connectionStatePanel", {
+			info: { tag: "span", class: "info", child: {
+				titleNode: { tag: "div", class: "title", text: "Sample Title" },
+				description: { tag: "div", class: "description", text: "Heheh is this descripting?" }
+			}},
+
+			button: createButton("BUTTON", {
+				color: "darkBlue",
+				complex: true,
+				disabled: true
+			}),
+
+			spinner: { tag: "span", class: ["simpleSpinner", "big"] },
+			icon: { tag: "icon", data: { icon: "unlink" } }
+		});
+
+		this.viewBG = triBg(this.view);
+		this.setView({ background: "red" });
+		this.initialized = true;
+	},
+
+	setView({
+		background = undefined,
+		title = undefined,
+		description = undefined,
+		button = undefined,
+		icon = undefined
+	}) {
+		if (typeof background === "string")
+			this.viewBG.color = background;
+		
+		if (typeof title === "string")
+			this.view.info.titleNode.innerText = title;
+		
+		if (typeof description === "string") {
+			this.view.info.description.classList.add("show");
+			this.view.info.description.innerText = description;
+		} else if (description === null) {
+			this.view.info.description.classList.remove("show");
+		}
+		
+		if (typeof button === "string") {
+			this.view.button.classList.add("show");
+			this.view.button.changeText(button);
+		} else if (button === null) {
+			this.view.button.classList.remove("show");
+		}
+
+		if (typeof icon === "string") {
+			if (icon === "loading")
+				this.view.classList.add("loading");
+			else {
+				this.view.classList.remove("loading");
+				this.view.icon.dataset.icon = icon;
+			}
+		}
+	},
+
+	/**
+	 * Check if url is a request to local server
+	 * @param	{String}	url
+	 * @returns {Boolean}
+	 */
+	validHost(url) {
+		return url.startsWith(this.HOST);
+	},
+
+	async show() {
+		this.container.appendChild(this.view);
+		await nextFrameAsync();
+		this.view.classList.add("show");
+	},
+
+	async hide() {
+		if (!this.container.contains(this.view))
+			return;
+		
+		this.view.classList.remove("show");
+		await delayAsync(600);
+		this.container.removeChild(this.view);
+	},
+
+	change(state = "online", data = {}) {
 		return new Promise((resolve, reject) => {
+			if (!this.initialized)
+				this.init();
+
 			if (!this.enabled) {
 				resolve({ code: 0, description: "Module Disabled", data: { disabled: true } });
 				return;
 			}
 
 			const s = ["online", "offline", "ratelimited"];
-			if (!typeof state === "string" || state === this.onlineState || s.indexOf(state) === -1) {
+			if (!typeof state === "string" || state === this.state || s.indexOf(state) === -1) {
 				let t = {code: -1, description: `Unknown state or rejected: ${state}`}
 				reject(t);
 				return;
@@ -4179,43 +4341,53 @@ const __connection__ = {
 				color: flatc("yellow")
 			});
 
-			this.onlineState = state;
+			this.state = state;
 			this.__triggerOnStateChange(state);
 			clearInterval(this.checkInterval);
 
 			switch(state) {
 				case "online":
-					clog("okay", "Đã kết nối tới máy chủ.");
-					if (this.__sbarItem)
-						this.__sbarItem.remove();
+					clog("OKAY", "Đã kết nối tới máy chủ.");
 					resolve();
+
+					this.setView({
+						background: "green",
+						title: "Đã kết nối tới máy chủ!",
+						description: null,
+						button: null,
+						icon: "check"
+					});
+
+					setTimeout(() => this.hide(), 2000);
 					break;
 
 				case "offline":
-					let checkerHandler = () => {}
 					let checkTimeout = null;
 					let doCheck = true;
 
-					clog("lcnt", "Mất kết nối tới máy chủ.");
+					clog("LCNT", "Mất kết nối tới máy chủ.");
 					this.checkCount = 0;
-					this.__sbarItem = (typeof sbar !== "undefined") ? sbar.additem("Đang thử kết nối lại...", "spinner", {align: "right"}) : null;
 
-					// Bind check handler
-					this.onDisconnected({ onCount: (f) => checkerHandler = f });
+					this.setView({
+						background: "orange",
+						title: "Mất kết nối!",
+						description: null,
+						button: null,
+						icon: "unlink"
+					});
+
+					this.show();
 
 					let checker = async () => {
 						this.checkCount++;
-						if (this.__sbarItem)
-							this.__sbarItem.change(`Đang thử kết nối lại... [Lần ${this.checkCount}]`);
+						clog("INFO", `Đang thử kết nối lại... [Lần ${this.checkCount}]`);
+						this.setView({ button: `KẾT NỐI LẠI (${this.checkCount})` });
 
-						checkerHandler(this.checkCount);
-
-						let data = await checkServer(window.location.origin);
+						let data = await checkServer(this.HOST);
 
 						if (data.online) {
 							doCheck = false;
-							this.stateChange("online");
-							checkerHandler("connected");
+							this.change("online");
 							resolve();
 						}
 					}
@@ -4236,30 +4408,34 @@ const __connection__ = {
 						checkTimeout = setTimeout(() => checkHandle(), this.checkEvery - timer.stop * 1000);
 					}
 
-					checkHandle();
+					setTimeout(() => {
+						this.setView({
+							background: "red",
+							description: `${this.NAME} đang cố gắng kết nối lại tới máy chủ...`,
+							button: "KẾT NỐI LẠI (0)",
+							icon: "loading"
+						});
+
+						checkHandle();
+					}, this.checkEvery);
 					break;
 
 				case "ratelimited":
 					let counterer = () => {}
 
-					clog("lcnt", data.description);
+					clog("LCNT", data.description);
 					this.__checkTime = parseInt(data.data.reset);
-					this.__sbarItem = (sbar) ? sbar.additem(`Kết nối lại sau [${this.__checkTime}] giây`, "spinner", {align: "right"}) : null;
-
-					this.onRatelimited({
-						onCount: (f) => counterer = f,
-						data: data
-					});
+					// this.__sbarItem = (sbar) ? sbar.additem(`Kết nối lại sau [${this.__checkTime}] giây`, "spinner", {align: "right"}) : null;
 
 					this.checkInterval = setInterval(() => {
 						this.__checkTime--;
 						counterer(this.__checkTime);
 
-						if (this.__sbarItem)
-							this.__sbarItem.change(`Kết nối lại sau [${this.__checkTime}] giây`);
+						// if (this.__sbarItem)
+						// 	this.__sbarItem.change(`Kết nối lại sau [${this.__checkTime}] giây`);
 
 						if (this.__checkTime <= 0) {
-							this.stateChange("online");
+							this.change("online");
 							resolve();
 						}
 					}, 1000);
@@ -4268,16 +4444,44 @@ const __connection__ = {
 		});
 	},
 
+	/**
+	 * Listen for state change event
+	 * @param {(state: "online" | "offline" | "ratelimited") => any} f 
+	 */
 	onStateChange(f) {
 		if (typeof f === "function")
-			this.__listeners.push(f);
+			return this.stateListeners.push(f) - 1;
 	},
 
 	__triggerOnStateChange(state) {
-		for (let i of this.__listeners)
+		for (let i of this.stateListeners)
 			i(state);
-	}
+	},
 
+	async check() {
+		let data = await checkServer(this.HOST);
+
+		if (data.online)
+			return true;
+
+		// We are offline, change state now.
+		this.change("offline");
+		return false;
+	},
+
+	backOnline() {
+		if (this.state === "online")
+			return;
+
+		return new Promise((resolve) => {
+			let index = this.onStateChange((state) => {
+				if (state === "online") {
+					this.stateListeners.splice(index, 1);
+					resolve();
+				}
+			})
+		});
+	}
 }
 
 const mouseCursor = {
