@@ -851,6 +851,10 @@ body.dark .md2html code {
 	z-index: 98;
 }
 
+.connectionStatePanel.triBg {
+	position: absolute;
+}
+
 .connectionStatePanel.show {
 	transition:
 		opacity 0.6s ease-in,
@@ -869,7 +873,7 @@ body.dark .md2html code {
 	right: 0;
 	bottom: 0;
 
-	box-shadow: -2px 220px 20px -160px var(--background) inset;
+	box-shadow: -2px 210px 20px -160px var(--background) inset;
 }
 
 .connectionStatePanel > .info {
@@ -942,7 +946,7 @@ body.dark .md2html code {
 	}
 
 	.connectionStatePanel > .triBgContainer::after {
-		box-shadow: -2px 200px 20px -160px var(--background) inset;
+		box-shadow: -2px 190px 20px -160px var(--background) inset;
 	}
 
 	.connectionStatePanel > .info {
@@ -1180,6 +1184,10 @@ body.dark .md2html code {
 }
 
 /** ======================== TRIBG ======================== **/
+
+.triBg {
+	position: relative;
+}
 
 .triBg > .triBgContainer {
 	position: absolute;
