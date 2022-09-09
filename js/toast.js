@@ -134,6 +134,8 @@ class ToastInstance {
 		this.timeout = null;
 		this.showListeners = []
 		this.hideListeners = []
+
+		clog("DEBG", `ToastInstance("${this.title}"): created new toast instance!`);
 	}
 
 	/**
@@ -260,7 +262,6 @@ class ToastInstance {
 			this.timeout = null;
 		}
 
-		this.showing = false;
 		clog("DEBG", `ToastInstance("${this.title}").hide(): hiding!`);
 
 		if (toast.showing) {
@@ -271,6 +272,8 @@ class ToastInstance {
 			toast.active = undefined;
 			toast.showing = false;
 		}
+
+		this.showing = false;
 
 		// Fire listeners
 		for (let f of this.hideListeners) {
