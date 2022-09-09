@@ -781,6 +781,8 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  * 	attribute: Object<string, string>
  * 	class: string | string[]
  * 	child: Object<string, TreeObject>
+ *	src: String
+ * 	href: String
  * }} TreeObject
  */
 

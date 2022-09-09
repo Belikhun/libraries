@@ -1,0 +1,122 @@
+/**
+ * /assets/fonts/TorusPro/TorusPro.css
+ * 
+ * TorusPro font definition.
+ * 
+ * This file is licensed under the MIT License.
+ * See LICENSE in the project root for license information.
+ * 
+ * @author		Belikhun
+ * @version		1.0
+ * @license		MIT
+ * @copyright	2018-2022 Belikhun
+ */
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Bold"), local("TorusPro-Bold"),
+        url("TorusPro-Bold.woff2") format("woff2");
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Bold Italic"), local("TorusPro-BoldItalic"),
+        url("TorusPro-BoldItalic.woff2") format("woff2");
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Thin Italic"), local("TorusPro-ThinItalic"),
+        url("TorusPro-ThinItalic.woff2") format("woff2");
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Heavy"), local("TorusPro-Heavy"),
+        url("TorusPro-Heavy.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Italic"), local("TorusPro-Italic"),
+        url("TorusPro-Italic.woff2") format("woff2");
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Regular"), local("TorusPro-Regular"),
+        url("TorusPro-Regular.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro SemiBold"), local("TorusPro-SemiBold"),
+        url("TorusPro-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Heavy Italic"), local("TorusPro-HeavyItalic"),
+        url("TorusPro-HeavyItalic.woff2") format("woff2");
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Light Italic"), local("TorusPro-LightItalic"),
+        url("TorusPro-LightItalic.woff2") format("woff2");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro SemiBold Italic"), local("TorusPro-SemiBoldItalic"),
+        url("TorusPro-SemiBoldItalic.woff2") format("woff2");
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Light"), local("TorusPro-Light"),
+        url("TorusPro-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Torus Pro";
+    src: local("Torus Pro Thin"), local("TorusPro-Thin"),
+        url("TorusPro-Thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
