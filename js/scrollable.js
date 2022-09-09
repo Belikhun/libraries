@@ -569,4 +569,8 @@
 			}).onComplete(() => resolve());
 		});
 	}
+
+	get scrollTop() {
+		return this.content.scrollTop;
+	}
 }
