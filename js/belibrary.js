@@ -2362,18 +2362,22 @@ class Animator {
 		this.completeHandlers.forEach(f => f(false));
 	}
 
+	/**
+	 * Wait for animation to complete.
+	 * @returns	{Promise<Boolean>}
+	 */
 	complete() {
 		return new Promise((resolve) => {
 			if (this.completed)
-				resolve();
+				resolve(true);
 
-			this.onComplete(() => resolve());
+			this.onComplete((completed) => resolve(completed));
 		});
 	}
 
 	/**
 	 * Animation complete handler
-	 * @param	{Function}	f
+	 * @param	{(completed: Boolean) => any}	f
 	 */
 	onComplete(f) {
 		if (!f || typeof f !== "function")
