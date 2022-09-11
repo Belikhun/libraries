@@ -408,3 +408,7 @@ icon[data-icon="flaskVial"]::after {
 icon[data-icon="wrench"]::after {
 	content: "\f0ad";
 }
+
+icon[data-icon="stopwatch"]::after {
+	content: "\f2f2";
+}
