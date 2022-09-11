@@ -1027,7 +1027,6 @@ body.dark .md2html code {
 
 .popupContainer > .popupWindow > .header > .top > .windowTitle {
 	flex-grow: 1;
-	font-family: "Open Sans";
 	font-size: 12px;
 	color: black;
 	margin-left: 10px;
