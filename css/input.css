@@ -1001,7 +1001,7 @@ body.dark .sq-choice {
     --focus-border: var(--osc-color-blue);
     
     font-family: var(--heading-font);
-    color: var(--black);
+    color: var(--color);
     background-color: var(--background);
     border-radius: 16px;
 }
@@ -1021,7 +1021,7 @@ body.dark .sq-choice {
 
     font-family: var(--heading-font);
     font-size: 20px;
-    color: var(--black);
+    color: var(--color);
     line-height: 1;
 
     border-radius: 16px;
@@ -1035,7 +1035,7 @@ body.dark .sq-choice {
 }
 
 body.dark .osc-input {
-    color: white;
+    --color: white;
     --background: rgb(26, 26, 26);
     --focus-background: rgb(58, 58, 58);
     --focus-border: var(--osc-color-blue);
