@@ -984,3 +984,59 @@ body.dark .sq-choice {
 .sq-choice[data-color="pink"] {
     --active: var(--osc-color-pink);
 }
+
+
+
+/** OSC INPUT */
+
+.osc-input {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    --color: black;
+    --background: white;
+    --focus-background: rgb(221, 221, 221);
+    --focus-border: var(--osc-color-blue);
+    
+    font-family: var(--heading-font);
+    color: var(--black);
+    background-color: var(--background);
+    border-radius: 16px;
+}
+
+.osc-input > label {
+    margin: 0 30px 0 20px;
+    font-weight: 600;
+}
+
+.osc-input > input {
+    flex-grow: 1;
+    padding: 16px;
+    padding-bottom: 14px;
+
+    border: 3px solid var(--background);
+    background-color: var(--background);
+
+    font-family: var(--heading-font);
+    font-size: 20px;
+    color: var(--black);
+    line-height: 1;
+
+    border-radius: 16px;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.osc-input > input:focus {
+    outline: none;
+    border: 3px solid var(--focus-border);
+    background-color: var(--focus-background);
+}
+
+body.dark .osc-input {
+    color: white;
+    --background: rgb(26, 26, 26);
+    --focus-background: rgb(58, 58, 58);
+    --focus-border: var(--osc-color-blue);
+}

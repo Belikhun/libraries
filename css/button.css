@@ -390,6 +390,7 @@ body.dark .sq-btn:focus {
 }
 
 /** Simple Text Button */
+
 .text-btn {
 	position: relative;
 	display: inline-flex;
