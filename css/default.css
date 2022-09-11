@@ -647,8 +647,9 @@ body.dark .checkboxContainer > span {
 
 /* Hacky but Work */
 .note > .inner.inner,
-.note > .inner.inner > t,
-.note > .inner.inner > pre {
+.note > .inner.inner t,
+.note > .inner.inner pre,
+.note > .inner.inner code {
     font-size: 15px;
 	color: #343434;
 }
