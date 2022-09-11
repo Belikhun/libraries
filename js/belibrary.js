@@ -790,7 +790,7 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
  * Object represent structure returned by `makeTree()`
  * @typedef {{
  * 	[x: string]: TreeDOM
- * } & HTMLElement} TreeDOM
+ * } & HTMLElement & HTMLInputElement} TreeDOM
  */
 
 /**
@@ -2364,7 +2364,7 @@ class Animator {
 
 	/**
 	 * Wait for animation to complete.
-	 * @returns	{Promise<Boolean>}
+	 * @returns {Promise<Boolean>} true if animation completed, false if cancelled
 	 */
 	complete() {
 		return new Promise((resolve) => {
@@ -2493,8 +2493,28 @@ function sanitizeHTML(html) {
 }
 
 /**
+ * @typedef { "text" | "textarea" | "email" | "password"
+ * 		| "color" | "number" | "date" | "time" | "select"
+ * 		| "file" | "datetime-local" | "month" | "week"
+ * 		| "tel" | "url" } CreateInputTypes
+ * 
+ * @typedef {(value: String | Number) => any} CreateInputHandle
+ */
+
+/**
  * Create Input Element, require `input.css`
- * @param	{Object}
+ * @param	{Object}							options
+ * @param	{CreateInputTypes}					options.type
+ * @param	{String}							options.id
+ * @param	{String}							options.label
+ * @param	{String}							options.value
+ * @param	{"blue" | "purple" | "red"}			options.color
+ * @param	{Boolean}							options.required
+ * @param	{Boolean}							options.autofill
+ * @param	{Boolean}							options.spellcheck
+ * @param	{Object<string, any>}				options.options
+ * @param	{Boolean}							options.animated
+ * @param	{Boolean}							options.disabled
  */
 function createInput({
 	type = "text",
@@ -2690,6 +2710,115 @@ function createInput({
 			onChangeHandlers.push(f);
 			f(container.input.value, null);
 		}
+	}
+}
+
+/**
+ * Create standard OSC input.
+ * @param	{Object}				options
+ * @param	{CreateInputTypes}		options.type
+ * @param	{String}				options.label
+ * @param	{String}				options.value
+ * @param	{Boolean}				options.disabled
+ * @param	{CreateInputHandle}		options.onInput
+ * @param	{CreateInputHandle}		options.onEnter
+ */
+function createOscInput({
+	type = "text",
+	label = "label",
+	value = "value",
+	disabled = false,
+	onInput = undefined,
+	onEnter = undefined
+}) {
+	let container = makeTree("div", "osc-input", {
+		label: { tag: "label", text: label },
+		input: { tag: "input", type, value }
+	});
+
+	if (typeof disabled === "boolean")
+		container.input.disabled = disabled;
+
+	let onInputHandlers = []
+	let onEnterHandlers = []
+
+	if (typeof onInput === "function")
+		onInputHandlers.push(onInput);
+
+	if (typeof onEnter === "function")
+		onEnterHandlers.push(onEnter);
+
+	const getValue = () => {
+		return (type === "number")
+			? parseFloat(container.input.value)
+			: container.input.value;
+	}
+
+	container.input.addEventListener("input", () => {
+		for (let f of onInputHandlers) {
+			try {
+				f(getValue());
+			} catch(e) {
+				clog("WARN", `an error occured while handing onInput`, e);
+				continue;
+			}
+		}
+	});
+
+	container.input.addEventListener("keydown", (e) => {
+		if (e.key !== "Enter")
+			return;
+
+		for (let f of onEnterHandlers) {
+			try {
+				f(getValue());
+			} catch(e) {
+				clog("WARN", `an error occured while handing onEnter`, e);
+				continue;
+			}
+		}
+	});
+
+	return {
+		container,
+		input: container.input,
+		getValue,
+
+		get value() {
+			return getValue();
+		},
+
+		/**
+		 * Set input's value
+		 * @param	{String}	value
+		 */
+		set value(value) {
+			container.input.value = value;
+		},
+
+		/**
+		 * Listen for input event.
+		 * @param {CreateInputHandle} f
+		 */
+		onInput(f) {
+			if (typeof f !== "function")
+				throw { code: -1, description: `createOscInput().onInput(): not a valid function!` }
+		
+			return onInputHandlers.push(f) - 1;
+		},
+
+		/**
+		 * Listen for event that will fire when enter key is
+		 * presses while focusing in the input element.
+		 * 
+		 * @param {CreateInputHandle} f
+		 */
+		onEnter(f) {
+			if (typeof f !== "function")
+				throw { code: -1, description: `createOscInput().onEnter(): not a valid function!` }
+		
+			return onEnterHandlers.push(f) - 1;
+		},
 	}
 }
 
