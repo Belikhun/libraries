@@ -2157,6 +2157,57 @@ function randItem(array) {
 	return array[randBetween(0, array.length - 1, true)];
 }
 
+/**
+ * Reduce an array of number by averaing it's value.
+ * @param	{Number[]}		array
+ * @param	{Number}		factor		Must be larger than 1.
+ * @param	{Number[]}
+ */
+function reduceNumbersArray(array, factor) {
+	if (typeof array !== "object" || !array || array.length === 0)
+		return []
+
+	if (factor === 1)
+		return array;
+
+	let newArray = []
+	let nLen = Math.floor(array.length / factor);
+	let step = nLen / array.length;
+	let sum = 0, count = 0, lFac, rFac;
+
+	for (let i = 0; i < nLen; i++) {
+		let o = i * factor;
+		sum = 0;
+		count = 0;
+
+		let left = o - (step * factor);
+		let right = o + (step * factor);
+
+		// Sum left and right
+		if (left >= 0) {
+			lFac = Math.ceil(left) - left;
+			count += lFac;
+			sum += array[Math.floor(left)] * lFac;
+		}
+
+		if (right <= (array.length - 1)) {
+			rFac = right - Math.floor(right);
+			count += rFac;
+			sum += array[Math.floor(right)] * rFac;
+		}
+
+		// Sum all points in between
+		for (let j = Math.max(Math.ceil(left), 0); j < Math.floor(right); j++) {
+			count += 1;
+			sum += array[j];
+		}
+
+		newArray.push(sum / count);
+	}
+
+	return newArray;
+}
+
 const Easing = {
 	/**
 	 * @param	{Number}	t	Point [0, 1]
