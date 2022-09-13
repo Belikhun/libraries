@@ -1165,7 +1165,7 @@ body.dark .md2html code {
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: calc(100% - 10px);
-	margin: 0 5px;
+	margin: 6px 5px 0;
 }
 
 .popupContainer > .popupWindow > .body > .buttonGroup > .sq-btn {
