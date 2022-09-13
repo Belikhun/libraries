@@ -527,11 +527,13 @@ const smenu = {
 
 				this.container.append(this.labelNode, this.input);
 
-				let savedValue = localStorage.getItem(this.save);
-				if (savedValue === null)
-					this.set({ value: (["number", "string"].includes(typeof value)) ? value : defaultValue || "" });
-				else
-					this.set({ value: savedValue });
+				if (this.save) {
+					let savedValue = localStorage.getItem(this.save);
+					if (savedValue === null)
+						this.set({ value: (["number", "string"].includes(typeof value)) ? value : defaultValue || "" });
+					else
+						this.set({ value: savedValue });
+				}
 
 				if (child) {
 					if (!child.container || typeof child.insert !== "function")
@@ -625,11 +627,13 @@ const smenu = {
 				if (typeof onChange === "function")
 					this.changeHandlers.push(onChange);
 
-				let savedValue = localStorage.getItem(this.save);
-				if (savedValue === null)
-					this.set({ value: (typeof value === "boolean") ? value : defaultValue || false });
-				else
-					this.set({ value: (savedValue === "true") });
+				if (this.save) {
+					let savedValue = localStorage.getItem(this.save);
+					if (savedValue === null)
+						this.set({ value: (typeof value === "boolean") ? value : defaultValue || false });
+					else
+						this.set({ value: (savedValue === "true") });
+				}
 
 				if (child) {
 					if (!child.container || typeof child.insert !== "function")
@@ -721,11 +725,13 @@ const smenu = {
 						this.container.classList.remove("changed");
 				});
 
-				let savedValue = localStorage.getItem(this.save);
-				if (savedValue === null)
-					value = (typeof value === "string") ? value : defaultValue;
-				else
-					value = savedValue;
+				if (this.save) {
+					let savedValue = localStorage.getItem(this.save);
+					if (savedValue === null)
+						value = (typeof value === "string") ? value : defaultValue;
+					else
+						value = savedValue;
+				}
 
 				if (typeof onChange === "function")
 					this.onChange(onChange);
@@ -806,11 +812,13 @@ const smenu = {
 				if (typeof onChange === "function")
 					this.changeHandlers.push(onChange);
 
-				let savedValue = localStorage.getItem(this.save);
-				if (savedValue === null)
-					this.set({ value: (typeof value === "string") ? value : defaultValue || false });
-				else
-					this.set({ value: savedValue });
+				if (this.save) {
+					let savedValue = localStorage.getItem(this.save);
+					if (savedValue === null)
+						this.set({ value: (typeof value === "string") ? value : defaultValue || false });
+					else
+						this.set({ value: savedValue });
+				}
 
 				if (child) {
 					if (!child.container || typeof child.insert !== "function")
@@ -888,11 +896,13 @@ const smenu = {
 					});
 				}
 
-				let savedValue = localStorage.getItem(this.save);
-				if (savedValue === null)
-					value = (typeof value === "number") ? value : defaultValue;
-				else
-					value = parseFloat(savedValue);
+				if (this.save) {
+					let savedValue = localStorage.getItem(this.save);
+					if (savedValue === null)
+						value = (typeof value === "number") ? value : defaultValue;
+					else
+						value = parseFloat(savedValue);
+				}
 
 				this.slider = createSlider({ color, value, min, max, step });
 				this.slider.input.disabled = disabled;
