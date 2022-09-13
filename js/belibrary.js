@@ -3609,6 +3609,7 @@ function createSlider({
  * @param	{String}				[options.icon]
  * @param	{"left" | "right"}		[options.align]
  * @param	{Boolean}				[options.complex]
+ * @param	{() => any}				[options.onClick]
  * @param	{Number}				[options.triangleCount]
  * @param	{Boolean}				[options.disabled]
  * @returns	{SQButton}									Button Element
@@ -3622,6 +3623,7 @@ function createButton(text, {
 	icon = null,
 	align = "left",
 	complex = false,
+	onClick = undefined,
 	triangleCount = 16,
 	disabled = false
 } = {}) {
@@ -3689,6 +3691,9 @@ function createButton(text, {
 
 	if (typeof sounds === "object")
 		sounds.applySound(button, ["soundhover", "soundselect"]);
+
+	if (typeof onClick === "function")
+		button.addEventListener("click", () => onClick());
 
 	return button;
 }
