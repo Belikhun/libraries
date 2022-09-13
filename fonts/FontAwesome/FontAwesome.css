@@ -412,3 +412,11 @@ icon[data-icon="wrench"]::after {
 icon[data-icon="stopwatch"]::after {
 	content: "\f2f2";
 }
+
+icon[data-icon="database"]::after {
+	content: "\f1c0";
+}
+
+icon[data-icon="hardDrive"]::after {
+	content: "\f0a0";
+}
