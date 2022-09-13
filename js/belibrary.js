@@ -767,14 +767,18 @@ function buildElementTree(type = "div", __class = [], data = new Array(), __keyp
 }
 
 /**
- * Object represent the DOM structure will be passed into `makeTree()`
- * @typedef {{
- * 	id: String
- * 	tag: "div" | "span" | "a" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "table" | "thead"
+ * @typedef {"div" | "span" | "a" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "table" | "thead"
  * 			| "tbody" | "tr" | "th" | "td" | "input" | "img" | "video" | "audio" | "iframe" | "b"
  * 			| "canvas" | "code" | "em" | "footer" | "form" | "hr" | "i" | "label" | "ul" | "ol"
  * 			| "li" | "meta" | "nav" | "option" | "optgroup" | "param" | "picture" | "pre" | "q"
- * 			| "s" | "script" | "strong" | "style" | "svg" | "textarea"
+ * 			| "s" | "script" | "strong" | "style" | "svg" | "textarea"} MakeTreeHTMLTags
+ */
+
+/**
+ * Object represent the DOM structure will be passed into `makeTree()`
+ * @typedef {{
+ * 	id: String
+ * 	tag: MakeTreeHTMLTags
  * 	text: String
  * 	for: String
  * 	data: Object<string, string>
@@ -3602,7 +3606,7 @@ function createSlider({
  * @param	{String}				text				Button Label
  * @param	{Object}				options				Button Options
  * @param	{String}				options.color
- * @param	{String}				options.element		HTML Element
+ * @param	{MakeTreeHTMLTags}		options.element		HTML Element
  * @param	{String}				options.type		HTML Button Type
  * @param	{"default" | "round"}	options.style
  * @param	{String | String[]}		[options.classes]
