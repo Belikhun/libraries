@@ -2392,6 +2392,7 @@ class Animator {
 		this.timingFunction = timingFunction;
 		this.animate = animate;
 		this.completed = false;
+		this.cancelled = false;
 
 		/** @type {Function[]} */
 		this.completeHandlers = []
@@ -2419,13 +2420,33 @@ class Animator {
 		else {
 			this.animate(1);
 			this.completed = true;
-			this.completeHandlers.forEach(f => f(true));
+			
+			for (let f of this.completeHandlers) {
+				try {
+					f(true);
+				} catch(e) {
+					clog("WARN", `Animator().update(): an error occured while handing complete handlers`, e);
+					continue;
+				}
+			}
 		}
 	}
 
 	cancel() {
+		if (this.completed || this.cancelled)
+			return;
+
 		cancelAnimationFrame(this.animationFrameID);
-		this.completeHandlers.forEach(f => f(false));
+		this.cancelled = true;
+
+		for (let f of this.completeHandlers) {
+			try {
+				f(false);
+			} catch(e) {
+				clog("WARN", `Animator().cancel(): an error occured while handing complete handlers`, e);
+				continue;
+			}
+		}
 	}
 
 	/**
