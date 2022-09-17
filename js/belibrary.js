@@ -539,6 +539,17 @@ async function initGroup(group, name, set = () => {}) {
 				throw error;
 
 			let e = parseException(error);
+
+			if (error instanceof Error) {
+				clog("ERRR", {
+					color: oscColor("pink"),
+					text: truncateString(path, 34),
+					padding: 34,
+					separate: true
+				}, `core.initGroup(${path}): ${e.description}`, e);
+				throw error;
+			}
+
 			throw { code: 12, description: `core.initGroup(${path}): ${e.description}`, data: error }
 		}
 

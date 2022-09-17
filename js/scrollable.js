@@ -127,11 +127,18 @@
 		this.content.addEventListener("wheel", (event) => {
 			if (event.ctrlKey || !this.overrideScroll)
 				return;
+
+			// Don't handle scroll event if a trackpad is in use as some
+			// trackpad has smooth scrolling built in.
+			if (Math.abs(event.deltaY) < 100 && this.smooth)
+				return;
 			
 			let contentScrollable = true;
 
 			if (!this.scrollout && !this.smooth) {
-				let delta = event.deltaY;
+				let delta = (this.horizontal)
+					? event.deltaX
+					: event.deltaY;
 	
 				let from = (this.horizontal)
 					? this.content.scrollLeft
