@@ -498,8 +498,10 @@
 
 		// If another animator is present, destory current one
 		// and initialize a new Animator
-		if (this.animator)
+		if (this.animator) {
 			this.animator.cancel();
+			this.animator = null;
+		}
 
 		this.animator = new Animator(.6, Easing.OutQuart, (t) => {
 			// Calucate current scrolling point by time
