@@ -20,6 +20,14 @@ const tests = {
 		// Enable debug logging
 		window.DEBUG = true;
 
+		// Wrap localStorage get/set
+		const lsg = localStorage.__proto__.getItem;
+		let lss = localStorage.__proto__.setItem;
+		const lsr = localStorage.__proto__.removeItem;
+		localStorage.__proto__.getItem = (key) => lsg.apply(localStorage, [`testfw.${key}`]);
+		localStorage.__proto__.setItem = (key, value) => lss.apply(localStorage, [`testfw.${key}`, value]);
+		localStorage.__proto__.removeItem = (key) => lsr.apply(localStorage, [`testfw.${key}`]);
+
 		const params = new URLSearchParams(window.location.search);
 		const autoTest = params.get("autotest") === "true";
 
