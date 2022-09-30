@@ -118,10 +118,11 @@ const errorHandler = async (error, returnable = true) => {
 		}
     })
     
-	if (typeof gtag === "function")
+	if (typeof gtag === "function") {
 		gtag("event", "errored", {
 			event_category: "error",
 			event_label: "exception",
 			value: `${e.code} >>> ${e.description}`
 		});
+	}
 }
