@@ -449,6 +449,7 @@
 	margin: 1px;
 	border-radius: 6px;
 
+	font-family: var(--heading-font);
 	font-size: 13px;
 	text-align: right;
 	text-overflow: ellipsis;
