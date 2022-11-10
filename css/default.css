@@ -918,6 +918,7 @@ body.dark .md2html code {
 	width: 0;
 	margin: 0 20px;
 	padding: 0;
+	white-space: nowrap;
 	transition: all 0.3s ease;
 }
 
@@ -932,6 +933,7 @@ body.dark .md2html code {
 	top: 50%;
 	transform: translateY(-50%);
 	transition: transform 0.3s ease;
+	--color: white;
 }
 
 .connectionStatePanel > icon[key="icon"] {

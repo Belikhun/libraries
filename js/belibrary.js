@@ -4261,7 +4261,7 @@ function clog(level, ...args) {
 }
 
 const popup = {
-	/** @type {HTMLElement} */
+	/** @type {TreeDOM} */
 	popup: undefined,
 
 	/** @type {TreeDOM} */
