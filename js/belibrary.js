@@ -3820,6 +3820,25 @@ function createImageInput({
 	}
 }
 
+/**
+ * Note Instance
+ * @typedef {{
+ * 	group: HTMLElement
+ * 	set(options: CreateNoteOptions)
+ * }} NoteInstance
+ * 
+ * @typedef {{
+ * 	level: "okay" | "info" | "warning" | "error"
+ * 	message: String
+ * 	style: "flat" | "round"
+ * }} CreateNoteOptions
+ */
+
+/**
+ * Create new note.
+ * @param		{CreateNoteOptions}		options
+ * @returns		{NoteInstance}
+ */
 function createNote({
 	level = "info",
 	message = "Smaple Note",

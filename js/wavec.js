@@ -86,7 +86,6 @@ class WaveContainer {
 		if (full)
 			this.container.classList.add("full");
 
-		wavec.container.appendChild(this.container);
 		this.container.dataset.color = color;
 
 		if (icon || title) {
@@ -114,7 +113,17 @@ class WaveContainer {
 		this.stackPos = null;
 		this.hideTimeout = null;
 
-		this.container.contentBox.header.buttons.reload.addEventListener("click", () => this.reloadHandlers.forEach(f => f()));
+		this.container.contentBox.header.buttons.reload.addEventListener("click", () => {
+			for (let f of this.reloadHandlers) {
+				try {
+					f();
+				} catch(e) {
+					clog("WARN", `WaveContainer(): an error occured while handing reload listeners`, e);
+					continue;
+				}
+			}
+		});
+
 		this.container.contentBox.header.buttons.close.addEventListener("click", () => this.hide());
 	}
 
@@ -137,6 +146,11 @@ class WaveContainer {
 		}
 	}
 
+	/**
+	 * Listen for container's show/hide event.
+	 * @param	{(showing: Boolean)}	f
+	 * @returns	{any}
+	 */
 	onToggle(f) {
 		if (typeof f !== "function")
 			throw { code: -1, description: `WaveContainer().onToggle(): not a valid function` }
@@ -144,6 +158,11 @@ class WaveContainer {
 		return this.toggleHandlers.push(f);
 	}
 
+	/**
+	 * Listen for reload button clicked event.
+	 * @param	{Function}	f
+	 * @returns	{any}
+	 */
 	onReload(f) {
 		if (typeof f !== "function")
 			throw { code: -1, description: `WaveContainer().onReload(): not a valid function` }
@@ -179,13 +198,23 @@ class WaveContainer {
 
 		wavec.container.classList.remove("hide");
 		this.container.classList.remove("hide");
+		wavec.container.appendChild(this.container);
+		
 		this.stackPos = wavec.active.push(this) - 1;
 		this.container.style.zIndex = this.stackPos;
 
 		if (typeof sounds === "object")
 			sounds.toggle();
 
-		this.toggleHandlers.forEach(f => f(true));
+		for (let f of this.toggleHandlers) {
+			try {
+				f(true);
+			} catch(e) {
+				clog("WARN", `WaveContainer().show(): an error occured while handing toggle listeners`, e);
+				continue;
+			}
+		}
+
 		requestAnimationFrame(() => {
 			this.container.classList.add("show");
 			wavec.layer.classList.add("show");
@@ -211,9 +240,18 @@ class WaveContainer {
 		if (wavec.active.length === 0)
 			wavec.layer.classList.remove("show");
 
-		this.toggleHandlers.forEach(f => f(false));
+		for (let f of this.toggleHandlers) {
+			try {
+				f(false);
+			} catch(e) {
+				clog("WARN", `WaveContainer().show(): an error occured while handing toggle listeners`, e);
+				continue;
+			}
+		}
+
 		this.hideTimeout = setTimeout(() => {
 			this.container.classList.add("hide");
+			wavec.container.removeChild(this.container);
 
 			// Hide the wavec container if there are no active
 			// container left

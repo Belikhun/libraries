@@ -658,6 +658,14 @@ body.dark .checkboxContainer > span {
 	color: rgb(21, 76, 255);
 }
 
+.note > .inner > :first-child {
+	margin-top: 0;
+}
+
+.note > .inner > :last-child {
+	margin-bottom: 0;
+}
+
 .note.info,
 .note[data-level="info"] {
     background-color: #ffffff;

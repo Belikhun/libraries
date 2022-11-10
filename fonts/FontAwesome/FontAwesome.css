@@ -424,3 +424,7 @@ icon[data-icon="hardDrive"]::after {
 icon[data-icon="receipt"]::after {
 	content: "\f543";
 }
+
+icon[data-icon="globe"]::after {
+	content: "\f0ac";
+}
