@@ -899,17 +899,24 @@ function makeTree(tag, classes, child = {}, path = "") {
 		if (typeof item.for === "string")
 			node.htmlFor = item.for;
 
-		if (typeof item.data === "object")
+		if (typeof item.data === "object") {
 			for (let key of Object.keys(item.data))
 				node.dataset[key] = item.data[key];
+		}
 
-		if (typeof item.attribute === "object")
+		if (typeof item.attribute === "object") {
 			for (let key of Object.keys(item.attribute))
 				node.setAttribute(key, item.attribute[key]);
+		}
 
-		for (let key of Object.keys(item))
+		// Special rule for icon tag
+		if (item.tag === "icon" && typeof item.icon === "string")
+			node.dataset.icon = item.icon;
+
+		for (let key of Object.keys(item)) {
 			if (!["tag", "class", "child", "html", "for", "text", "data", "attribute"].includes(key) && typeof node[key] !== "undefined")
 				node[key] = item[key];
+		}
 
 		node.setAttribute("key", key);
 		container.appendChild(node);
