@@ -120,22 +120,22 @@ icon[data-icon="table"]::after {
 
 icon[data-icon="arrowLeft"]::after {
 	content: "\f104";
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 icon[data-icon="arrowRight"]::after {
 	content: "\f105";
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 icon[data-icon="arrowDown"]::after {
 	content: "\f107";
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 icon[data-icon="arrowUp"]::after {
 	content: "\f106";
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 icon[data-icon="pencil"]::after {
