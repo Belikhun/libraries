@@ -176,7 +176,7 @@ icon[data-icon="trash"]::after {
 
 icon[data-icon="close"]::after {
 	content: "\f00d";
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 icon[data-icon="reload"]::after {
