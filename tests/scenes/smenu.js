@@ -76,12 +76,12 @@ tests.scenes.smenu = {
 			});
 
 			let noteChild = new smenu.Child({
-				label: "senpai,"
+				label: "setting child"
 			}, this.parent.store.infoGroup);
 
 			this.parent.store.note = new smenu.components.Note({
 				level: "warning",
-				message: `notice <a href="https://open.spotify.com/track/3q6fwV911vTYbOq7CbdeVG?si=9e67beb036754916" target="_blank">me!</a>`
+				message: `a neat little note!`
 			}, noteChild);
 		},
 
