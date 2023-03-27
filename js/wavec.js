@@ -10,7 +10,7 @@
  * @author		Belikhun
  * @version		1.0
  * @license		MIT
- * @copyright	2018-2022 Belikhun
+ * @copyright	2018-2023 Belikhun
  */
 
 const wavec = {

@@ -10,7 +10,7 @@
  * @author		Belikhun
  * @version		1.0
  * @license		MIT
- * @copyright	2018-2022 Belikhun
+ * @copyright	2018-2023 Belikhun
  */
 
 const HTTP_STATUS_MESSAGES = {
@@ -4100,7 +4100,7 @@ const cookie = {
 //? |-----------------------------------------------------------------------------------------------|
 //? |  from web-clog.js                                                                             |
 //? |                                                                                               |
-//? |  Copyright (c) 2018-2022 Belikhun. All right reserved                                         |
+//? |  Copyright (c) 2018-2023 Belikhun. All right reserved                                         |
 //? |  Licensed under the MIT License. See LICENSE in the project root for license information.     |
 //? |-----------------------------------------------------------------------------------------------|
 
