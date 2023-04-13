@@ -428,3 +428,7 @@ icon[data-icon="receipt"]::after {
 icon[data-icon="globe"]::after {
 	content: "\f0ac";
 }
+
+icon[data-icon="font"]::after {
+	content: "\f031";
+}
