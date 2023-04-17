@@ -1,0 +1,8 @@
+Options +FollowSymLinks +Indexes
+Order allow,deny
+Allow from all
+Require all granted
+
+<IfModule mod_rewrite.c>
+	RewriteEngine Off
+</IfModule>
