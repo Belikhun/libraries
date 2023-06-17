@@ -21,15 +21,28 @@ tests.scenes.triangles = {
 
 		store: {
 			node: undefined,
-			instance: undefined
+			node2: undefined,
+
+			/** @type {TriangleBackground} */
+			instance: undefined,
+
+			/** @type {TriangleBackground} */
+			instanceBorder: undefined
 		},
 
 		setup(group) {
-			this.store.node = document.createElement("div");
-			this.store.node.style.width = "500px";
-			this.store.node.style.height = "500px";
+			this.store.node = document.createElement("span");
+			this.store.node.style.width = "600px";
+			this.store.node.style.height = "400px";
+
+			this.store.node2 = document.createElement("span");
+			this.store.node2.style.width = "600px";
+			this.store.node2.style.height = "400px";
+
 			this.store.instance = triBg(this.store.node);
-			group.field.appendChild(this.store.node);
+			this.store.instanceBorder = triBg(this.store.node2, { style: "border" });
+
+			group.field.append(this.store.node, this.store.node2);
 		},
 
 		"reset"() {
@@ -39,39 +52,54 @@ tests.scenes.triangles = {
 				count: 38
 			});
 
+			this.store.instanceBorder.set({
+				scale: 2,
+				speed: 34,
+				count: 38
+			});
+
 			this.store.instance.color = "gray";
+			this.store.instanceBorder.color = "gray";
 		},
 
 		"50 triangles"() {
 			this.store.instance.generate(50);
+			this.store.instanceBorder.generate(50);
 		},
 
 		"100 triangles"() {
 			this.store.instance.generate(100);
+			this.store.instanceBorder.generate(100);
 		},
 
 		"200 triangles"() {
 			this.store.instance.generate(200);
+			this.store.instanceBorder.generate(200);
 		},
 
 		"color blue"() {
 			this.store.instance.color = "blue";
+			this.store.instanceBorder.color = "blue";
 		},
 
 		"color green"() {
 			this.store.instance.color = "green";
+			this.store.instanceBorder.color = "green";
 		},
 
 		"color red"() {
 			this.store.instance.color = "red";
+			this.store.instanceBorder.color = "red";
 		},
 
 		"scale 8"() {
 			this.store.instance.scale = 8;
+			this.store.instanceBorder.scale = 8;
 		},
 
 		"speed 50"() {
 			this.store.instance.speed = 50;
+			this.store.instanceBorder.speed = 50;
 		}
 	}
 }

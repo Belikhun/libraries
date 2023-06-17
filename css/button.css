@@ -63,16 +63,16 @@
 	align-items: center;
 	justify-content: center;
 	
-	padding: 8px 20px;
+	padding: 0.5rem 1rem;
 	box-sizing: border-box;
 	background-color: rgb(68, 170, 221);
 	
 	color: white;
-	font-size: 12px;
-	font-family: "Open Sans", var(--primary-font), sans-serif;
+	font-size: 0.75rem;
+	font-family: var(--primary-font), var(--secondary-font), sans-serif;
 	font-weight: 700;
 	text-align: center;
-	letter-spacing: 0.6px;
+	letter-spacing: 0.04rem;
 	text-decoration: none;
 
 	border: unset;
@@ -122,7 +122,7 @@
 	display: none;
 }
 
-.sq-btn.triBg > .triBgContainer {
+.sq-btn.triBg > .triangleBackground {
 	z-index: -1;
 }
 
@@ -130,7 +130,7 @@
 	display: flex;
 	justify-content: flex-end;
 	flex-grow: 1;
-	flex-shrink: 1;
+	flex-shrink: 0;
 
 	margin: 0 0 0 10px;
 	line-height: 20px;
@@ -171,8 +171,8 @@ body.dark .sq-btn > icon::after {
 }
 
 .sq-btn[data-style="round"] {
-	padding: 14px;
-	border-radius: 4px;
+	padding: 0.5rem 1rem;
+	border-radius: 6rem;
 }
 
 .sq-btn[data-style="round"]:focus {
@@ -190,7 +190,7 @@ body.dark .sq-btn > icon::after {
 	display: none;
 }
 
-.sq-btn[data-style="flat"] > .triBgContainer {
+.sq-btn[data-style="flat"] > .triangleBackground {
 	display: none;
 }
 

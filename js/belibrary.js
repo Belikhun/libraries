@@ -1999,142 +1999,310 @@ function scaleValue(value, from, to) {
  * 
  * Create alot of triangle in the background of element
  *
- * @param	{Element}	element					Target Element
- * @param	{Object}	options
- * @param	{Number}	options.speed			Triangle speed
- * @param	{String}	options.color			Triangle color
- * @param	{Number}	options.scale			How large the triangle is
- * @param	{Number}	options.triangleCount	How many triangles?
+ * @param	{Element}			element					Target Element
+ * @param	{Object}			options
+ * @param	{Number}			options.speed			Triangle speed
+ * @param	{String}			options.color			Triangle color
+ * @param	{Number}			options.scale			How large the triangle is
+ * @param	{Number}			options.triangleCount	How many triangles?
+ * @param	{"fill"|"border"}	options.style			Triangle style
  */
 function triBg(element, {
 	speed = 34,
 	color = "gray",
 	scale = 2,
-	triangleCount = 38
+	triangleCount = 38,
+	style = "fill"
 } = {}) {
-	const DARKCOLOR = ["brown", "dark", "darkRed", "darkGreen", "darkBlue"]
-	const LIGHTCOLOR = ["lightBlue"]
+	return new TriangleBackground(element, {
+		speed,
+		color,
+		size: 52 * scale,
+		count: triangleCount,
+		style,
+		scale: [0.4, 3.0]
+	});
+}
 
-	let getRandBright = (color) => DARKCOLOR.includes(color)
-		? randBetween(1.1, 1.3, false)
-		: (LIGHTCOLOR.includes(color)
-			? randBetween(0.96, 1.05, false)
-			: randBetween(0.9, 1.2, false))
+class TriangleBackground {
+	/**
+	 * Create a lot of triangles in the background of element.
+	 * 
+	 * @param	{Element}			element					Target element
+	 * @param	{Object}			options
+	 * @param	{Number}			options.speed			Triangle speed.
+	 * @param	{String}			options.color			Triangle color.
+	 * @param	{Number}			options.size			How large the triangle is, in pixels.
+	 * @param	{Number}			options.count			How many triangles?
+	 * @param	{"fill"|"border"}	options.style			Triangle style.
+	 * @param	{Number[]}			options.scale			Scale range.
+	 * @param	{Boolean}			options.hoverable
+	 */
+	constructor(element, {
+		speed = 12,
+		color = "blue",
+		size = 52,
+		count = 38,
+		style = "fill",
+		scale = [0.4, 3.0],
+		hoverable = true,
+		bright = 15
+	} = {}) {
+		this.container = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		this.container.classList.add("triangleBackground");
+		this.container.dataset.count = count;
+		this.container.dataset.style = style;
 
-	let currentSpeed = speed;
-	let currentScale = scale;
-	let current = element.querySelector(":scope > .triBgContainer");
+		if (hoverable)
+			this.container.setAttribute("hoverable", "");
 
-	if (current)
-		element.removeChild(current);
+		this.currentSpeed = speed;
+		this.currentColor = color;
+		this.size = size;
+		this.currentCount = count;
+		this.currentScale = scale;
+		this.style = style;
+		this.bright = bright;
+		this.hoverable = hoverable;
 
-	element.classList.add("triBg");
-	element.dataset.triColor = color;
+		this.container.dataset.triColor = color;
+		this.container.dataset.triStyle = style;
 
-	let container = document.createElement("div");
-	container.classList.add("triBgContainer");
-	container.dataset.count = triangleCount;
+		/** @type {SVGPolygonElement[]} */
+		this.triangles = [];
 
-	const updateSize = () => {
-		let scaleStep = [50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000]
+		if (typeof element === "object" && element.tagName) {
+			let current = element.querySelector(":scope > .triangleBackground");
 
-		for (let i = 0; i < scaleStep.length; i++)
-			if (scaleStep[i] >= (container.offsetHeight + (0.866 * 30 * 2 * currentScale))) {
-				container.dataset.anim = scaleStep[i];
-				return;
-			}
+			if (current)
+				element.removeChild(current);
 
-		container.dataset.anim = "full";
+			element.classList.add("triBg");
+			element.insertBefore(this.container, element.firstChild);
+
+			(new ResizeObserver(() => this.updateSize(true))).observe(element);
+			this.updateSize();
+		}
+
+		this.generate();
 	}
 
-	(new ResizeObserver(() => updateSize())).observe(container);
+	updateSize(observed = false) {
+		if (!this.container.parentElement)
+			return;
 
-	const generate = (count) => {
-		emptyNode(container);
-		triangleCount = count;
-		updateSize();
+		let width = this.container.parentElement.clientWidth;
+		let height = this.container.parentElement.clientHeight;
+		this.container.setAttributeNS("http://www.w3.org/2000/svg", "viewBox", `0 0 ${width} ${height}`);
 
-		for (let i = 0; i < count; i++) {
-			let randScale = randBetween(0.4, 2.0, false) * currentScale;
-			let width = 15 * randScale;
-			let height = 0.866 * (30 * randScale);
-			let randBright = getRandBright(color);
-			let randLeftPos = randBetween(0, 98, false);
-			let delay = randBetween(-currentSpeed / 2, currentSpeed / 2, false);
-	
-			let triangle = document.createElement("span");
-			triangle.style.filter = `brightness(${randBright})`;
-			triangle.style.borderWidth = `0 ${width}px ${height}px`;
-			triangle.style.left = `calc(${randLeftPos}% - ${width}px)`;
+		if (observed)
+			this.updateTriangles();
+	}
+
+	async updateTriangles() {
+		// Nice hack =))
+		// This is to trigger update on triangles position in animation.
+
+		this.container.style.display = "flex";
+		await nextFrameAsync();
+		this.container.style.display = "block";
+	}
+
+	set({ scale, speed, count, color } = {}) {
+		let reGen = false;
+
+		if (typeof scale === "number") {
+			this.size = 52 * scale;
+			reGen = true;
+		}
+
+		if (typeof speed === "number") {
+			this.currentSpeed = speed;
+			reGen = true;
+		}
+
+		if (typeof count === "number") {
+			this.currentCount = count;
+			reGen = true;
+		}
+
+		if (typeof color === "string") {
+			this.currentColor = color;
+			this.container.dataset.triColor = color;
+
+			if (this.style === "border")
+				reGen = true;
+		}
+
+		if (reGen)
+			this.generate();
+	}
+
+	/**
+	 * Set triangle's scale (size).
+	 * 
+	 * @param {Number} scale
+	 */
+	set scale(scale) {
+		this.set({ scale });
+	}
+
+	/**
+	 * Set triangle's color.
+	 * 
+	 * @param {String} color
+	 */
+	set color(color) {
+		this.set({ color });
+	}
+
+	/**
+	 * Set triangle's move speed.
+	 * 
+	 * @param {Number} speed
+	 */
+	set speed(speed) {
+		this.set({ speed });
+	}
+
+	/**
+	 * Set how many triangles will be generated.
+	 * 
+	 * @param {String} count
+	 */
+	set count(count) {
+		this.set({ count });
+	}
+
+	generate(count) {
+		if (typeof count === "number")
+			this.currentCount = count;
+
+		emptyNode(this.container);
+		this.triangles = []
+		const d = 0.8660254;
+
+		for (let i = 0; i < this.currentCount; i++) {
+			let scale = randBetween(this.currentScale[0], this.currentScale[1], false);
+			let side = this.size * scale;
+			let left = randBetween(-5, 90);
+			let delay = randBetween(-this.currentSpeed / 2, this.currentSpeed / 2, false);
+
+			let dh = side * d;
+			let A = [(side / 2), 0];
+			let B = [0, dh];
+			let C = [side, dh];
+
+			let triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+			triangle.style.setProperty("--left", `${left}%`);
+			triangle.style.setProperty("--height", `${dh}px`);
 			triangle.style.animationDelay = `${delay}s`;
-			triangle.style.animationDuration = `${currentSpeed / randScale}s`;
-	
-			container.appendChild(triangle);
+			triangle.style.animationDuration = `${this.currentSpeed / scale}s`;
+
+			if (this.style === "fill") {
+				let bright = TriangleBackground.randomBright(this.currentColor);
+				triangle.style.filter = `brightness(${bright})`;
+			}
+			
+			for (let point of [A, B, C]) {
+				let p = this.container.createSVGPoint();
+				p.x = point[0];
+				p.y = point[1];
+				triangle.points.appendItem(p);
+			}
+
+			this.triangles.push(triangle);
+			this.container.appendChild(triangle);
+		}
+
+		if (this.style === "border") {
+			let id = randString(8);
+			let color = oscColor(this.currentColor);
+			let color2 = TriangleBackground.increaseBrightness(color, this.bright);
+			this.container.style.setProperty("--background-up", color2);
+
+			let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+			defs.appendChild(this.createGradient(`trigrad1-${id}`, color, [1, 0.9, 0]));
+			defs.appendChild(this.createGradient(`trigrad2-${id}`, color2, [1, 0.9, 0], 90));
+
+			let rect1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+			rect1.style.fill = `url(#trigrad1-${id})`;
+			rect1.classList.add("rect1");
+
+			this.container.append(defs, rect1);
+
+			if (this.hoverable) {
+				let rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+				rect2.style.fill = `url(#trigrad2-${id})`;
+				rect2.classList.add("rect2");
+
+				this.container.appendChild(rect2);
+			}
 		}
 	}
 
-	generate(triangleCount);
-	element.insertBefore(container, element.firstChild);
+	createGradient(id, color, opacity = [1, 1, 1], rotate = -90) {
+		let gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+		gradient.id = id;
 
-	return {
-		generate,
+		let gradTransform = this.container.createSVGTransform();
+		gradTransform.setRotate(rotate, 0.5, 0.5);
+		gradient.gradientTransform.baseVal.appendItem(gradTransform);
 
-		setColor(color) {
-			element.dataset.triColor = color;
+		let gradFrom = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+		gradFrom.offset.baseVal = 0;
+		gradFrom.style.stopColor = color;
+		gradFrom.style.stopOpacity = opacity[0];
 
-			for (let triangle of container.childNodes) {
-				let randBright = getRandBright(color);
-				triangle.style.filter = `brightness(${randBright})`;
-			}
-		},
+		let gradMid = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+		gradMid.offset.baseVal = 0.1;
+		gradMid.style.stopColor = color;
+		gradMid.style.stopOpacity = opacity[1];
 
-		set({ scale, speed, count } = {}) {
-			let reGen = false;
+		let gradTo = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+		gradTo.offset.baseVal = 1;
+		gradTo.style.stopColor = color;
+		gradTo.style.stopOpacity = opacity[2];
 
-			if (typeof scale === "number") {
-				currentScale = scale;
-				reGen = true;
-			}
+		gradient.append(gradFrom, gradMid, gradTo);
+		return gradient;
+	}
 
-			if (typeof speed === "number") {
-				currentSpeed = speed;
-				reGen = true;
-			}
+	static increaseBrightness(hex, percent) {
+		// Strip the leading # if it's there.
+		hex = hex.replace(/^\s*#|\s*$/g, '');
+	
+		// Convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
+		if (hex.length === 3)
+			hex = hex.replace(/(.)/g, "$1$1");
+	
+		let r = parseInt(hex.substr(0, 2), 16),
+			g = parseInt(hex.substr(2, 2), 16),
+			b = parseInt(hex.substr(4, 2), 16);
+	
+		return "#" +
+			((0 | (1 << 8) + r + (256 - r) * percent / 100).toString(16)).substring(1) +
+			((0 | (1 << 8) + g + (256 - g) * percent / 100).toString(16)).substring(1) +
+			((0 | (1 << 8) + b + (256 - b) * percent / 100).toString(16)).substring(1);
+	}
 
-			if (typeof count === "number") {
-				triangleCount = count;
-				reGen = true;
-			}
+	static randomBright(color) {
+		if (this.darkColors().includes(color))
+			return randBetween(1.1, 1.3, false);
 
-			if (reGen)
-				this.generate(triangleCount);
-		},
+		if (this.lightColors().includes(color))
+			return randBetween(0.96, 1.05, false);
 
-		/**
-		 * Set triangle's color
-		 * @param {String} color 
-		 */
-		set color(color) {
-			this.setColor(color);
-		},
+		return randBetween(0.9, 1.2, false);
+	}
 
-		/**
-		 * Set triangle's scale
-		 * @param {Number} scale 
-		 */
-		set scale(scale) {
-			currentScale = scale;
-			this.generate(triangleCount);
-		},
+	static darkColors() {
+		return ["brown", "dark", "darkRed", "darkGreen", "darkBlue"];
+	}
 
-		/**
-		 * Set triangle's speed
-		 * @param {String} speed 
-		 */
-		set speed(speed) {
-			currentSpeed = speed;
-			this.generate(triangleCount);
-		}
+	static lightColors() {
+		return ["lightBlue", "whitesmoke"];
 	}
 }
 
