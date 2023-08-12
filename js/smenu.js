@@ -1053,7 +1053,7 @@ const smenu = {
 				
 				if (typeof color === "string")
 					if (this.button.background)
-						this.button.background.setColor(color);
+						this.button.background.color = color;
 
 				if (typeof icon === "string")
 					this.button.dataset.icon = icon;

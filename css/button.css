@@ -69,7 +69,7 @@
 	
 	color: white;
 	font-size: 0.75rem;
-	font-family: var(--primary-font), var(--secondary-font), sans-serif;
+	font-family: var(--button-font), var(--primary-font), var(--secondary-font), sans-serif;
 	font-weight: 700;
 	text-align: center;
 	letter-spacing: 0.04rem;
@@ -176,6 +176,15 @@ body.dark .sq-btn > icon::after {
 }
 
 .sq-btn[data-style="round"]:focus {
+	outline: none;
+}
+
+.sq-btn[data-style="big"] {
+	padding: 1rem;
+	border-radius: 0.45rem;
+}
+
+.sq-btn[data-style="big"]:focus {
 	outline: none;
 }
 

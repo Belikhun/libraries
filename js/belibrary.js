@@ -3804,26 +3804,27 @@ function createSlider({
  * @typedef {{
  * 	changeText(text: string)
  * 	loading(loading: boolean)
- * 	background?: triBg.prototype
+ * 	background?: TriangleBackground
  * } & HTMLButtonElement} SQButton
  */
 
 /**
  * Create Button Element, require button.css
- * @param	{String}				text				Button Label
- * @param	{Object}				options				Button Options
- * @param	{String}				options.color
- * @param	{MakeTreeHTMLTags}		options.element		HTML Element
- * @param	{String}				options.type		HTML Button Type
- * @param	{"default" | "round"}	options.style
- * @param	{String | String[]}		[options.classes]
- * @param	{String}				[options.icon]
- * @param	{"left" | "right"}		[options.align]
- * @param	{Boolean}				[options.complex]
- * @param	{() => any}				[options.onClick]
- * @param	{Number}				[options.triangleCount]
- * @param	{Boolean}				[options.disabled]
- * @returns	{SQButton}									Button Element
+ * @param	{String}						text				Button Label
+ * @param	{Object}						options				Button Options
+ * @param	{String}						options.color
+ * @param	{MakeTreeHTMLTags}				options.element		HTML Element
+ * @param	{String}						options.type		HTML Button Type
+ * @param	{"default" | "round" | "big"}	options.style
+ * @param	{String | String[]}				[options.classes]
+ * @param	{String}						[options.icon]
+ * @param	{"left" | "right"}				[options.align]
+ * @param	{Boolean}						[options.complex]
+ * @param	{() => any}						[options.onClick]
+ * @param	{Number}						[options.triangleCount]
+ * @param	{"fill" | "border"}				[options.triangleStyle]
+ * @param	{Boolean}						[options.disabled]
+ * @returns	{SQButton}											Button Element
  */
 function createButton(text, {
 	color = "blue",
@@ -3836,6 +3837,7 @@ function createButton(text, {
 	complex = false,
 	onClick = undefined,
 	triangleCount = 16,
+	triangleStyle = "fill",
 	disabled = false
 } = {}) {
 	let button = document.createElement(element);
@@ -3894,9 +3896,10 @@ function createButton(text, {
 	if (complex && style !== "flat") {
 		button.background = triBg(button, {
 			scale: 1.6,
-			speed: 8,
+			speed: 16,
 			color: color,
-			triangleCount
+			triangleCount,
+			style: triangleStyle
 		});
 	}
 
