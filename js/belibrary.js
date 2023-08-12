@@ -4623,7 +4623,7 @@ const popup = {
 		this.popupNode.classList.remove("show");
 
 		if (this.showing)
-			this.popup.header.removeChild(fcfn(this.popup.header, "triBgContainer"));
+			this.popup.header.removeChild(fcfn(this.popup.header, "triangleBackground"));
 
 		this.showing = false;
 		emptyNode(this.popup.body.button);
