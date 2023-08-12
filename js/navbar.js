@@ -514,7 +514,7 @@ const navbar = {
 					iconNode.dataset.icon = icon;
 
 				if (color)
-					background.setColor(color);
+					background.color = color;
 			}
 		}
 	},
@@ -610,7 +610,7 @@ const navbar = {
 				color = null
 			} = {}) {
 				if (color)
-					background.setColor(color);
+					background.color = color;
 			}
 		}
 	}
