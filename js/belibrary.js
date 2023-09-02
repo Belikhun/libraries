@@ -4445,6 +4445,9 @@ const popup = {
 	/** @type {TreeDOM} */
 	popupNode: undefined,
 
+	/** @type {TriangleBackground} */
+	background: undefined,
+
 	initialized: false,
 	showing: false,
 
@@ -4536,7 +4539,7 @@ const popup = {
 			else
 				reject({ code: -1, description: `Unknown level: ${level}` })
 
-			triBg(this.popup.header, {
+			this.background = triBg(this.popup.header, {
 				scale: 4,
 				speed: 64,
 				color: (typeof bgColor === "string")
