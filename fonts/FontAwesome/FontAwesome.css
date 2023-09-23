@@ -432,3 +432,7 @@ icon[data-icon="globe"]::after {
 icon[data-icon="font"]::after {
 	content: "\f031";
 }
+
+icon[data-icon="seedling"]::after {
+	content: "\f4d8";
+}
