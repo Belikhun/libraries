@@ -1,20 +1,20 @@
 /**
  * /assets/css/scrollbar.css
- * 
+ *
  * Override default webkit scrollbar, and define default look
  * for Scrollable's scrollbar.
- * 
+ *
  * This file is licensed under the MIT License.
  * See LICENSE in the project root for license information.
- * 
+ *
  * @author		Belikhun
  * @version		1.0
  * @license		MIT
  * @copyright	2018-2023 Belikhun
  */
 
-::-webkit-scrollbar {
-    width: 15px;
+ ::-webkit-scrollbar {
+    width: 16px;
     height: 4px;
 }
 
@@ -23,16 +23,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    box-shadow: inset 0 0 0 5px #a3a3a3;
-    border: solid 5px transparent;
+    box-shadow: inset 0 0 0 4px #a3a3a3;
+    border: solid 7px transparent;
+    border-radius: 30px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    box-shadow: inset 0 0 0 5px #838383;
-}
-
-body.dark ::-webkit-scrollbar {
-    background-color: rgb(24, 24, 24);
+    box-shadow: inset 0 0 0 8px #838383;
+    border-width: 4px;
 }
 
 /** =========== SCROLLABLE SCROLLBAR =========== */
@@ -47,14 +45,14 @@ body.dark ::-webkit-scrollbar {
     --active-color: rgba(75, 75, 75, 0.6);
 }
 
-.scrollable.scrollbar > .content::-webkit-scrollbar {
+.scrollable.customScrollbar > .content::-webkit-scrollbar {
 	display: none;
 }
 
 .scrollable > .scrollbar {
     position: absolute;
     display: block;
-    
+
     top: 0;
     right: 0;
     bottom: 0;
@@ -69,7 +67,7 @@ body.dark ::-webkit-scrollbar {
     display: none;
 }
 
-.scrollable:not(.scrollbar) > .scrollbar {
+.scrollable:not(.customScrollbar) > .scrollbar {
     display: none;
 }
 
@@ -84,7 +82,7 @@ body.dark ::-webkit-scrollbar {
 .scrollable > .scrollbar > .thumb {
     position: absolute;
     display: block;
-    
+
     top: 0;
     right: 0;
     width: 50%;
@@ -144,7 +142,43 @@ body.dark ::-webkit-scrollbar {
     height: 100%;
 
     overflow: auto;
-    transition: transform 0.05s linear;
+    transition: transform .1s linear;
+}
+
+.scrollable > .debug-graph {
+	position: absolute;
+	display: flex;
+	align-items: flex-end;
+	bottom: 0;
+	right: 0;
+
+	pointer-events: none;
+}
+
+.scrollable > .debug-graph.d2 {
+	bottom: 100px;
+}
+
+.scrollable > .debug-graph.d3 {
+	bottom: 200px;
+}
+
+.scrollable > .debug-graph > span {
+	display: inline-block;
+	width: 4px;
+	background-color: blue;
+}
+
+.scrollable > .debug-graph > .red {
+	background-color: red;
+}
+
+.scrollable > .debug-graph > .green {
+	background-color: green;
+}
+
+.scrollable > .debug-graph > .orange {
+	background-color: orange;
 }
 
 body.dark .scrollable {

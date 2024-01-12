@@ -1,33 +1,47 @@
+/* eslint-disable */
 /**
  * /assets/js/scrollable.js
- * 
+ *
  * Provide Smooth Scrolling and Custom Scrollbar.
- * 
+ *
  * This file is licensed under the MIT License.
  * See LICENSE in the project root for license information.
- * 
+ *
  * @author		Belikhun
- * @version		1.0
+ * @version		2.0
  * @license		MIT
  * @copyright	2018-2023 Belikhun
  */
 
- class Scrollable {
+class Scrollable {
 	/**
-	 * @param {HTMLElement}		container		Container
+	 * Provide Smooth Scrolling and Custom Scrollbar.
+	 *
+	 * @param	{HTMLElement}		container				Container where the scrollbar will live in.
+	 * @param	{Object}			options
+	 * @param	{HTMLElement}		options.content			The content container where the scrolling content live in. If leave empty, content of container will be appended to a newly created content node.
+	 * @param	{Number}			options.scrollDistance	Controls the distance scrolled per unit of mouse scroll.
+	 * @param	{Number}			options.distanceDecay	Controls the rate with which the target position is approached after scrolling.
+	 * @param	{Number}			options.clampExtension	This limits how far out of clamping bounds we allow the target position to be at most.
+	 * @param	{Boolean}			options.horizontal		Scroll horizontally or vertically.
+	 * @param	{Boolean}			options.overrideScroll	Override vanilla scrolling behaviour.
+	 * @param	{Boolean}			options.smooth			Enable smooth scrolling.
+	 * @param	{Boolean}			options.scrollbar		Inject custom scrollbar.
+	 * @param	{Boolean}			options.scrollout		Bubble scrolling event to parent when child max scroll is achieved.
+	 * @param	{Number}			options.barSize			Scroll bar size.
 	 */
 	constructor(container, {
 		content,
-		distance = 1,
-		velocity = 2,
-		clamp = 20,
-		maxClamp = 400,
+		scrollDistance = 80,
+		distanceDecay = 0.01,
+		clampExtension = 500,
 		horizontal = false,
-		smooth = true,
 		overrideScroll = true,
+		smooth = true,
 		scrollbar = true,
-		scrollout = false,
-		barSize = 10
+		scrollout = true,
+		barSize = 10,
+		debug = false
 	} = {}) {
 		if (typeof container !== "object" || (!container.classList && !container.container))
 			throw { code: -1, description: `Scrollable(): container is not a valid node` }
@@ -35,12 +49,14 @@
 		if (content) {
 			/**
 			 * Main scrolling container
+			 *
 			 * @type {HTMLElement}
 			 */
 			this.container = container;
-			
+
 			/**
-			 * Content
+			 * Scrolling content wrapper
+			 *
 			 * @type {HTMLElement}
 			 */
 			this.content;
@@ -58,6 +74,7 @@
 
 			if (!this.container.contains(this.content))
 				this.container.appendChild(this.content);
+
 		} else {
 			this.container = document.createElement("div");
 			this.container.id = container.id;
@@ -74,105 +91,167 @@
 
 		/**
 		 * Vertical Scrollbar
+		 *
 		 * @type {HTMLElement}
 		 */
-		this.vBar = buildElementTree("div", ["scrollbar", "vertical"], [
-			{ type: "div", class: "thumb", name: "thumb" }
-		]).obj;
+		this.vBar = makeTree("div", ["scrollbar", "vertical"], {
+			thumb: { tag: "div", class: "thumb" }
+		});
 
 		/**
 		 * Horizontal Scrollbar
+		 *
 		 * @type {HTMLElement}
 		 */
-		this.hBar = buildElementTree("div", ["scrollbar", "horizontal"], [
-			{ type: "div", class: "thumb", name: "thumb" }
-		]).obj;
+		this.hBar = makeTree("div", ["scrollbar", "horizontal"], {
+			thumb: { tag: "div", class: "thumb" }
+		});
 
 		this.container.insertBefore(this.hBar, this.container.firstChild);
 		this.container.insertBefore(this.vBar, this.container.firstChild);
 
-		// Initialize some variables
-		this.distance = distance;
-		this.velocity = velocity;
-		this.clamp = clamp;
-		this.maxClamp = maxClamp;
-		this.currentVelocity = 0;
+		// Add debug graphs to scroll container if debugging is enabled.
+		// This is temporary and might be removed in the future.
+		if (debug) {
+			this.debug = document.createElement("div");
+			this.debug.classList.add("debug-graph");
+			this.debug2 = document.createElement("div");
+			this.debug2.classList.add("debug-graph", "d2");
+
+			this.debugBarSize = 3;
+			this.container.append(this.debug, this.debug2);
+		}
+
+		/**
+		 * Controls the rate with which the target position is approached
+		 * after scrolling. Default is 0.01
+		 *
+		 * @type {Number}
+		 */
+		this.distanceDecay = distanceDecay;
+
+		/**
+		 * Current scroll distance decay set in the update function.
+		 *
+		 * @type {Number}
+		 */
+		this.currentDistanceDecay = distanceDecay;
+
+		/**
+		 * This limits how far out of clamping bounds we allow the
+		 * target position to be at most.
+		 *
+		 * Effectively, larger values result in bouncier behavior
+		 * as the scroll boundaries are approached with high velocity.
+		 *
+		 * @type {Number}
+		 */
+		this.clampExtension = clampExtension;
+
+		/**
+		 * Controls the distance scrolled per unit of mouse scroll.
+		 *
+		 * @type {Number}
+		 */
+		this.scrollDistance = scrollDistance;
+
+		/**
+		 * The maximum distance that can be scrolled in the scroll direction.
+		 *
+		 * @type {Number}
+		 */
+		this.scrollableExtent = 0;
+
+		/**
+		 * The current scroll position.
+		 *
+		 * @type {Number}
+		 */
+		this.current = 0;
+
+		/**
+		 * The target scroll position which is exponentially approached
+		 * by current via a rate of distance decay.
+		 *
+		 * When not animating scroll position, this will always
+		 * be equal to {@link current}.
+		 *
+		 * @type {Number}
+		 */
+		this.target = 0;
+
+		this.clamping = false;
 		this.currentClampV = 0;
 		this.currentClampH = 0;
 		this.vHideTimeout = null;
 		this.hHideTimeout = null;
 		this.smooth = smooth;
+		this.barSize = barSize;
 		this.overrideScroll = overrideScroll;
 		this.scrollbar = scrollbar;
-		this.barSize = barSize;
+
+		/**
+		 * Animation frame ID.
+		 */
+		this.frameID = null;
+
+		/**
+		 * Animation running state.
+		 */
+		this.running = false;
+
+		/**
+		 * Last update frame time. This need to be set on every scroll
+		 * update.
+		 */
+		this.lastFrameTime = 0;
 
 		/** @type {Boolean} */
 		this.horizontal = horizontal;
 
 		this.dragInit = false;
-		this.animator = null;
 		this.disabled = false;
-		this.ticking = false;
-		this.clamping = false;
 
 		/**
 		 * Stop Propagating to parent scrollable even when scroll content
 		 * reached top or bottom point of scroll container
+		 *
 		 * @type {Boolean}
 		 */
 		this.scrollout = scrollout;
 
 		// Listeners for scrolling events
-		this.content.addEventListener("scroll", (e) => this.updateScrollbar(e));
+		this.content.addEventListener("scroll", (e) => this.updateScrollbar(e), { passive: true });
 		this.content.addEventListener("wheel", (event) => {
 			if (event.ctrlKey || !this.overrideScroll)
 				return;
 
-			// Don't handle scroll event if a trackpad is in use as some
-			// trackpad has smooth scrolling built in.
-			if (Math.abs(event.deltaY) < 100 && this.smooth)
-				return;
-			
-			let contentScrollable = true;
+            let delta = -event.wheelDelta;
 
-			if (!this.scrollout && !this.smooth) {
-				let delta = (this.horizontal)
-					? event.deltaX
-					: event.deltaY;
-	
-				let from = (this.horizontal)
-					? this.content.scrollLeft
-					: this.content.scrollTop;
-	
-				let maxScroll = (this.horizontal)
-					? this.content.scrollWidth - this.content.offsetWidth
-					: this.content.scrollHeight - this.content.offsetHeight;
-	
-				contentScrollable = maxScroll > 0 && (this.smooth || delta > 0 && from < maxScroll) || (delta < 0 && from > 0);
-			}
+			if (this.scrollout) {
+				const contentScrollable = (this.scrollableExtent > 0)
+					&& ((delta > 0 && this.current < this.scrollableExtent) || (delta < 0 && this.current > 0));
 
-			if (contentScrollable) {
+				if (contentScrollable)
+					event.stopPropagation();
+			} else {
 				event.stopPropagation();
-				event.preventDefault();
-	
-				if (!this.ticking) {
-					requestAnimationFrame(() => {
-						if (this.smooth)
-							this.animationUpdate({ event });
-						else
-							this.update({ event });
-	
-						this.ticking = false;
-					});
-	
-					this.ticking = true;
-				}
 			}
+
+			event.preventDefault();
+
+			if (this.smooth)
+				this.animationUpdate({ event });
+			else
+				this.update({ event });
+
 		}, { passive: false });
 
 		// Observer for content resizing and new element
-		// added into content for updaing scrollbar
+		// added into content for updating state and scrollbar.
 		new ResizeObserver(() => {
+			this.updateState();
+
 			this.updateScrollbarPos();
 			this.updateScrollbar();
 		}).observe(this.content);
@@ -190,6 +269,16 @@
 		this.updateObserveList();
 	}
 
+	/**
+	 * This corresponds to the clamping force. A larger value means
+	 * more aggressive clamping. Default is 0.012.
+	 *
+	 * @returns	{Number}
+	 */
+	get DISTANCE_DECAY_CLAMPING() {
+		return 0.012;
+	}
+
 	initDrag() {
 		if (this.dragInit)
 			return;
@@ -203,10 +292,12 @@
 		this.__dragStartH = (e) => this.dragStart(e, true);
 		this.__dragUpdate = (e) => this.dragUpdate(e);
 		this.__dragEnd = () => this.dragEnd();
+		this.__hoverUpdate = () => this.updateScrollbar();
 
 		this.vBar.thumb.addEventListener("mousedown", this.__dragStartV);
 		this.hBar.thumb.addEventListener("mousedown", this.__dragStartH);
 		window.addEventListener("mouseup", this.__dragEnd);
+		this.container.addEventListener("mouseenter", this.__hoverUpdate);
 
 		this.dragInit = true;
 	}
@@ -218,6 +309,7 @@
 		this.vBar.thumb.removeEventListener("mousedown", this.__dragStartV);
 		this.hBar.thumb.removeEventListener("mousedown", this.__dragStartH);
 		window.removeEventListener("mouseup", this.__dragEnd);
+		this.container.removeEventListener("mouseenter", this.__hoverUpdate);
 
 		this.dragInit = false;
 	}
@@ -228,8 +320,7 @@
 		this.hThumbDragging = horizontal;
 		window.addEventListener("mousemove", this.__dragUpdate);
 
-		// Calculate cursor position relative to selected
-		// track
+		// Calculate cursor position relative to selected track
 		let r = e.target.getBoundingClientRect();
 		this.cRel.x = e.clientX - r.left;
 		this.cRel.y = e.clientY - r.top;
@@ -240,40 +331,47 @@
 			return;
 
 		e.preventDefault();
+
 		if (!this.sTicking) {
+			this.sTicking = true;
+
 			requestAnimationFrame(() => {
 				let horizontal;
 				let value;
 
 				if (this.vThumbDragging) {
-					let r = this.vBar.getBoundingClientRect();
-					let t = this.vBar.thumb.getBoundingClientRect();
-					let top = r.top + this.cRel.y;
-					let bottom = (r.top + r.height) - (t.height - this.cRel.y);
-					let cVal = clamp((e.clientY - top) / (bottom - top), 0, 1);
-					
-					value = (this.content.scrollHeight - this.content.offsetHeight) * cVal;
+					const r = this.vBar.getBoundingClientRect();
+					const t = this.vBar.thumb.getBoundingClientRect();
+					const top = r.top + this.cRel.y;
+					const bottom = (r.top + r.height) - (t.height - this.cRel.y);
+					const cVal = clamp((e.clientY - top) / (bottom - top), 0, 1);
+
+					value = this.verticalScrollableExtent * cVal;
 					horizontal = false;
 				}
-	
+
 				if (this.hThumbDragging) {
-					let r = this.hBar.getBoundingClientRect();
-					let t = this.hBar.thumb.getBoundingClientRect();
-					let left = r.left + this.cRel.x;
-					let right = (r.left + r.width) - (t.width - this.cRel.x);
-					let cVal = clamp((e.clientX - left) / (right - left), 0, 1);
-					
-					value = (this.content.scrollWidth - this.content.offsetWidth) * cVal;
+					const r = this.hBar.getBoundingClientRect();
+					const t = this.hBar.thumb.getBoundingClientRect();
+					const left = r.left + this.cRel.x;
+					const right = (r.left + r.width) - (t.width - this.cRel.x);
+					const cVal = clamp((e.clientX - left) / (right - left), 0, 1);
+
+					value = this.horizontalScrollableExtent * cVal;
 					horizontal = true;
 				}
 
-				if (typeof horizontal === "boolean")
-					this.update({ value, horizontal });
+				if (typeof horizontal === "boolean") {
+					const scrollableExtent = (horizontal)
+						? this.horizontalScrollableExtent
+						: this.verticalScrollableExtent;
+
+					this.content[horizontal ? "scrollLeft" : "scrollTop"]
+						= Math.min(scrollableExtent, value);
+				}
 
 				this.sTicking = false;
 			});
-
-			this.sTicking = true;
 		}
 	}
 
@@ -281,6 +379,15 @@
 		this.vThumbDragging = false;
 		this.hThumbDragging = false;
 		window.removeEventListener("mousemove", this.__dragUpdate);
+	}
+
+	updateState() {
+		const { width, height } = this.content.getBoundingClientRect();
+		this.contentWidth = width;
+		this.contentHeight = height;
+		this.horizontalScrollableExtent = this.content.scrollWidth - this.contentWidth;
+		this.verticalScrollableExtent = this.content.scrollHeight - this.contentHeight;
+		this.scrollableExtent = (this.horizontal) ? this.horizontalScrollableExtent : this.verticalScrollableExtent;
 	}
 
 	updateObserveList() {
@@ -297,6 +404,7 @@
 				// A better implement is appreciated
 				await nextFrameAsync();
 
+				this.updateState();
 				this.updateScrollbar();
 			}).observe(e);
 		}
@@ -305,7 +413,7 @@
 	/**
 	 * Enable or Disable custom scrollbar
 	 * You probally won't do it. Right? 😊
-	 * 
+	 *
 	 * @param	{Boolean}	enable
 	 */
 	set scrollbar(enable) {
@@ -315,10 +423,10 @@
 		this.__scrollbar = enable;
 
 		if (enable) {
-			this.container.classList.add("scrollbar");
+			this.container.classList.add("customScrollbar");
 			this.initDrag();
 		} else {
-			this.container.classList.remove("scrollbar");
+			this.container.classList.remove("customScrollbar");
 			this.cleanDrag();
 		}
 	}
@@ -326,7 +434,7 @@
 	/**
 	 * Is the custom scrollbar Enabled
 	 * or Disabled?
-	 * 
+	 *
 	 * @returns	{Boolean}
 	 */
 	get scrollbar() {
@@ -335,7 +443,7 @@
 
 	/**
 	 * Set scrollbar width/height
-	 * 
+	 *
 	 * @returns	{Number}
 	 */
 	set barSize(size) {
@@ -352,61 +460,84 @@
 			return;
 
 		/** @type {HTMLElement} */
-		let t = this.content;
+		const content = this.content;
 
-		let r =  {
-			width: t.offsetWidth,
-			height: t.offsetHeight,
-			sWidth: t.scrollWidth + Math.abs(this.currentClampH),
-			sHeight: t.scrollHeight + Math.abs(this.currentClampV)
+		const rect =  {
+			width: content.offsetWidth,
+			height: content.offsetHeight,
+			sWidth: content.scrollWidth + Math.abs(this.currentClampH),
+			sHeight: content.scrollHeight + Math.abs(this.currentClampV)
 		}
 
-		let s = {
+		const bar = {
 			width: this.hBar.getBoundingClientRect().width,
 			height: this.vBar.getBoundingClientRect().height
 		}
 
-		let top = t.scrollTop;
-		let left = t.scrollLeft;
-		let width = r.sWidth - r.width - Math.abs(this.currentClampH);
-		let height = r.sHeight - r.height - Math.abs(this.currentClampV);
-		let tWidth = (r.width / r.sWidth) * s.width;
-		let tHeight = (r.height / r.sHeight) * s.height;
+		const top = content.scrollTop;
+		const left = content.scrollLeft;
+		const width = rect.sWidth - rect.width - Math.abs(this.currentClampH);
+		const height = rect.sHeight - rect.height - Math.abs(this.currentClampV);
+		const tWidth = (rect.width / rect.sWidth) * bar.width;
+		const tHeight = (rect.height / rect.sHeight) * bar.height;
 
-		if (r.height < r.sHeight) {
+		if (!this.almostEquals(rect.height, rect.sHeight, 1.001)) {
 			clearTimeout(this.vHideTimeout);
 			this.vBar.classList.remove("hide", "none");
 			this.vBar.thumb.style.height = `${tHeight}px`;
-			this.vBar.thumb.style.top = `${(top / height) * (s.height - tHeight)}px`;
+			this.vBar.thumb.style.top = `${(top / height) * (bar.height - tHeight)}px`;
 		} else if (!this.clamping) {
 			this.vBar.classList.add("hide");
+			clearTimeout(this.vHideTimeout);
 			this.vHideTimeout = setTimeout(() => this.vBar.classList.add("none"), 1000);
 		}
 
-		if (r.width < r.sWidth) {
+		if (!this.almostEquals(rect.width, rect.sWidth, 1.001)) {
 			clearTimeout(this.hHideTimeout);
 			this.hBar.classList.remove("hide", "none");
 			this.hBar.thumb.style.width = `${tWidth}px`;
-			this.hBar.thumb.style.left = `${(left / width) * (s.width - tWidth)}px`;
+			this.hBar.thumb.style.left = `${(left / width) * (bar.width - tWidth)}px`;
 		} else if (!this.clamping) {
 			this.hBar.classList.add("hide");
+			clearTimeout(this.hHideTimeout);
 			this.hHideTimeout = setTimeout(() => this.hBar.classList.add("none"), 1000);
 		}
+
+		this.content.classList[top > 5 ? "add" : "remove"]("scrolling");
 	}
 
 	toBottom() {
-		let maxScroll = this.content.scrollHeight - this.content.offsetHeight;
-
-		if (this.smooth)
+		if (this.smooth) {
 			this.animationUpdate({
-				value: maxScroll,
+				value: this.scrollableExtent,
 				horizontal: false
 			});
-		else
+		} else {
 			this.update({
-				value: maxScroll,
+				value: this.scrollableExtent,
 				horizontal: false
 			});
+		}
+
+		return this;
+	}
+
+	/**
+	 * Clamp a value to the available scroll range.
+	 *
+	 * @param	{Number}	position	The value to clamp.
+	 * @param	{Number}	extension	An extension value beyond the normal extent.
+	 */
+	clamp(position, extension = 0) {
+		return Math.max(Math.min(position, this.scrollableExtent + extension), -extension);
+	}
+
+	lerp(start, final, amount) {
+		return start + (final - start) * amount;
+	}
+
+	almostEquals(value1, value2, acceptableDifference = Number.EPSILON) {
+		return Math.abs(value1 - value2) <= acceptableDifference;
 	}
 
 	updateScrollbarPos() {
@@ -418,151 +549,229 @@
 
 	update({
 		event,
-		value,
-		horizontal = this.horizontal
+		value
 	} = {}) {
 		// Calculate the point where the user start scrolling
-		let from = (horizontal)
+		const from = (this.horizontal)
 			? this.content.scrollLeft
 			: this.content.scrollTop;
-	
+
 		// Amount of scroll in pixel
-		let delta;
-		if (event)
-			delta = event.deltaY;
-		else
-			delta = value - from;
-		
+		const delta = (event)
+			? -event.wheelDelta
+			: value - from;
+
 		// Check if scrolling event actually move the
 		// scrollable content or scrolling is disabled
 		// If so we will stop executing
 		if (delta === 0 || this.disabled)
 			return;
 
-		// Calculate the maximum point of
-		// scrolling in the content
-		let maxScroll = (horizontal)
-			? this.content.scrollWidth - this.content.offsetWidth
-			: this.content.scrollHeight - this.content.offsetHeight;
-
-		this.content[horizontal ? "scrollLeft" : "scrollTop"] = Math.min(maxScroll, from + delta);
+		this.content[this.horizontal ? "scrollLeft" : "scrollTop"] = Math.min(this.scrollableExtent, from + delta);
 	}
 
 	animationUpdate({
 		event,
-		value,
-		horizontal = this.horizontal,
-		clamping = true
+		value
 	} = {}) {
 		// Calculate the point where the user start scrolling
-		let from = (horizontal)
+		const from = (this.horizontal)
 			? this.content.scrollLeft
 			: this.content.scrollTop;
 
+		/**
+		 * Wheel on a mouse always produce a delta value of 120, so this simple check
+		 * will work fine (hopefully).
+		 *
+		 * Source: https://devblogs.microsoft.com/oldnewthing/20130123-00/?p=5473
+		 */
+		const isPrecise = (event)
+			? ((Math.abs(event.wheelDelta) % 60) !== 0)
+			: false;
+
 		// Amount of scroll in pixel
-		let delta;
-		if (event)
-			delta = event.deltaY;
-		else
-			delta = value - from;
-		
+		const delta = (event)
+			? -((isPrecise) ? (this.horizontal ? event.wheelDeltaX : event.wheelDeltaY) : event.wheelDelta)
+			: value - from;
+
+		// Let trackpad also scroll in other direction, but without us handing
+		// the scrolling.
+		if (isPrecise && event) {
+			if (this.horizontal && event.wheelDeltaY !== 0) {
+				// Allow trackpad to also scroll vertically.
+				this.content.scrollTop = clamp(
+					this.content.scrollTop - event.wheelDeltaY,
+					0,
+					this.verticalScrollableExtent
+				);
+			} else if (!this.horizontal && event.wheelDeltaX !== 0) {
+				// Allow trackpad to also scroll horizontally.
+				this.content.scrollLeft = clamp(
+					this.content.scrollLeft - event.wheelDeltaX,
+					0,
+					this.horizontalScrollableExtent
+				);
+			}
+		}
+
 		// Check if scrolling event actually move the
 		// scrollable content or scrolling is disabled
 		// If so we will stop executing
 		if (delta === 0 || this.disabled)
 			return;
 
-		// Calculate the maximum point of
-		// scrolling in the content
-		let maxScroll = (horizontal)
-			? this.content.scrollWidth - this.content.offsetWidth
-			: this.content.scrollHeight - this.content.offsetHeight;
-
-		// Calculate current scrolling velocity and add
-		// it with global velocity
-		//
-		// This is to add up velocity in case user is scrolling
-		// continiously
-		this.currentVelocity += (delta > 0) ? this.velocity : -this.velocity;
-		
-		// Initialize staring point of velocity so we can
-		// decreaese the global velocity by time
-		let startVelocity = this.currentVelocity;
-
-		// Calculate the point where scrolling should be end
-		let to = from + ((this.distance * Math.abs(delta)) * this.currentVelocity);
-
-		let clampPoint;
-		let clampFrom;
-		let clampTo;
-
-		// If another animator is present, destory current one
-		// and initialize a new Animator
-		if (this.animator) {
-			this.animator.cancel();
-			this.animator = null;
+		if (!value) {
+			value = (isPrecise)
+				? this.target + delta
+				: this.target + (this.scrollDistance * (delta / 120));
 		}
 
-		this.animator = new Animator(.6, Easing.OutQuart, (t) => {
-			// Calucate current scrolling point by time
-			let current = from + (to - from) * t;
+		this.currentDistanceDecay = (isPrecise) ? 0.05 : this.distanceDecay;
+		this.target = this.clamp(value, this.clampExtension);
+		this.isUpdateFrame = true;
+		this.animationStartUpdate();
+	}
 
-			// Decreasing the velocity
-			this.currentVelocity = startVelocity * (1 - t);
+	async animationStartUpdate() {
+		if (this.running)
+			return;
 
-			// Check if scrolling reached the begining of the content
-			// or the end of the content. If so we will calculate
-			// the clamping animation
-			if ((current > maxScroll || current < 0)) {
-				if (!clamping)
-					return false;
+		this.running = true;
+		cancelAnimationFrame(this.frameID);
 
-				// If the clamping point hasn't been defined yet,
-				// we init clampPoint with the current time and
-				// calculate some others value
-				if (!clampPoint) {
-					clampPoint = t;
-					clampFrom = this.content.clampValue;
-					clampTo = clampFrom + (this.clamp * -(this.currentVelocity * ((1 - (clampFrom / this.maxClamp)) / 2)));
+		// Kind of weird that we need to wait another frame to make elapsed time
+		// calculation work properly in the first call.
+		this.lastFrameTime = performance.now();
+		await nextFrameAsync();
 
-					if (current > maxScroll) {
-						this.content[horizontal ? "scrollLeft" : "scrollTop"] = maxScroll;
-						clampTo = Math.max(clampTo, -this.maxClamp);
-					} else if (current < 0) {
-						this.content[horizontal ? "scrollLeft" : "scrollTop"] = 0;
-						clampTo = Math.min(clampTo, this.maxClamp);
-					}
-				}
+		this.frameID = requestAnimationFrame(() => this.animationUpdatePosition());
+	}
 
-				let c = (t - clampPoint) / (1 - clampPoint);
-				t = ((c < 0.5) ? 2*c : (-2*c + 2));
+	/**
+	 * Update scrolling position. This function should be called per-frame.
+	 *
+	 * This is a almost 1-to-1 implementation of osu-framework's ScrollContainer.
+	 *
+	 * Source:
+	 * https://github.com/ppy/osu-framework/blob/master/osu.Framework/Graphics/Containers/ScrollContainer.cs
+	 */
+	animationUpdatePosition() {
+		this.running = true;
+		const currentTime = performance.now();
 
-				if (c >= 0.5 && clampFrom !== 0)
-					clampFrom = 0;
+		/** Elapsed time during last frame in milliseconds. */
+		const elapsed = currentTime - this.lastFrameTime;
 
-				let clampValue = clampFrom + (clampTo - clampFrom) * t;
+		this.lastFrameTime = currentTime;
+		let localDistanceDecay = this.currentDistanceDecay;
 
-				this.content.style.transform = (horizontal)
-					? `translateX(${clampValue}px)`
-					: `translateY(${clampValue}px)`;
+		// If we have scrolled out of bounds, then we should handle the clamping force.
+		// Note, that if the target is _within_ acceptable bounds, then we do not need
+		// special handling of the clamping force, as we will naturally scroll back
+		// into acceptable bounds.
+		if (this.current !== this.clamp(this.current) && this.target !== this.clamp(this.target, -0.01)) {
+			// Firstly, we want to limit how far out the target may go to limit overly bouncy
+            // behaviour with extreme scroll velocities.
+			this.target = this.clamp(this.target, this.clampExtension);
 
-				if (this.horizontal)
-					this.currentClampH = clampValue;
-				else
-					this.currentClampV = clampValue;
-					
-				this.updateScrollbar();
-				this.content.clampValue = clampValue;
-				this.clamping = true;
-			} else {
-				this.content.style.transform = null;
-				this.content.clampValue = 0;
-				this.content[horizontal ? "scrollLeft" : "scrollTop"] = current;
-				this.clamping = false;
-			}
-		});
+			// Secondly, we would like to quickly approach the target while we are out of bounds.
+            // This is simulating a "strong" clamping force towards the target.
+			if ((this.current < this.target && this.target < 0) || (this.current > this.target && this.target > this.scrollableExtent))
+				localDistanceDecay = this.DISTANCE_DECAY_CLAMPING * 2;
 
-		this.animator.onComplete(() => this.animator = null);
+			// Lastly, we gradually nudge the target towards valid bounds.
+			this.target = this.lerp(this.clamp(this.target), this.target, Math.exp(-(this.DISTANCE_DECAY_CLAMPING * elapsed)));
+
+			let clampedTarget = this.clamp(this.target);
+			if (this.almostEquals(clampedTarget, this.target))
+				this.target = clampedTarget;
+
+			this.clamping = true;
+		} else {
+			// We are currently in bound of scrollable content.
+			this.clamping = false;
+		}
+
+		// Exponential interpolation between the target and our current scroll position.
+		this.current = this.lerp(this.target, this.current, Math.exp(-(localDistanceDecay * elapsed)));
+
+		// This prevents us from entering the de-normalized range of floating point
+		// numbers when approaching target closely.
+		if (this.almostEquals(this.current, this.target, 0.00001)) {
+			this.current = this.target;
+			this.running = false;
+			this.clamping = false;
+		}
+
+		const fineDelta = round(Math.abs(this.current - this.target), 6);
+
+		if (this.debug) {
+			let col = document.createElement("span");
+			col.style.width = `${this.debugBarSize}px`;
+			col.style.height = `${this.debugBarSize + fineDelta}px`;
+
+			if (this.clamping)
+				col.classList.add("red");
+			if (this.isUpdateFrame)
+				col.classList.add("green");
+
+			this.debug.appendChild(col);
+
+			// Remove exceeding debug bars.
+			const maxBars = Math.floor(this.contentWidth / this.debugBarSize);
+			while (this.debug.childElementCount > maxBars)
+				this.debug.removeChild(this.debug.firstChild);
+		}
+
+		if (this.debug2) {
+			let col = document.createElement("span");
+			col.style.width = `${this.debugBarSize}px`;
+			col.style.height = `${this.debugBarSize + elapsed}px`;
+			col.classList.add("orange");
+
+			this.debug2.appendChild(col);
+
+			// Remove exceeding debug bars.
+			const maxBars = Math.floor(this.contentWidth / this.debugBarSize);
+			while (this.debug2.childElementCount > maxBars)
+				this.debug2.removeChild(this.debug2.firstChild);
+		}
+
+		this.isUpdateFrame = false;
+
+		// Finally update the scroll position in DOM.
+		const scrollValue = clamp(this.current, 0, this.scrollableExtent);
+		this.content[this.horizontal ? "scrollLeft" : "scrollTop"] = scrollValue;
+
+		if (this.clamping) {
+			// We are now clamping outside of content. Transform out-of-bound
+			// value to CSS `translate()` value because browser do not support
+			// out of bound scrollTop.
+
+			const clampValue = -((this.current < 0)
+				? this.current
+				: (this.current - this.scrollableExtent));
+
+			this.content.style.transform = (this.horizontal)
+				? `translateX(${round(clampValue, 5)}px)`
+				: `translateY(${round(clampValue, 5)}px)`;
+
+			if (this.horizontal)
+				this.currentClampH = clampValue;
+			else
+				this.currentClampV = clampValue;
+
+			this.content.clampValue = clampValue;
+
+			this.updateScrollbar();
+		} else {
+			// Scrolling inside content. Just set the scrollTop value normally.
+			this.content.style.transform = null;
+			this.content.clampValue = 0;
+		}
+
+		if (this.running)
+			this.frameID = requestAnimationFrame(() => this.animationUpdatePosition());
 	}
 
 	scrollTo(top = 0, {
