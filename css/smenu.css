@@ -165,7 +165,7 @@
 
 	right: 30px;
 
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-size: 18px;
     font-weight: 600;
 	text-align: center;
@@ -703,7 +703,7 @@
     content: "\f111";
     position: relative;
     display: block;
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-size: 12px;
     font-weight: 600;
     color: gray;
@@ -824,7 +824,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, calc(-50% - 22px));
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-weight: 900;
     font-size: 72px;
     color: rgb(170, 170, 170);

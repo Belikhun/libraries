@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * /assets/js/scrollable.js
  *

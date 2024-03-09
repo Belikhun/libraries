@@ -1,16 +1,17 @@
 /**
  * /assets/fonts/FontAwesome/FontAwesome.css
- * 
+ *
  * Font Awesome integration with icon styles.
- * 
+ *
  * This file is licensed under the MIT License.
  * See LICENSE in the project root for license information.
- * 
+ *
  * @author		Belikhun
  * @version		1.0
  * @license		MIT
  * @copyright	2018-2023 Belikhun
  */
+/* stylelint-disable selector-type-no-unknown */
 
 @font-face {
 	font-family: 'Font Awesome Brands';
@@ -21,19 +22,31 @@
 }
 
 @font-face {
-	font-family: 'Font Awesome Free';
+	font-family: 'Font Awesome';
 	font-style: normal;
-	font-weight: 400;
-	src: url("fa-regular-400.eot");
-	src: url("fa-regular-400.eot?#iefix") format("embedded-opentype"), url("fa-regular-400.woff2") format("woff2"), url("fa-regular-400.woff") format("woff"), url("fa-regular-400.ttf") format("truetype"), url("fa-regular-400.svg#fontawesome") format("svg");
+	font-weight: 100;
+	src: url("fa-thin-100.woff2") format("woff2"), url("fa-thin-100.ttf") format("truetype");
 }
 
 @font-face {
-	font-family: 'Font Awesome Free';
+	font-family: 'Font Awesome';
+	font-style: normal;
+	font-weight: 300;
+	src: url("fa-light-300.woff2") format("woff2"), url("fa-light-300.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: 'Font Awesome';
+	font-style: normal;
+	font-weight: 400;
+	src: url("fa-regular-400.woff2") format("woff2"), url("fa-regular-400.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: 'Font Awesome';
 	font-style: normal;
 	font-weight: 900;
-	src: url("fa-solid-900.eot");
-	src: url("fa-solid-900.eot?#iefix") format("embedded-opentype"), url("fa-solid-900.woff2") format("woff2"), url("fa-solid-900.woff") format("woff"), url("fa-solid-900.ttf") format("truetype"), url("fa-solid-900.svg#fontawesome") format("svg");
+	src: url("fa-solid-900.woff2") format("woff2"), url("fa-solid-900.ttf") format("truetype");
 }
 
 icon {
@@ -42,18 +55,15 @@ icon {
 	align-items: center;
 	justify-content: center;
 
-	font-size: 1rem;
 	font-weight: 600;
 	text-align: center;
-	line-height: 1rem;
-	color: #36414B;
 }
 
 icon::after {
 	content: "\f111";
 	position: relative;
 
-	font-family: "Font Awesome Free";
+	font-family: "Font Awesome";
 }
 
 icon:focus::after {
@@ -433,6 +443,161 @@ icon[data-icon="font"]::after {
 	content: "\f031";
 }
 
-icon[data-icon="seedling"]::after {
-	content: "\f4d8";
+icon[data-icon="caretDown"]::after {
+	content: "\f0d7";
+}
+
+icon[data-icon="gear"]::after {
+	content: "\f013";
+}
+
+icon[data-icon="circleCheck"]::after {
+	content: "\f058";
+	font-weight: 400;
+}
+
+icon[data-icon="circleCheckFill"]::after {
+	content: "\f058";
+	font-weight: 900;
+}
+
+icon[data-icon="circleXMark"]::after {
+	content: "\f057";
+	font-weight: 400;
+}
+
+icon[data-icon="circleInfo"]::after {
+	content: "\f05a";
+	font-weight: 400;
+}
+
+icon[data-icon="circleQuestion"]::after {
+	content: "\f059";
+	font-weight: 400;
+}
+
+icon[data-icon="triangleExclamation"]::after {
+	content: "\f071";
+	font-weight: 400;
+}
+
+icon[data-icon="sortDown"]::after {
+	content: "\f0dd";
+}
+
+icon[data-icon="minus"]::after {
+	content: "\f068";
+}
+
+icon[data-icon="squareCaretDown"]::after {
+	content: "\f150";
+}
+
+icon[data-icon="copy"]::after {
+	content: "\f0c5";
+}
+
+icon[data-icon="broom"]::after {
+	content: "\f51a";
+}
+
+icon[data-icon="fileImport"]::after {
+	content: "\f56f";
+}
+
+icon[data-icon="bookCopy"]::after {
+	content: "\e0be";
+}
+
+icon[data-icon="download"]::after {
+	content: "\f019";
+	font-weight: 500;
+}
+
+icon[data-icon="tableColumns"]::after {
+	content: "\f0db";
+}
+
+icon[data-icon="language"]::after {
+	content: "\f1ab";
+}
+
+icon[data-icon="arrowRightFromBracket"]::after {
+	content: "\f08b";
+}
+
+icon[data-icon="arrowRightToBracket"]::after {
+	content: "\f090";
+}
+
+icon[data-icon="fileChart"]::after {
+	content: "\f65a";
+}
+
+icon[data-icon="screenUsers"]::after {
+	content: "\f63d";
+}
+
+icon[data-icon="arrowDownShapes"]::after {
+	content: "\f888";
+}
+
+icon[data-icon="sitemap"]::after {
+	content: "\f0e8";
+}
+
+icon[data-icon="dashedSquare"]::after {
+	content: "\e269";
+}
+
+icon[data-icon="exclamationCircle"]::after {
+	content: "\f06a";
+}
+
+icon[data-icon="sidebarFlip"]::after {
+	content: "\e24f";
+}
+
+icon[data-icon="hourglassClock"]::after {
+	content: "\e41b";
+}
+
+icon[data-icon="wifiExclamation"]::after {
+	content: "\e2cf";
+}
+
+icon[data-icon="dash"]::after {
+	content: "\e404";
+}
+
+icon[data-icon="slashForward"]::after {
+	content: "\2f";
+}
+
+icon[data-icon="cube"]::after {
+	content: "\f1b2";
+}
+
+icon[data-icon="cube"]::after {
+	content: "\f1b2";
+}
+
+icon[data-icon="fileChartPie"]::after {
+	content: "\f65a";
+}
+
+icon[data-icon="puzzle"]::after {
+	content: "\e443";
+}
+
+icon[data-icon="users"]::after {
+	content: "\f0c0";
+}
+
+icon[data-icon="fileArrowDown"]::after {
+	content: "\f56d";
+}
+
+icon[data-icon="paperPlane"]::after {
+	content: "\f1d8";
 }

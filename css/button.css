@@ -62,17 +62,18 @@
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	
+
 	padding: 0.5rem 1rem;
 	box-sizing: border-box;
 	background-color: rgb(68, 170, 221);
-	
+	border-radius: 6rem;
+
 	color: white;
 	font-size: 0.75rem;
-	font-family: var(--button-font), var(--primary-font), var(--secondary-font), sans-serif;
+	font-family: var(--primary-font), sans-serif;
 	font-weight: 700;
 	text-align: center;
-	letter-spacing: 0.04rem;
+	letter-spacing: 0.6px;
 	text-decoration: none;
 
 	border: unset;
@@ -104,8 +105,7 @@
 
 	will-change: transform;
 
-	animation:
-		sq-btn-trig-anim 8s linear 0s infinite;
+	animation: sq-btn-trig-anim 8s linear 0s infinite;
 }
 
 .sq-btn::after {
@@ -122,18 +122,20 @@
 	display: none;
 }
 
-.sq-btn.triBg > .triangleBackground {
+.sq-btn.triBg > .triBgContainer {
 	z-index: -1;
 }
 
 .sq-btn > icon {
+	position: relative;
 	display: flex;
 	justify-content: flex-end;
 	flex-grow: 1;
-	flex-shrink: 0;
+	flex-shrink: 1;
 
 	margin: 0 0 0 10px;
 	line-height: 20px;
+	z-index: 1;
 }
 
 .sq-btn > icon.left {
@@ -150,6 +152,11 @@ body.dark .sq-btn > icon::after {
 
 .sq-btn.empty > icon {
 	margin: unset;
+}
+
+.sq-btn > .text {
+	margin-top: -2px;
+	z-index: 1;
 }
 
 .sq-btn > .simpleSpinner {
@@ -170,37 +177,15 @@ body.dark .sq-btn > icon::after {
 	visibility: hidden;
 }
 
-.sq-btn[data-style="round"] {
-	padding: 0.5rem 1rem;
-	border-radius: 6rem;
-}
-
-.sq-btn[data-style="round"]:focus {
-	outline: none;
-}
-
-.sq-btn[data-style="big"] {
-	padding: 1rem;
-	border-radius: 0.45rem;
-}
-
-.sq-btn[data-style="big"]:focus {
-	outline: none;
-}
-
-.sq-btn[data-style="flat"] {
-	padding: 14px;
-	border-radius: 4px;
-}
-
-.sq-btn[data-style="flat"]::before,
-.sq-btn[data-style="flat"]::after {
-	content: unset;
-	display: none;
-}
-
-.sq-btn[data-style="flat"] > .triangleBackground {
-	display: none;
+.sq-btn > .confirmRipple {
+	position: absolute;
+	display: block;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 100%;
+	opacity: 0.4;
+	background-color: white;
 }
 
 @keyframes sq-btn-trig-anim {
@@ -213,15 +198,15 @@ body.dark .sq-btn > icon::after {
 	}
 }
 
-.sq-btn:hover {
+.sq-btn:not([data-tri-style="border"]):not(:disabled):hover {
 	filter: brightness(1.2);
 }
 
-.sq-btn:active {
+.sq-btn:not(.holdConfirm):active {
 	transition:
 		filter 1s cubic-bezier(0.06, 0.81, 0, 0.98),
 		transform 1.2s cubic-bezier(0.215, 0.61, 0.355, 1);
-	
+
 	transform: scale(0.9);
 }
 
@@ -352,50 +337,9 @@ body.dark .sq-btn:focus {
 	animation-delay: -0.3s;
 }
 
-@keyframes sq-btn-bgRainbow {
-	0%      { background-color: rgb(221, 45, 68);   }
-	20%     { background-color: rgb(246, 194, 28);  }
-	40%     { background-color: rgb(136, 180, 0);   }
-	60%     { background-color: rgb(68, 170, 221);  }
-	80%     { background-color: rgb(255, 102, 170); }
-	100%    { background-color: rgb(221, 45, 68);   }
-}
-
-@keyframes sq-btn-triRainbow1 {
-	0%      { border-bottom-color: rgb(240, 62, 86);   }
-	20%     { border-bottom-color: rgb(254, 204, 34);  }
-	40%     { border-bottom-color: rgb(156, 204, 0);   }
-	60%     { border-bottom-color: rgb(102, 204, 255); }
-	80%     { border-bottom-color: rgb(255, 152, 204); }
-	100%    { border-bottom-color: rgb(240, 62, 86);   }
-}
-
-@keyframes sq-btn-triRainbow2 {
-	0%      { border-color: transparent transparent rgb(197, 36, 57);       }
-	20%     { border-color: transparent transparent rgb(240, 178, 14);      }
-	40%     { border-color: transparent transparent rgb(124, 162, 0);       }
-	60%     { border-color: transparent transparent rgb(41, 154, 190);      }
-	80%     { border-color: transparent transparent rgb(202, 96, 146);      }
-	100%    { border-color: transparent transparent rgb(197, 36, 57);       }
-}
-
-.sq-btn.rainbow,
-.sq-btn[data-color="rainbow"] {
-	animation: sq-btn-bgRainbow 10s linear 0s infinite;
-}
-
-.sq-btn.rainbow::before,
-.sq-btn[data-color="rainbow"]::before {
-	animation:
-		sq-btn-trig-anim 8.2s linear 0s infinite,
-		sq-btn-triRainbow1 10s linear 0s infinite;
-}
-
-.sq-btn.rainbow::after,
-.sq-btn[data-color="rainbow"]::after {
-	animation:
-		sq-btn-trig-anim 7.6s linear 0s infinite,
-		sq-btn-triRainbow2 10s linear 0s infinite;
+.sq-btn[data-color="whitesmoke"],
+.sq-btn[data-color="lightBlue"] {
+	color: var(--text-primary);
 }
 
 /** Simple Text Button */

@@ -109,41 +109,20 @@ ul {
 	padding: 0 0 0 20px;
 }
 
-pre,
 code {
-	position: relative;
-	display: inline-block;
+	margin: -0.1em 0;
+	padding: 0.1em 0.5em;
+	border-radius: 0.5em;
 
-	max-width: 100%;
-	margin: unset;
 	font-family: var(--code-font);
 	font-weight: bold;
 	color: rgb(22, 22, 22);
-	
-	overflow: auto;
-	vertical-align: sub;
+	background-color: rgba(192, 192, 192, 0.5);
 }
 
-pre.break,
-code.break {
-	display: block;
-	overflow: hidden;
-	white-space: pre-wrap;
-	word-break: break-word;
-}
-
-pre.center,
-code.center {
-	display: block;
-	margin: 12px 0;
-	text-align: center;
-}
-
-pre.light,
-body.dark pre,
-code.light,
 body.dark code {
 	color: white;
+	background-color: rgba(128, 128, 128, 0.5);
 }
 
 .title, h1, h2, h3, h4, h5, h6 {
@@ -169,6 +148,45 @@ body.dark code {
 	transform: skew(-9deg);
 	border-radius: 6px;
 	z-index: -1;
+}
+
+.intup-health {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+
+	--warning: var(--osc-color-orange);
+	--critical: var(--osc-color-red);
+}
+
+.intup-health > .icon {
+	display: none;
+}
+
+.intup-health > .icon.display {
+	display: block;
+}
+
+.intup-health > icon {
+	color: var(--warning);
+}
+
+.intup-health > icon[data-level="critical"] {
+	color: var(--critical);
+	animation-name: intup-health-breath;
+	animation-timing-function: ease-in-out;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+}
+
+.intup-health > .simpleSpinner {
+	--color: var(--warning);
+}
+
+body.dark .intup-health {
+	--warning: rgb(255, 241, 163);
+	--critical: rgb(255, 108, 140);
 }
 
 /** ======================== TIMER ======================== **/
@@ -412,7 +430,7 @@ body.dark tag {
 	left: 50%;
 	
 	transform: translate(-50%, -50%);
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-weight: 900;
     font-size: 18px;
 	font-style: normal;
@@ -516,7 +534,7 @@ tip::before {
 	content: "\f128";
 	position: relative;
 
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-size: 8px;
     font-weight: 600;
 	text-align: center;
@@ -637,7 +655,7 @@ body.dark .checkboxContainer > span {
 	display: inline-block;
 	
     margin-right: 15px;
-    font-family: "Font Awesome Free";
+    font-family: "Font Awesome";
     font-size: 17px;
     font-weight: 900;
     color: black;

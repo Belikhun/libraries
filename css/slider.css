@@ -1,18 +1,18 @@
 /**
  * /assets/css/slider.css
- * 
+ *
  * Just some slider and stuff.
- * 
+ *
  * This file is licensed under the MIT License.
  * See LICENSE in the project root for license information.
- * 
+ *
  * @author		Belikhun
  * @version		1.0
  * @license		MIT
  * @copyright	2018-2023 Belikhun
  */
 
-.sq-slider {
+ .sq-slider {
     position: relative;
     width: 40px;
     height: 2px;
@@ -107,7 +107,7 @@
 .osc-slider > input {
     position: relative;
     display: block;
-    
+
     width: 100%;
     height: 100%;
     margin: unset;
@@ -124,7 +124,7 @@
     height: 20px;
     border-radius: 0;
     background-color: white;
-    
+
     -webkit-appearance: none;
     -moz-appearance: none;
 }
@@ -155,8 +155,7 @@
 
 .osc-slider.dragging > .leftTrack,
 .osc-slider.dragging > .rightTrack {
-    transition:
-        background-color 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 .osc-slider > .rightTrack {
@@ -227,8 +226,7 @@
     box-shadow: 0 0 14px 0 rgba(160, 220, 250);
     opacity: 0;
 
-    transition:
-        opacity 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition: opacity 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .osc-slider:hover > input:not(:disabled) ~ .thumb::before {

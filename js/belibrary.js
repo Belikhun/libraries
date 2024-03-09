@@ -405,6 +405,7 @@ var initGroupHandlers = {}
 
 /**
  * Attach listener that will be called when a group is initialized.
+ * 
  * @param {String}					name
  * @param {(group: object) => any}	f
  */
@@ -420,6 +421,7 @@ function onInitGroup(name, f) {
 
 /**
  * Initialize A Group Object
+ * 
  * @param {Object}		group			The Target Object
  * @param {String}		name			Group Name
  * @param {Function}	set				Report Progress to Initializer
@@ -2551,9 +2553,10 @@ const Easing = {
 class Animator {
 	/**
 	 * Animate a value
-	 * @param {Number}		duration 			Animation Duration in Seconds
-	 * @param {Function}	timingFunction 		Animation Timing Function
-	 * @param {Function}	animate 			Function To Handle Animation
+	 *
+	 * @param	{Number}		duration 			Animation Duration in Seconds
+	 * @param	{Function}		timingFunction 		Animation Timing Function
+	 * @param	{Function}		animate 			Function To Handle Animation
 	 */
 	constructor(duration, timingFunction, animate) {
 		if (duration < 0) {
@@ -2577,6 +2580,9 @@ class Animator {
 	}
 
 	update() {
+		if (this.completed || this.cancelled)
+			return;
+
 		let tPoint = (performance.now() - this.start) / this.duration;
 
 		// Safe executing update function to prevent stopping
@@ -2595,7 +2601,7 @@ class Animator {
 		else {
 			this.animate(1);
 			this.completed = true;
-			
+
 			for (let f of this.completeHandlers) {
 				try {
 					f(true);
@@ -3490,27 +3496,420 @@ function createSelectInput({
 }
 
 /**
- * Check current agent is a mobile phone?
- * @returns {Boolean}
+ * @typedef {{
+ *	group: HTMLElement
+ *  update: (trusted: Boolean) => void
+ * 	value: String|Object|String[]|Object[]|null
+ *  disabled: Boolean
+ *  loading: Boolean
+ * 	message: String
+ *  onInput: (f: (value: any, { trusted: bool }) => void) => void
+ * }} AutocompleteInputInstance
+ *
+ * @typedef {(search) => Promise<object[]>} AutocompleteInputFetch
+ * @typedef {(item) => { value, label: String|HTMLElement, badge: ?HTMLElement }} AutocompleteInputProcess
  */
-function checkAgentMobile() {
-	if (typeof navigator.userAgentData === "object"
-		&& typeof navigator.userAgentData.mobile === "boolean")
-		return navigator.userAgentData.mobile;
 
-	// Borrowed from Stack Overflow
-	// https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
-	const toMatch = Array(
-		/Android/i,
-		/webOS/i,
-		/iPhone/i,
-		/iPad/i,
-		/iPod/i,
-		/BlackBerry/i,
-		/Windows Phone/i
-	);
-		
-	return toMatch.some((i) => navigator.userAgent.match(i));
+/**
+ * Create autocomplete input that support server-side searching.
+ *
+ * @param	{Object}								options
+ * @param	{String}								options.id
+ * @param	{String}								options.label
+ * @param	{String}								options.color
+ * @param	{Boolean}								options.required
+ * @param	{Boolean}								options.multiple
+ * @param	{Boolean}								options.animated
+ * @param	{Boolean}								options.fixed
+ * @param	{AutocompleteInputFetch}				options.fetch
+ * @param	{AutocompleteInputProcess}				options.process
+ * @param	{(value, { trusted: bool }) => void}	options.onInput
+ * @return	{AutocompleteInputInstance}
+ */
+function createAutocompleteInput({
+	id,
+	label,
+	color = "blue",
+	required = false,
+	multiple = false,
+	animated = false,
+	fixed = true,
+	fetch = () => [],
+	process = (i) => i,
+	onInput = null
+} = {}) {
+	let input = createInput({
+		type: "text",
+		id,
+		label,
+		color,
+		autofill: false,
+		animated,
+		required
+	});
+
+	input.group.classList.add("sq-autocomplete");
+	let selects = document.createElement("span");
+	selects.classList.add("selects");
+	input.group.insertBefore(selects, input.group.firstChild);
+
+	let spinner = document.createElement("div");
+	spinner.classList.add("simpleSpinner");
+
+	let panel = document.createElement("div");
+	panel.classList.add("select-panel");
+
+	let inner = document.createElement("div");
+	inner.classList.add("inner");
+	panel.appendChild(inner);
+
+	if (!fixed) {
+		input.group.classList.add("dynamic");
+
+		(new ResizeObserver(() => {
+			input.group.style.setProperty("--bottom-space", `calc(0.5rem + ${panel.clientHeight}px)`);
+		})).observe(panel);
+	}
+
+	new Scrollable(panel, {
+		content: inner,
+		scrollout: false
+	});
+
+	const empty = makeTree("div", "message", {
+		icon: { tag: "icon", icon: "search" },
+		label: { tag: "label", text: `No result found` },
+		sub: { tag: "div", text: `No result found matching with your input.` }
+	});
+
+	const error = makeTree("div", "message", {
+		icon: { tag: "icon", icon: "exclamation" },
+		label: { tag: "label", text: "Unknown Error" },
+		sub: { tag: "div", text: "An unknown error occured! Please try again later." }
+	});
+
+	inner.appendChild(empty);
+
+	let timeout = null;
+	let fetched = {};
+	let activates = [];
+	let badges = [];
+	let showing = false;
+	let inputListeners = [];
+	let isDisabled = false;
+
+	if (typeof onInput === "function")
+		inputListeners.push(onInput);
+
+	document.body.addEventListener("click", (e) => {
+		if (input.group.contains(e.target) || badges.includes(e.target))
+			return;
+
+		hideSelectPanel();
+	});
+
+	input.input.addEventListener("focus", async () => {
+		if (showing || isDisabled)
+			return;
+
+		input.group.appendChild(panel);
+
+		await nextFrameAsync();
+
+		if (!fixed)
+			input.group.style.setProperty("--bottom-space", `12.5rem`);
+
+		panel.classList.add("display");
+		showing = true;
+		await search(input.value);
+	});
+
+	input.input.addEventListener("keydown", async () => {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => search(input.value), 500);
+	});
+
+	const update = (trusted = false) => {
+		let inputted = activates.length > 0;
+		input.group.classList[inputted ? "add" : "remove"]("inputting");
+
+		if (required)
+			input.input.required = !inputted;
+
+		inputListeners.forEach((f) => f(instance.value, { trusted }));
+	};
+
+	const hideSelectPanel = () => {
+		if (!showing)
+			return;
+
+		if (!fixed)
+			input.group.style.setProperty("--bottom-space", `0`);
+
+		showing = false;
+		panel.classList.remove("display");
+		input.group.removeChild(panel);
+		input.value = "";
+	}
+
+	const deactivateAll = (trusted = false, triggerUpdate = true) => {
+		let i = activates.length;
+
+		while (i--)
+			activates[i].deactivate(trusted, false);
+
+		activates = [];
+
+		if (triggerUpdate) {
+			update(trusted);
+		} else {
+			input.group.classList.remove("inputting");
+
+			if (required)
+				input.input.required = true;
+		}
+	};
+
+	const search = async (search) => {
+		input.group.appendChild(spinner);
+		input.value = search;
+
+		try {
+			let items = await fetch(search);
+			items = items.map((i) => ({ instance: i, ...process(i) }));
+
+			if (inner.contains(error))
+				inner.removeChild(error);
+
+			setItems(items);
+		} catch (e) {
+			clog("WARN", `createAutocompleteInput() [search()]: handing fetch resulted in an error:`, e);
+
+			const { code, description } = parseException(e);
+			error.label.innerText = code;
+			error.sub.innerHTML = description;
+
+			inner.appendChild(error);
+
+			if (inner.contains(empty))
+				inner.removeChild(empty);
+		}
+
+		if (input.group.contains(spinner))
+			input.group.removeChild(spinner);
+	}
+
+	const setItems = (items, selected = false) => {
+		emptyNode(inner);
+
+		if (!items || items.length === 0) {
+			if (!selected) {
+				inner.appendChild(empty);
+			} else {
+				update();
+			}
+
+			return;
+		}
+
+		let updateAfter = false;
+
+		for (let item of items) {
+			if (fetched[item.value]) {
+				fetched[item.value].label(item.label);
+				inner.appendChild(fetched[item.value].node);
+
+				if (selected) {
+					if (multiple) {
+						fetched[item.value].activate(false, false);
+						updateAfter = true;
+					} else {
+						fetched[item.value].activate();
+					}
+				}
+
+				continue;
+			}
+
+			let node = document.createElement("div");
+			node.classList.add("item");
+			node.dataset.value = item.value;
+
+			let badge = document.createElement("span");
+			badge.classList.add("badge");
+			badges.push(badge);
+
+			const label = (label, badgeView = null) => {
+				item.label = label;
+
+				if (isElement(label)) {
+					emptyNode(node);
+					emptyNode(badge);
+					badge.classList.add("node");
+
+					node.appendChild(label);
+					badge.appendChild(badgeView ? badgeView : label.cloneNode(true));
+				} else {
+					badge.classList.remove("node");
+					node.innerHTML = label;
+					badge.innerHTML = label;
+				}
+			};
+
+			label(item.label, item.badge);
+			let activated = false;
+
+			const activate = (trusted = false, triggerUpdate = true) => {
+				if (!multiple)
+					deactivateAll(trusted, false);
+
+				activates.push(instance);
+				node.classList.add("selected");
+				selects.appendChild(badge);
+				activated = true;
+
+				if (triggerUpdate)
+					update(trusted);
+			};
+
+			const deactivate = (trusted = false, triggerUpdate = true) => {
+				let index = activates.indexOf(instance);
+
+				if (index >= 0)
+					activates.splice(index, 1);
+
+				node.classList.remove("selected");
+				selects.removeChild(badge);
+				activated = false;
+
+				if (triggerUpdate)
+					update(trusted);
+			};
+
+			node.addEventListener("click", () => {
+				if (activated) {
+					deactivate(true);
+					return;
+				}
+
+				activate(true);
+
+				if (!multiple && showing)
+					hideSelectPanel();
+			});
+
+			badge.addEventListener("click", () => {
+				if (isDisabled)
+					return;
+
+				deactivate(true);
+			});
+
+			let instance = { item, node, badge, label, activate, deactivate };
+			fetched[item.value] = instance;
+			inner.appendChild(node);
+
+			if (selected) {
+				if (multiple) {
+					activate(false, false);
+					updateAfter = true;
+				} else {
+					activate();
+				}
+			}
+		}
+
+		if (updateAfter)
+			update();
+	}
+
+	const instance = {
+		group: input.group,
+		update,
+
+		/**
+		 * Get values
+		 *
+		 * @returns {String|Object|null}
+		 */
+		get value() {
+			if (multiple) {
+				return activates.map((instance) => {
+					return (instance.item.instance)
+						? instance.item.instance
+						: instance.item.value;
+				});
+			}
+
+			if (activates[0]) {
+				return (activates[0].item.instance)
+					? activates[0].item.instance
+					: activates[0].item.value;
+			}
+
+			return null;
+		},
+
+		set value(value) {
+			if (value === null) {
+				deactivateAll();
+				return;
+			}
+
+			if (multiple) {
+				if (!Array.isArray(value))
+					value = [value];
+
+				value = value.map((i) => {
+					return { instance: i, ...process(i) };
+				});
+
+				deactivateAll(false, false);
+				setItems(value, true);
+				return;
+			}
+
+			if (Array.isArray(value))
+				value = value[0];
+
+			value = { instance: value, ...process(value) };
+			setItems([value], true);
+		},
+
+		get disabled() {
+			return input.input.disabled;
+		},
+
+		set disabled(disabled) {
+			input.input.disabled = disabled;
+			input.input.classList.toggle("disabled", disabled);
+			isDisabled = disabled;
+		},
+
+		set loading(loading) {
+			if (loading)
+				input.group.appendChild(spinner);
+			else {
+				if (input.group.contains(spinner))
+					input.group.removeChild(spinner);
+			}
+		},
+
+		set message(message) {
+			input.set({ message });
+		},
+
+		/**
+		 * Listen for on input event.
+		 *
+		 * @param   {(value, { trusted: bool }) => void}    f
+		 */
+		onInput(f) {
+			inputListeners.push(f);
+		}
+	}
+
+   return instance;
 }
 
 /**
@@ -3667,6 +4066,7 @@ function createChoiceInput({
 
 /**
  * Create a new slider component
+ * 
  * @param {{
  * 	color: "pink" | "blue"
  * 	value: Number
@@ -3711,7 +4111,7 @@ function createSlider({
 		o.left.style.width = `calc((100% - 40px) * ${valP})`;
 		o.right.style.width = `calc(100% - (100% - 40px) * ${valP} - 40px)`;
 
-		if (e.isTrusted && sounds)
+		if (e.isTrusted && typeof sounds === "object")
 			if (valP === 0)
 				sounds.slider(2);
 			else if (valP === 1)
@@ -3803,41 +4203,46 @@ function createSlider({
 /**
  * @typedef {{
  * 	changeText(text: string)
- * 	loading(loading: boolean)
- * 	background?: TriangleBackground
+ * 	loading: boolean
+ * 	background?: triBg.prototype
  * } & HTMLButtonElement} SQButton
  */
 
 /**
  * Create Button Element, require button.css
- * @param	{String}						text				Button Label
- * @param	{Object}						options				Button Options
- * @param	{String}						options.color
- * @param	{MakeTreeHTMLTags}				options.element		HTML Element
- * @param	{String}						options.type		HTML Button Type
- * @param	{"default" | "round" | "big"}	options.style
- * @param	{String | String[]}				[options.classes]
- * @param	{String}						[options.icon]
- * @param	{"left" | "right"}				[options.align]
- * @param	{Boolean}						[options.complex]
- * @param	{() => any}						[options.onClick]
- * @param	{Number}						[options.triangleCount]
- * @param	{"fill" | "border"}				[options.triangleStyle]
- * @param	{Boolean}						[options.disabled]
- * @returns	{SQButton}											Button Element
+ *
+ * @param	{String|HTMLElement}	text					Button Label
+ * @param	{Object}				options					Button Options
+ * @param	{String}				options.color
+ * @param	{MakeTreeHTMLTags}		options.element			HTML Element
+ * @param	{String}				options.type			HTML Button Type
+ * @param	{"default" | "round"}	options.style
+ * @param	{String | String[]}		[options.classes]
+ * @param	{String}				[options.icon]
+ * @param	{"left" | "right"}		[options.align]
+ * @param	{Boolean}				[options.complex]
+ * @param	{?Number}				[options.holdToConfirm]
+ * @param	{() => any}				[options.onClick]
+ * @param	{() => any}				[options.onConfirm]
+ * @param	{Number}				[options.triangleCount]
+ * @param	{"fill" | "border"}		[options.triangleStyle]
+ * @param	{Boolean}				[options.disabled]
+ * @returns	{SQButton}										Button Element
  */
 function createButton(text, {
-	color = "blue",
+	color = "accent",
 	element = "button",
 	type = "button",
-	style = "default",
+	style = "round",
 	classes,
 	icon = null,
 	align = "left",
-	complex = false,
+	complex = true,
+	holdToConfirm = null,
 	onClick = undefined,
+	onConfirm = undefined,
 	triangleCount = 16,
-	triangleStyle = "fill",
+	triangleStyle = "border",
 	disabled = false
 } = {}) {
 	let button = document.createElement(element);
@@ -3851,7 +4256,7 @@ function createButton(text, {
 		case "string":
 			button.classList.add(classes);
 			break;
-		
+
 		case "object":
 			if (classes.length && classes.length >= 0)
 				button.classList.add(...classes);
@@ -3871,7 +4276,10 @@ function createButton(text, {
 	if (typeof text === "undefined" || text === null || text === "icon" || text === "") {
 		button.classList.add("empty");
 	} else {
-		textNode.innerText = text;
+		if (typeof text === "object" && text.tagName)
+			textNode.appendChild(text);
+		else
+			textNode.innerText = text;
 
 		if (align === "left")
 			button.appendChild(textNode);
@@ -3883,31 +4291,138 @@ function createButton(text, {
 	spinner.classList.add("simpleSpinner");
 	button.appendChild(spinner);
 
-	button.loading = (loading) => {
-		if (loading) {
-			button.disabled = true;
-			button.dataset.loading = true;
-		} else {
-			button.disabled = false;
-			button.removeAttribute("data-loading");
+	Object.defineProperty(button, "loading", {
+		set (loading) {
+			if (loading) {
+				button.disabled = true;
+				button.dataset.loading = true;
+			} else {
+				button.disabled = false;
+				button.removeAttribute("data-loading");
+			}
+		},
+
+		get () {
+			return (!!button.getAttribute("data-loading"));
 		}
-	}
+	});
 
 	if (complex && style !== "flat") {
 		button.background = triBg(button, {
 			scale: 1.6,
 			speed: 16,
 			color: color,
-			triangleCount,
-			style: triangleStyle
+			triangleCount: (triangleStyle === "border")
+				? triangleCount / 2
+				: triangleCount,
+			style: triangleStyle,
+			hoverable: true
 		});
+	}
+
+	if (typeof holdToConfirm === "number") {
+		let confirmRipple = document.createElement("div");
+		confirmRipple.classList.add("confirmRipple");
+		button.appendChild(confirmRipple);
+		button.classList.add("holdConfirm");
+
+		let progress = 0;
+		let confirmed = false;
+		let resetTimeout = null;
+		let resetting = false;
+
+		/** @type {Animator} */
+		let animator = null;
+
+		const reset = () => {
+			progress = 0;
+			confirmRipple.style.width = `0`;
+			confirmed = false;
+
+			if (animator) {
+				animator.cancel();
+				animator = null;
+			}
+		}
+
+		const down = () => {
+			if (confirmed)
+				return;
+
+			if (animator) {
+				animator.cancel();
+				animator = null;
+			}
+
+			clearTimeout(resetTimeout);
+			resetting = false;
+
+			let dur = holdToConfirm * (1 - progress);
+			let start = progress;
+			let amount = (1 - start);
+
+			animator = new Animator(dur, Easing.Linear, (t) => {
+				progress = start + amount * t;
+				confirmRipple.style.width = `${progress * 100}%`;
+			});
+
+			animator.onComplete(async (completed) => {
+				if (!completed)
+					return;
+
+				confirmed = true;
+				button.loading = true;
+				confirmRipple.style.width = `0`;
+
+				if (typeof onConfirm === "function") {
+					await onConfirm();
+					button.loading = false;
+					reset();
+				}
+			});
+		}
+
+		const up = () => {
+			if (confirmed || resetting)
+				return;
+
+			if (animator) {
+				animator.cancel();
+				animator = null;
+			}
+
+			clearTimeout(resetTimeout);
+			resetting = true;
+
+			resetTimeout = setTimeout(() => {
+				let dur = (holdToConfirm * 0.6) * progress;
+				let start = progress;
+
+				if (dur === 0)
+					return;
+
+				animator = new Animator(dur, Easing.InQuart, (t) => {
+					progress = start * (1 - t);
+					confirmRipple.style.width = `${progress * 100}%`;
+				});
+			}, Math.max(500, (holdToConfirm / 2) * 1000));
+		}
+
+		button.addEventListener("mousedown", () => down());
+		button.addEventListener("mouseup", () => up());
+		button.addEventListener("mouseleave", () => up());
 	}
 
 	if (typeof sounds === "object")
 		sounds.applySound(button, ["soundhover", "soundselect"]);
 
-	if (typeof onClick === "function")
-		button.addEventListener("click", () => onClick());
+	if (typeof onClick === "function") {
+		button.addEventListener("click", async () => {
+			button.loading = true;
+			await onClick();
+			button.loading = false;
+		});
+	}
 
 	return button;
 }
@@ -4000,6 +4515,7 @@ function createImageInput({
 
 /**
  * Note Instance
+ * 
  * @typedef {{
  * 	group: HTMLElement
  * 	set(options: CreateNoteOptions)
@@ -4014,6 +4530,7 @@ function createImageInput({
 
 /**
  * Create new note.
+ * 
  * @param		{CreateNoteOptions}		options
  * @returns		{NoteInstance}
  */
@@ -4055,6 +4572,7 @@ function createNote({
 
 /**
  * Create Timer Element
+ * 
  * @param	{Number|Object}	time	Time in seconds or object from parseTime()
  */
 function createTimer(time = 0, {
@@ -4100,63 +4618,68 @@ function createTimer(time = 0, {
 
 /**
  * @typedef {{
- * transition: Boolean
- * warningZone: Number
- * blink: "grow" | "fade" | "none"
- * duration: Number
- * color: "blue" | "pink" | "red" | "green" | "yellow"
- * progress: Number
- * style: "flat" | "round"
- * left: String
- * right: String
+ * 	transition: Boolean
+ *  indeterminate: Boolean
+ * 	warningZone: Number
+ * 	blink: "grow" | "fade" | "none"
+ * 	duration: Number
+ * 	color: "blue" | "pink" | "red" | "green" | "yellow"
+ * 	progress: Number
+ * 	style: "flat" | "round"
  * }} ProgressBarOptions
  * 
+ * @typedef {{
+ * 	group: HTMLDivElement
+ * 	set: (options: ProgressBarOptions) => void
+ * 	value: Number
+ * 	progress: (progress: Number) => void
+ * }} ProgressBarInstance
+ */
+
+/**
  * Create a progress bar node.
  * 
  * @param	{ProgressBarOptions}	options
+ * @returns	{ProgressBarInstance}
  */
 function createProgressBar({
 	transition = true,
+	indeterminate = false,
 	warningZone = 0,
 	blink,
 	duration,
 	color = "blue",
 	progress = 0,
-	style = "flat",
-	left,
-	right
+	style = "flat"
 } = {}) {
-	let container = document.createElement("div");
+	const container = document.createElement("div");
 	container.classList.add("progressBar");
 
-	let bar = document.createElement("bar");
+	const bar = document.createElement("bar");
 	bar.classList.add("bar");
 
-	let leftNode = document.createElement("bar");
-	leftNode.classList.add("left");
-
-	let rightNode = document.createElement("bar");
-	rightNode.classList.add("right");
-
-	let warning = document.createElement("div");
+	const warning = document.createElement("div");
 	warning.classList.add("warningZone");
 
-	container.append(bar, warning, leftNode, rightNode);
+	const indeterminateBar2 = document.createElement("div");
+	indeterminateBar2.classList.add("bar", "indeterminate", "indeterminate-secondary");
+
+	container.append(bar, warning);
 
 	/**
 	 * Update progress bar options
+	 * 
 	 * @param {ProgressBarOptions} options 
 	 */
 	const set = ({
 		transition,
+		indeterminate,
 		warningZone,
 		blink,
 		duration,
 		color,
 		progress,
-		style,
-		left,
-		right
+		style
 	} = {}) => {
 		if (typeof transition === "boolean")
 			container.classList[transition ? "remove" : "add"]("noTransition");
@@ -4177,34 +4700,34 @@ function createProgressBar({
 		if (typeof color === "string")
 			bar.dataset.color = color;
 
-		if (typeof progress === "number")
-			bar.style.width = `${progress}%`;
+		if (!indeterminate) {
+			if (container.contains(indeterminateBar2)) {
+				bar.classList.remove("indeterminate");
+				container.removeChild(indeterminateBar2);
+			}
+
+			if (typeof progress === "number")
+				bar.style.width = `${progress}%`;
+		} else {
+			indeterminateBar2.dataset.color = bar.dataset.color;
+			container.appendChild(indeterminateBar2);
+			bar.classList.add("indeterminate");
+			bar.style.width = null;
+		}
 
 		if (typeof style === "string")
 			container.dataset.style = style;
-
-		if (typeof left === "string")
-			leftNode.innerHTML = left;
-
-		if (typeof right === "string")
-			rightNode.innerHTML = right;
-
-		if (!leftNode.innerHTML && !rightNode.innerHTML)
-			container.classList.add("noSpace");
-		else
-			container.classList.remove("noSpace");
 	}
 
 	set({
 		transition,
+		indeterminate,
 		warningZone,
 		blink,
 		duration,
 		color,
 		progress,
-		style,
-		left,
-		right
+		style
 	});
 
 	return {
@@ -4213,7 +4736,8 @@ function createProgressBar({
 		
 		/**
 		 * Set progress value
-		 * @param {Number} value
+		 * 
+		 * @param	{Number}	value
 		 */
 		set value(value) {
 			set({ progress: value })
@@ -4221,9 +4745,341 @@ function createProgressBar({
 
 		/**
 		 * Set ProgressBar's Progress
-		 * @param		{Number}	progress	Number in %
+		 * 
+		 * @param	{Number}	progress	Number in %
 		 */
 		progress: (progress) => set({ progress })
+	}
+}
+
+/**
+ * Disable all input inside a form
+ * 
+ * @param	{HTMLFormElement}		form
+ */
+function disableInputs(form) {
+	for (let input of form.elements) {
+		if (input instanceof HTMLInputElement
+			|| input instanceof HTMLTextAreaElement)
+			input.disabled = true;
+	}
+}
+
+/**
+ * Enable all input inside a form
+ * 
+ * @param	{HTMLFormElement}		form
+ */
+function enableInputs(form) {
+	for (let input of form.elements) {
+		// Only enable input that don't have disabled class.
+		// This is for input that don't want to be enabled.
+		if ((input instanceof HTMLInputElement
+			|| input instanceof HTMLTextAreaElement)
+			&& !input.classList.contains("disabled"))
+			input.disabled = false;
+	}
+}
+
+/**
+ * Verify if a value is an element.
+ * 
+ * @param   {HTMLElement}   element
+ * @returns {Boolean}
+ */
+function isElement(element) {
+	return (element && typeof element === "object" && element.tagName);
+}
+
+/**
+ * Calculate and return variance of an array.
+ *
+ * @param	{Number[]}	data
+ * @returns	{Number}
+ */
+function calculateVariance(data) {
+	const mean = data.reduce((sum, value) => sum + value, 0) / data.length;
+	const squaredDiff = data.map(value => Math.pow(value - mean, 2));
+	const variance = squaredDiff.reduce((sum, value) => sum + value, 0) / data.length;
+	return variance;
+}
+
+/**
+ * Check current agent is a mobile phone?
+ * 
+ * @returns {Boolean}
+ */
+function checkAgentMobile() {
+	if (typeof navigator.userAgentData === "object"
+		&& typeof navigator.userAgentData.mobile === "boolean")
+		return navigator.userAgentData.mobile;
+
+	// Borrowed from Stack Overflow
+	// https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
+	const toMatch = Array(
+		/Android/i,
+		/webOS/i,
+		/iPhone/i,
+		/iPad/i,
+		/iPod/i,
+		/BlackBerry/i,
+		/Windows Phone/i
+	);
+		
+	return toMatch.some((i) => navigator.userAgent.match(i));
+}
+
+class SmoothValue {
+	/**
+	 * Create a new smooth value element.
+	 *
+	 * @param	{Object}				options
+	 * @param	{String|String[]}		options.classes
+	 * @param	{Number}				options.duration	Animation duration, in seconds.
+	 * @param	{(Number) => Number}	options.timing		Timing functions, see {@link Easing}.
+	 * @param	{Number}				options.decimal		Number of decimal points will be shown.
+	 * @param	{String}				options.surfix		Text will be added to the end of the number.
+	 */
+	constructor({
+		classes = [],
+		duration = 1,
+		timing = Easing.OutExpo,
+		decimal = 0,
+		surfix = ""
+	} = {}) {
+		if (typeof classes === "string")
+			classes = [classes];
+
+		this.container = document.createElement("span");
+		this.container.classList.add("smooth-value", ...classes);
+
+		this.duration = duration;
+		this.timing = timing;
+		this.decimal = decimal;
+		this.surfix = surfix;
+
+		/** @type {Animator} */
+		this.animator = null;
+
+		this.currentValue = 0;
+		this.container.innerText = this.currentValue.toFixed(this.decimal);
+	}
+
+	set value(value) {
+		this.set(value);
+	}
+
+	async set(value) {
+		if (this.animator) {
+			this.animator.cancel();
+			this.animator = null;
+		}
+
+		if (this.currentValue === value)
+			return this;
+
+		let start = this.currentValue;
+		let delta = (value - this.currentValue);
+
+		this.animator = new Animator(this.duration, this.timing, (t) => {
+			this.currentValue = start + (delta * t);
+			this.container.innerText = this.currentValue.toFixed(this.decimal) + this.surfix;
+		});
+
+		await this.animator.complete();
+		return this;
+	}
+}
+
+class IntervalUpdater {
+	/**
+	 * Create a new interval updater that do an async task without piling
+	 * requests when network connection is unstable.
+	 *
+	 * @param	{Object}				[options]
+	 * @param	{number}				[options.interval]
+	 * @param	{() => Promise<void>}	[options.callback]
+	 */
+	constructor({
+		interval = 1,
+		callback = async () => {}
+	} = {}) {
+		this.beforeUpdateHandler = () => {};
+		this.updatedHandler = () => {};
+		this.erroredHandler = () => {};
+		this.running = false;
+		this.timeout = null;
+		this.lastCall = null;
+		this.interval = interval;
+		this.callback = callback;
+
+		this.loading = false;
+		this.pRuntime = 0;
+		this.errors = 0;
+
+		/** @type {TreeDOM} */
+		this.healthNode = null;
+	}
+
+	health() {
+		if (this.healthNode)
+			return this.healthNode;
+
+		this.healthNode = makeTree("div", "intup-health", {
+			loading: { tag: "span", class: ["simpleSpinner", "icon"] },
+			variation: { tag: "icon", class: "icon", icon: "hourglassClock" },
+			latency: { tag: "icon", class: "icon", icon: "wifiExclamation" },
+			errors: { tag: "icon", class: "icon", icon: "exclamation" }
+		});
+
+		this.callbackGuard = null;
+		this.samples = [];
+		this.variation = false;
+		this.latency = false;
+
+		return this.healthNode;
+	}
+
+	/**
+	 * Run before the update was called.
+	 *
+	 * @param	{() => void}	f
+	 * @returns	{this}
+	 */
+	onBeforeUpdate(f) {
+		this.beforeUpdateHandler = f;
+		return this;
+	}
+
+	/**
+	 * Run after an update was completed successfully.
+	 *
+	 * @param	{(data) => void}	f
+	 * @returns	{this}
+	 */
+	onUpdated(f) {
+		this.updatedHandler = f;
+		return this;
+	}
+
+	/**
+	 * Run after an update generated an error.
+	 *
+	 * @param	{(error: Error) => void}	f
+	 * @returns	{this}
+	 */
+	onErrored(f) {
+		this.updatedHandler = f;
+		return this;
+	}
+
+	start() {
+		if (this.running)
+			return this;
+
+		this.running = true;
+		this.update();
+		return this;
+	}
+
+	async update() {
+		if (!this.running)
+			return;
+
+		let start = performance.now();
+		this.loading = true;
+		this.beforeUpdateHandler();
+
+		if (this.healthNode) {
+			this.callbackGuard = setTimeout(() => {
+				this.healthNode.loading.classList.add("display");
+			}, (this.interval * 0.6) * 1000);
+		}
+
+		try {
+			let data = await this.callback();
+			this.updatedHandler(data);
+		} catch (e) {
+			this.errors += 1;
+			this.healthNode.errors.classList.add("display");
+			this.healthNode.errors.dataset.level = (this.errors > 2) ? "critical" : "warning";
+			this.healthNode.errors.title = `${this.errors} runtime errors occured. Check console for more details.`;
+
+			clog("WARN", `IntervalUpdater().update() generated an error while handing callback: `, e);
+			this.erroredHandler(e);
+		}
+
+		this.loading = false;
+
+		if (this.healthNode) {
+			this.healthNode.loading.classList.remove("display");
+			clearTimeout(this.callbackGuard);
+		}
+
+		// Safeguard.
+		if (!this.running)
+			return;
+
+		let runtime = (performance.now() - start) / 1000;
+		this.pRuntime = (runtime / this.interval);
+
+		if (this.healthNode) {
+			this.samples.push(runtime);
+
+			if (this.samples.length > 5) {
+				this.samples.shift();
+
+				let variance = calculateVariance(this.samples);
+
+				if (variance > 0.1) {
+					if (!this.variation) {
+						this.healthNode.variation.classList.add("display");
+						this.variation = true;
+					}
+
+					this.healthNode.variation.dataset.level = (variance >= 0.2)
+						? "critical"
+						: "warning";
+
+					this.healthNode.variation.title = `Connection unstable! Variation ${(variance * 1000).toFixed(1)}ms`
+				} else {
+					if (this.variation) {
+						this.healthNode.variation.classList.remove("display");
+						this.variation = false;
+					}
+				}
+			}
+
+			if (this.pRuntime >= 0.6) {
+				if (!this.latency) {
+					this.healthNode.latency.classList.add("display");
+					this.latency = true;
+				}
+
+				this.healthNode.latency.dataset.level = (this.pRuntime >= 1)
+					? "critical"
+					: "warning";
+
+				this.healthNode.latency.title = `Update took ${(this.pRuntime * 100).toFixed(1)}% of expected runtime (${(this.interval * 1000)}ms)`;
+			} else {
+				if (this.latency) {
+					this.healthNode.latency.classList.remove("display");
+					this.latency = false;
+				}
+			}
+		}
+
+		let wait = (this.interval - runtime) * 1000;
+		this.timeout = setTimeout(() => this.update(), wait);
+	}
+
+	stop() {
+		if (!this.running)
+			return this;
+
+		this.running = false;
+		clearTimeout(this.timeout);
+		return this;
 	}
 }
 
