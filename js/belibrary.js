@@ -4708,7 +4708,7 @@ function createProgressBar({
 	 */
 	const set = ({
 		transition,
-		indeterminate,
+		indeterminate = false,
 		warningZone,
 		blink,
 		duration,
@@ -4744,10 +4744,12 @@ function createProgressBar({
 			if (typeof progress === "number")
 				bar.style.width = `${progress}%`;
 		} else {
-			indeterminateBar2.dataset.color = bar.dataset.color;
-			container.appendChild(indeterminateBar2);
-			bar.classList.add("indeterminate");
-			bar.style.width = null;
+			if (!container.contains(indeterminateBar2)) {
+				indeterminateBar2.dataset.color = bar.dataset.color;
+				container.appendChild(indeterminateBar2);
+				bar.classList.add("indeterminate");
+				bar.style.width = null;
+			}
 		}
 
 		if (typeof style === "string")
