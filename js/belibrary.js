@@ -985,6 +985,7 @@ function time(date) {
 
 /**
  * Is date today??
+ * 
  * @param	{Date}	date
  * @param	{Date}	today	Date to compare to
  */
@@ -996,6 +997,7 @@ function isToday(date, today = new Date()) {
 
 /**
  * Get current Week in a year
+ * 
  * @returns {Number}	Current Week
  */
 Date.prototype.getWeek = function() {
@@ -1013,7 +1015,7 @@ function parseTime(t = 0, {
 	strVal = true,
 	calcDays = false
 } = {}) {
-	let d = showPlus ? "+" : "";
+	const d = showPlus ? "+" : "";
 	let days = 0;
 	
 	if (t < 0) {
@@ -1026,10 +1028,10 @@ function parseTime(t = 0, {
 		t %= 86400;
 	}
 	
-	let h = Math.floor(t / 3600);
-	let m = Math.floor(t % 3600 / 60);
-	let s = Math.floor(t % 3600 % 60);
-	let ms = pleft(parseInt(t.toFixed(msDigit).split(".")[1]), msDigit);
+	const h = Math.floor(t / 3600);
+	const m = Math.floor(t % 3600 / 60);
+	const s = Math.floor(t % 3600 % 60);
+	const ms = pleft(parseInt(t.toFixed(msDigit).split(".")[1]), msDigit);
 
 	return {
 		h, m, s, ms, d,
@@ -3243,6 +3245,7 @@ function createCheckbox({
  * }} SQSwitch
  * 
  * Create Switch Element, require switch.css
+ * 
  * @param	{Object}			options
  * @param	{String}			options.label
  * @param	{Boolean}			options.value
@@ -3323,12 +3326,41 @@ function createSwitch({
 	}
 }
 
+/**
+ * @typedef {{
+ * 	icon: String
+ * 	color: "blue"|"pink"
+ * 	fixed: Boolean
+ * 	options: { [x: String]: String }
+ * 	value: String
+ * 	onChange: (f: (value: String) => void) => void
+ * }} SelectInputOptions
+ * 
+ * @typedef {{
+ * 	group: HTMLElement
+ * 	showing: Boolean
+ * 	show: () => void
+ * 	hide: (isSelected: Boolean = false) => void
+ * 	set: (options: SelectInputOptions) => void
+ * 	add: (key: String, value: String) => void
+ * 	value: String
+ * 	onChange: (f: (value: String) => void) => void
+ * }} SelectInputInstance
+ */
+
+/**
+ * Create a new select input.
+ * 
+ * @param	{SelectInputOptions}		options
+ * @returns {SelectInputInstance}
+ */
 function createSelectInput({
 	icon,
 	color = "blue",
 	fixed = false,
 	options = {},
-	value
+	value,
+	onChange = null
 } = {}) {
 	let container = makeTree("div", "sq-selector", {
 		current: { tag: "div", class: "current", child: {
@@ -3358,6 +3390,9 @@ function createSelectInput({
 	let currentOptions = {}
 	let changeHandlers = []
 	let showing = false;
+
+	if (typeof onChange === "function")
+		changeHandlers.push(onChange);
 
 	const show = () => {
 		if (typeof sounds === "object")

@@ -505,7 +505,11 @@ class Scrollable {
 		this.content.classList[top > 5 ? "add" : "remove"]("scrolling");
 	}
 
-	toBottom() {
+	async toBottom() {
+		// Make sure we have time to let browser update the current state
+		// of our scrolling container.
+		await nextFrameAsync();
+
 		if (this.smooth) {
 			this.animationUpdate({
 				value: this.scrollableExtent,

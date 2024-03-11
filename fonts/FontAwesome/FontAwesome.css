@@ -601,3 +601,7 @@ icon[data-icon="fileArrowDown"]::after {
 icon[data-icon="paperPlane"]::after {
 	content: "\f1d8";
 }
+
+icon[data-icon="lineArrowRight"]::after {
+	content: "\f061";
+}
